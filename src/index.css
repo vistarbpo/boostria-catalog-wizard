@@ -6,7 +6,67 @@
 
 @layer base {
   :root {
-    /* Dark theme by default - Boostria brand colors */
+    /* Light theme - Boostria brand colors */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 263 70% 55%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 263 70% 65%;
+
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 3.9%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 5% 45%;
+
+    --accent: 263 50% 95%;
+    --accent-foreground: 263 70% 25%;
+
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+
+    --border: 240 5% 91%;
+    --input: 240 5% 96%;
+    --ring: 263 70% 55%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar styling - light */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 10% 9%;
+    --sidebar-primary: 263 70% 55%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 5% 91%;
+    --sidebar-accent-foreground: 240 10% 9%;
+    --sidebar-border: 240 5% 85%;
+    --sidebar-ring: 263 70% 55%;
+
+    /* Custom gradients and effects */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-dark: linear-gradient(135deg, hsl(var(--background)), hsl(var(--muted)));
+    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.15);
+    --shadow-elegant: 0 8px 32px hsl(240 5% 85% / 0.5);
+    
+    /* Animation easing */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .dark {
+    /* Dark theme - Boostria brand colors */
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
@@ -42,9 +102,7 @@
     --input: 240 5% 15%;
     --ring: 263 70% 55%;
 
-    --radius: 0.75rem;
-
-    /* Sidebar styling */
+    /* Sidebar styling - dark */
     --sidebar-background: 240 10% 2.5%;
     --sidebar-foreground: 0 0% 85%;
     --sidebar-primary: 263 70% 55%;
@@ -54,15 +112,8 @@
     --sidebar-border: 240 5% 15%;
     --sidebar-ring: 263 70% 55%;
 
-    /* Custom gradients and effects */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-dark: linear-gradient(135deg, hsl(var(--background)), hsl(var(--muted)));
-    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.15);
+    /* Custom effects - dark */
     --shadow-elegant: 0 8px 32px hsl(240 10% 2% / 0.5);
-    
-    /* Animation easing */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
 
