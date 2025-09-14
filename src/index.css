@@ -72,10 +72,6 @@
   }
 
   body {
-    @apply bg-background text-foreground dark;
-  }
-
-  html {
-    @apply dark;
+    @apply bg-background text-foreground;
   }
 }
