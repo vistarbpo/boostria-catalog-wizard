@@ -12,6 +12,7 @@ import FeedManager from "./pages/FeedManager";
 import Analytics from "./pages/Analytics";
 import Billing from "./pages/Billing";
 import Support from "./pages/Support";
+import TemplateCreate from "./pages/TemplateCreate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,7 +33,8 @@ const App = () => (
             <Route path="/feeds" element={<FeedManager />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/billing" element={<Billing />} />
-            <Route path="/support" element={<Support />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/templates/create" element={<TemplateCreate />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
