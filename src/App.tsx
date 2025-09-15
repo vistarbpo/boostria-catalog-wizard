@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DashboardLayout } from "./components/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
+import ProductEdit from "./pages/ProductEdit";
 import MediaManager from "./pages/MediaManager";
 import FeedManager from "./pages/FeedManager";
 import Analytics from "./pages/Analytics";
@@ -25,6 +26,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/products/new" element={<ProductEdit />} />
+            <Route path="/products/edit/:id" element={<ProductEdit />} />
             <Route path="/media" element={<MediaManager />} />
             <Route path="/feeds" element={<FeedManager />} />
             <Route path="/analytics" element={<Analytics />} />

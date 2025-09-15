@@ -131,7 +131,10 @@ export default function Products() {
             <Upload className="w-4 h-4 mr-2" />
             Import
           </Button>
-          <Button className="bg-gradient-primary hover:opacity-90 transition-opacity">
+          <Button 
+            className="bg-gradient-primary hover:opacity-90 transition-opacity"
+            onClick={() => window.location.href = '/products/new'}
+          >
             <Plus className="w-4 h-4 mr-2" />
             Add Product
           </Button>
