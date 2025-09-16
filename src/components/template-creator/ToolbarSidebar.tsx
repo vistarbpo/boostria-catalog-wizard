@@ -112,6 +112,18 @@ export function ToolbarSidebar({ selectedTool, onToolSelect }: ToolbarSidebarPro
             </div>
             
             <div>
+              <h3 className="text-sm font-medium mb-2">Custom Shapes</h3>
+              <Button 
+                variant="outline" 
+                className="w-full h-20 flex-col"
+                onClick={() => onToolSelect("custom-shape")}
+              >
+                <Upload className="w-8 h-8 mb-1" />
+                <span className="text-xs">Upload Shape</span>
+              </Button>
+            </div>
+            
+            <div>
               <h3 className="text-sm font-medium mb-2">Colors</h3>
               <div className="grid grid-cols-6 gap-2">
                 {colors.map((color) => (

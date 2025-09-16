@@ -76,6 +76,9 @@ export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize }: Te
       case "line":
         addLine();
         break;
+      case "custom-shape":
+        addCustomShape();
+        break;
     }
   }, [selectedTool, fabricCanvas]);
 
@@ -99,8 +102,8 @@ export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize }: Te
       width: 100,
       height: 100,
       fill: "#3b82f6",
-      stroke: "#1e40af",
-      strokeWidth: 2,
+      stroke: "",
+      strokeWidth: 0,
     });
     fabricCanvas?.add(rect);
     fabricCanvas?.setActiveObject(rect);
@@ -112,8 +115,8 @@ export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize }: Te
       top: 50,
       radius: 50,
       fill: "#ef4444",
-      stroke: "#dc2626",
-      strokeWidth: 2,
+      stroke: "",
+      strokeWidth: 0,
     });
     fabricCanvas?.add(circle);
     fabricCanvas?.setActiveObject(circle);
@@ -128,8 +131,8 @@ export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize }: Te
       left: 50,
       top: 50,
       fill: "#10b981",
-      stroke: "#059669",
-      strokeWidth: 2,
+      stroke: "",
+      strokeWidth: 0,
     });
     fabricCanvas?.add(triangle);
     fabricCanvas?.setActiveObject(triangle);
@@ -151,8 +154,8 @@ export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize }: Te
       left: 50,
       top: 50,
       fill: "#f59e0b",
-      stroke: "#d97706",
-      strokeWidth: 2,
+      stroke: "",
+      strokeWidth: 0,
     });
     fabricCanvas?.add(star);
     fabricCanvas?.setActiveObject(star);
@@ -165,6 +168,33 @@ export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize }: Te
     });
     fabricCanvas?.add(line);
     fabricCanvas?.setActiveObject(line);
+  };
+
+  const addCustomShape = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,.svg';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const imgUrl = event.target?.result as string;
+          FabricImage.fromURL(imgUrl).then((img) => {
+            img.set({
+              left: 50,
+              top: 50,
+              scaleX: 0.5,
+              scaleY: 0.5,
+            });
+            fabricCanvas?.add(img);
+            fabricCanvas?.setActiveObject(img);
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
   };
 
   return (

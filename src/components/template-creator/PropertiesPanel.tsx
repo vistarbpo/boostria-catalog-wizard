@@ -280,7 +280,8 @@ export function PropertiesPanel({ selectedElement }: PropertiesPanelProps) {
                         if (file) {
                           const reader = new FileReader();
                           reader.onload = (event) => {
-                            updateProperty("fill", event.target?.result);
+                            const imgUrl = event.target?.result as string;
+                            updateProperty("fill", imgUrl);
                           };
                           reader.readAsDataURL(file);
                         }
@@ -302,6 +303,9 @@ export function PropertiesPanel({ selectedElement }: PropertiesPanelProps) {
                       <option value="category_image">Category Image</option>
                       <option value="user_avatar">User Avatar</option>
                     </select>
+                    <div className="mt-2 p-2 bg-muted rounded text-xs text-muted-foreground">
+                      This will show dynamic content when template is generated
+                    </div>
                   </div>
                 )}
               </div>
