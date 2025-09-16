@@ -168,18 +168,24 @@ export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize }: Te
   };
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center items-center min-h-0 w-full">
       <div 
-        className="border-2 border-dashed border-border bg-white shadow-lg"
+        className="border-2 border-dashed border-border bg-white shadow-lg max-w-full"
         style={{ 
-          width: canvasSize.width + 40, 
-          height: canvasSize.height + 40,
+          width: Math.min(canvasSize.width + 40, window.innerWidth - 100), 
+          height: Math.min(canvasSize.height + 40, window.innerHeight - 200),
           padding: 20
         }}
       >
         <canvas 
           ref={canvasRef}
-          className="border border-border"
+          className="border border-border max-w-full max-h-full"
+          style={{
+            width: '100%',
+            height: 'auto',
+            maxWidth: canvasSize.width,
+            maxHeight: canvasSize.height
+          }}
         />
       </div>
     </div>
