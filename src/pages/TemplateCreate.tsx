@@ -10,11 +10,12 @@ export default function TemplateCreate() {
   const [selectedTool, setSelectedTool] = useState<string>("select");
   const [selectedElement, setSelectedElement] = useState<any>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [fabricCanvas, setFabricCanvas] = useState<any>(null);
 
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <TemplateHeader />
+      <TemplateHeader fabricCanvas={fabricCanvas} />
       
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
@@ -68,6 +69,7 @@ export default function TemplateCreate() {
               selectedTool={selectedTool}
               onElementSelect={setSelectedElement}
               canvasSize={canvasSize}
+              onCanvasReady={setFabricCanvas}
             />
           </div>
         </div>

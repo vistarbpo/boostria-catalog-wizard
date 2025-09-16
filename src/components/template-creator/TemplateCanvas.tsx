@@ -5,9 +5,10 @@ interface TemplateCanvasProps {
   selectedTool: string;
   onElementSelect: (element: any) => void;
   canvasSize: { width: number; height: number };
+  onCanvasReady?: (canvas: any) => void;
 }
 
-export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize }: TemplateCanvasProps) {
+export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize, onCanvasReady }: TemplateCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
@@ -38,6 +39,7 @@ export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize }: Te
     });
 
     setFabricCanvas(canvas);
+    onCanvasReady?.(canvas);
 
     return () => {
       canvas.dispose();

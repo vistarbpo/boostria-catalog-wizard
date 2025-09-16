@@ -281,6 +281,7 @@ export function PropertiesPanel({ selectedElement }: PropertiesPanelProps) {
                           const reader = new FileReader();
                           reader.onload = (event) => {
                             const imgUrl = event.target?.result as string;
+                            // For now, just set the fill directly - we'll improve pattern support later
                             updateProperty("fill", imgUrl);
                           };
                           reader.readAsDataURL(file);
@@ -288,6 +289,9 @@ export function PropertiesPanel({ selectedElement }: PropertiesPanelProps) {
                       }}
                       className="mt-1"
                     />
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Upload an image to fill this element
+                    </div>
                   </div>
                 )}
 
