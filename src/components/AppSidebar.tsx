@@ -9,7 +9,8 @@ import {
   CreditCard, 
   HelpCircle,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from "lucide-react";
 
 import {
@@ -27,6 +28,7 @@ import {
 const navItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Products", url: "/products", icon: Package },
+  { title: "Templates", url: "/templates", icon: FileText },
   { title: "Media Manager", url: "/media", icon: Images },
   { title: "Feed Manager", url: "/feeds", icon: Rss },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },

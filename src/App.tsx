@@ -12,6 +12,7 @@ import FeedManager from "./pages/FeedManager";
 import Analytics from "./pages/Analytics";
 import Billing from "./pages/Billing";
 import Support from "./pages/Support";
+import Templates from "./pages/Templates";
 import TemplateCreate from "./pages/TemplateCreate";
 import NotFound from "./pages/NotFound";
 
@@ -29,12 +30,14 @@ const App = () => (
             <Route path="/products" element={<Products />} />
             <Route path="/products/new" element={<ProductEdit />} />
             <Route path="/products/edit/:id" element={<ProductEdit />} />
+            <Route path="/templates" element={<Templates />} />
+            <Route path="/templates/create" element={<TemplateCreate />} />
+            <Route path="/templates/edit/:id" element={<TemplateCreate />} />
             <Route path="/media" element={<MediaManager />} />
             <Route path="/feeds" element={<FeedManager />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/billing" element={<Billing />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/templates/create" element={<TemplateCreate />} />
+            <Route path="/support" element={<Support />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
