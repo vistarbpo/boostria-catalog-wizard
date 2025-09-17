@@ -16,9 +16,9 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 263 70% 55%;
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
-    --primary-glow: 263 70% 65%;
+    --primary-glow: 0 0% 15%;
 
     --secondary: 240 5% 96%;
     --secondary-foreground: 240 10% 3.9%;
@@ -26,8 +26,8 @@
     --muted: 240 5% 96%;
     --muted-foreground: 240 5% 45%;
 
-    --accent: 263 50% 95%;
-    --accent-foreground: 263 70% 25%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
 
     --destructive: 0 75% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -40,19 +40,19 @@
 
     --border: 240 5% 91%;
     --input: 240 5% 96%;
-    --ring: 263 70% 55%;
+    --ring: 0 0% 9%;
 
     --radius: 0.75rem;
 
     /* Sidebar styling - light */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 10% 9%;
-    --sidebar-primary: 263 70% 55%;
+    --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 5% 91%;
     --sidebar-accent-foreground: 240 10% 9%;
     --sidebar-border: 240 5% 85%;
-    --sidebar-ring: 263 70% 55%;
+    --sidebar-ring: 0 0% 9%;
 
     /* Custom gradients and effects */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
@@ -76,9 +76,9 @@
     --popover: 240 10% 5.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 263 70% 55%;
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
-    --primary-glow: 263 70% 65%;
+    --primary-glow: 0 0% 15%;
 
     --secondary: 240 5% 10%;
     --secondary-foreground: 0 0% 90%;
@@ -86,8 +86,8 @@
     --muted: 240 5% 15%;
     --muted-foreground: 240 5% 65%;
 
-    --accent: 263 50% 25%;
-    --accent-foreground: 263 70% 85%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 90%;
 
     --destructive: 0 75% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -100,17 +100,17 @@
 
     --border: 240 5% 20%;
     --input: 240 5% 15%;
-    --ring: 263 70% 55%;
+    --ring: 0 0% 9%;
 
     /* Sidebar styling - dark */
     --sidebar-background: 240 10% 2.5%;
     --sidebar-foreground: 0 0% 85%;
-    --sidebar-primary: 263 70% 55%;
+    --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 5% 8%;
     --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 240 5% 15%;
-    --sidebar-ring: 263 70% 55%;
+    --sidebar-ring: 0 0% 9%;
 
     /* Custom effects - dark */
     --shadow-elegant: 0 8px 32px hsl(240 10% 2% / 0.5);

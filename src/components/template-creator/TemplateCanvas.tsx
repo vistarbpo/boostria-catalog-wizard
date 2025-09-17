@@ -200,23 +200,23 @@ export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize, onCa
   };
 
   return (
-    <div className="flex justify-center items-center min-h-0 w-full">
+    <div className="flex justify-center items-center min-h-0 w-full p-4 overflow-auto">
       <div 
-        className="border-2 border-dashed border-border bg-white shadow-lg max-w-full"
+        className="border-2 border-dashed border-border bg-white shadow-lg"
         style={{ 
-          width: Math.min(canvasSize.width + 40, window.innerWidth - 100), 
-          height: Math.min(canvasSize.height + 40, window.innerHeight - 200),
-          padding: 20
+          padding: 20,
+          maxWidth: '100%',
+          maxHeight: 'calc(100vh - 200px)'
         }}
       >
         <canvas 
           ref={canvasRef}
-          className="border border-border max-w-full max-h-full"
+          className="border border-border"
           style={{
-            width: '100%',
-            height: 'auto',
-            maxWidth: canvasSize.width,
-            maxHeight: canvasSize.height
+            width: Math.min(canvasSize.width, window.innerWidth - 200),
+            height: Math.min(canvasSize.height, window.innerHeight - 300),
+            maxWidth: '100%',
+            maxHeight: '100%'
           }}
         />
       </div>
