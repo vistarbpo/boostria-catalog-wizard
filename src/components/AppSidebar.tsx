@@ -55,15 +55,15 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarContent>
-        <div className="px-4 py-6">
-          <div className="flex items-center gap-3">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <SidebarContent className="overflow-hidden">
+        <div className="px-4 py-6 border-b border-sidebar-border">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
               <Package className="w-5 h-5 text-white" />
             </div>
             {!isCollapsed && (
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <h1 className="text-lg font-bold text-sidebar-foreground truncate">Boostria</h1>
                 <p className="text-xs text-sidebar-foreground/60 truncate">Catalog Manager</p>
               </div>
@@ -71,16 +71,18 @@ export function AppSidebar() {
           </div>
         </div>
 
-        <SidebarGroup>
+        <SidebarGroup className="flex-1 py-4">
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
                     <NavLink 
                       to={item.url} 
                       end={item.url === "/"} 
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg mx-3 min-w-0 ${getNavCls(item.url)}`}
+                      className={`flex items-center gap-3 rounded-lg transition-colors min-w-0 ${
+                        isCollapsed ? 'px-2 py-2 mx-2 justify-center' : 'px-3 py-2 mx-3'
+                      } ${getNavCls(item.url)}`}
                     >
                       <item.icon className="w-5 h-5 flex-shrink-0" />
                       {!isCollapsed && <span className="text-sm truncate">{item.title}</span>}
