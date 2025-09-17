@@ -27,7 +27,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
             <div className="flex items-center justify-between h-full px-6">
               <div className="flex items-center gap-4">
-                <SidebarTrigger className="lg:hidden" />
+                <SidebarTrigger />
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input 
