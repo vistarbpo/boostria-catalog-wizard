@@ -11,12 +11,38 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
+import { useCredits } from "@/hooks/useCredits";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { user } = useAuth();
+  const { profile } = useCredits();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast({
+        title: "Sign out failed",
+        description: "An error occurred during sign out",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -38,6 +64,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
               
               <div className="flex items-center gap-3">
+                {profile && (
+                  <div className="text-sm text-muted-foreground">
+                    {(profile.monthly_credits + profile.addon_credits).toLocaleString()} credits
+                  </div>
+                )}
                 <ThemeToggle />
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="w-5 h-5" />
@@ -53,11 +84,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      {user?.email}
+                    </div>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem>Profile Settings</DropdownMenuItem>
                     <DropdownMenuItem>API Keys</DropdownMenuItem>
                     <DropdownMenuItem>Team</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive">Sign Out</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>
+                      Sign Out
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
