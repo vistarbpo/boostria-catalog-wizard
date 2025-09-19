@@ -257,6 +257,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "member"
       billing_status: "active" | "expired" | "canceled"
       catalog_source:
         | "salla"
@@ -400,6 +401,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "member"],
       billing_status: ["active", "expired", "canceled"],
       catalog_source: ["salla", "zid", "shopify", "woocommerce", "xml", "csv"],
       catalog_status: ["active", "in_sync", "error"],
