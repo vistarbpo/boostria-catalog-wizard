@@ -14,16 +14,265 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      addon_credits: {
+        Row: {
+          credits: number
+          expires_at: string
+          id: string
+          purchased_at: string
+          used_credits: number
+          user_id: string
+        }
+        Insert: {
+          credits: number
+          expires_at?: string
+          id?: string
+          purchased_at?: string
+          used_credits?: number
+          user_id: string
+        }
+        Update: {
+          credits?: number
+          expires_at?: string
+          id?: string
+          purchased_at?: string
+          used_credits?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addon_credits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing: {
+        Row: {
+          created_at: string
+          id: string
+          invoices: Json | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          status: Database["public"]["Enums"]["billing_status"]
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invoices?: Json | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          status?: Database["public"]["Enums"]["billing_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invoices?: Json | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: Database["public"]["Enums"]["billing_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalogs: {
+        Row: {
+          created_at: string
+          google_feed_url: string | null
+          id: string
+          meta_feed_url: string | null
+          name: string
+          product_count: number
+          snapchat_feed_url: string | null
+          source: Database["public"]["Enums"]["catalog_source"]
+          status: Database["public"]["Enums"]["catalog_status"]
+          tiktok_feed_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          google_feed_url?: string | null
+          id?: string
+          meta_feed_url?: string | null
+          name: string
+          product_count?: number
+          snapchat_feed_url?: string | null
+          source: Database["public"]["Enums"]["catalog_source"]
+          status?: Database["public"]["Enums"]["catalog_status"]
+          tiktok_feed_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          google_feed_url?: string | null
+          id?: string
+          meta_feed_url?: string | null
+          name?: string
+          product_count?: number
+          snapchat_feed_url?: string | null
+          source?: Database["public"]["Enums"]["catalog_source"]
+          status?: Database["public"]["Enums"]["catalog_status"]
+          tiktok_feed_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalogs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credits_log: {
+        Row: {
+          action: string
+          created_at: string
+          credits_used: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          credits_used: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          credits_used?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credits_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media: {
+        Row: {
+          catalog_id: string
+          created_at: string
+          id: string
+          type: Database["public"]["Enums"]["media_type"]
+          url: string
+        }
+        Insert: {
+          catalog_id: string
+          created_at?: string
+          id?: string
+          type: Database["public"]["Enums"]["media_type"]
+          url: string
+        }
+        Update: {
+          catalog_id?: string
+          created_at?: string
+          id?: string
+          type?: Database["public"]["Enums"]["media_type"]
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "catalogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          addon_credits: number
+          created_at: string
+          email: string
+          id: string
+          monthly_credits: number
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          renewal_date: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          addon_credits?: number
+          created_at?: string
+          email: string
+          id: string
+          monthly_credits?: number
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          renewal_date?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          addon_credits?: number
+          created_at?: string
+          email?: string
+          id?: string
+          monthly_credits?: number
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          renewal_date?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      deduct_credits: {
+        Args: { p_action: string; p_credits: number; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      billing_status: "active" | "expired" | "canceled"
+      catalog_source:
+        | "salla"
+        | "zid"
+        | "shopify"
+        | "woocommerce"
+        | "xml"
+        | "csv"
+      catalog_status: "active" | "in_sync" | "error"
+      media_type:
+        | "template_square"
+        | "template_story"
+        | "manual_image"
+        | "manual_video"
+      subscription_plan: "basic" | "pro" | "advanced" | "enterprise"
+      user_role: "admin" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +399,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      billing_status: ["active", "expired", "canceled"],
+      catalog_source: ["salla", "zid", "shopify", "woocommerce", "xml", "csv"],
+      catalog_status: ["active", "in_sync", "error"],
+      media_type: [
+        "template_square",
+        "template_story",
+        "manual_image",
+        "manual_video",
+      ],
+      subscription_plan: ["basic", "pro", "advanced", "enterprise"],
+      user_role: ["admin", "member"],
+    },
   },
 } as const
