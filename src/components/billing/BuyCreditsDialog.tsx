@@ -12,12 +12,12 @@ interface BuyCreditsDialogProps {
 }
 
 const ADDON_PACKAGES = [
-  { price: "$10", credits: 500, popular: false },
-  { price: "$25", credits: 2800, popular: true },
+  { price: "$10", credits: 400, popular: false },
+  { price: "$25", credits: 1250, popular: true },
   { price: "$100", credits: 6000, popular: false },
-  { price: "$500", credits: 40000, popular: false },
-  { price: "$1000", credits: 70000, popular: false },
-  { price: "$2000", credits: 150000, popular: false }
+  { price: "$500", credits: 35000, popular: false },
+  { price: "$1000", credits: 80000, popular: false },
+  { price: "$2000", credits: 180000, popular: false }
 ];
 
 export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) {
@@ -55,7 +55,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   };
 
   const calculateSavings = (credits: number, price: number) => {
-    const baseRate = 10 / 500; // $10 for 500 credits
+    const baseRate = 10 / 400; // $10 for 400 credits
     const packageRate = price / credits;
     const savings = Math.round((1 - packageRate / baseRate) * 100);
     return savings > 0 ? savings : 0;
