@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,8 @@ import { useCredits } from "@/hooks/useCredits";
 import { useAuth } from "@/hooks/useAuth";
 import { CreditCard, Calendar, TrendingUp, History, ShoppingCart } from "lucide-react";
 import { format } from "date-fns";
+import { UpgradePlanDialog } from "@/components/billing/UpgradePlanDialog";
+import { BuyCreditsDialog } from "@/components/billing/BuyCreditsDialog";
 
 const PLAN_DETAILS = {
   basic: { name: "Basic", price: "$29/month", maxCredits: 500, catalogs: 1, products: 50 },
@@ -35,6 +38,9 @@ const USAGE_COSTS = [
 export default function Billing() {
   const { user } = useAuth();
   const { profile, creditLogs, loading } = useCredits();
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [buyCreditsDialogOpen, setBuyCreditsDialogOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
 
   if (!user) {
     return (
@@ -115,7 +121,11 @@ export default function Billing() {
                 <span>{planDetails.products}</span>
               </div>
             </div>
-            <Button className="w-full" variant="outline">
+            <Button 
+              className="w-full" 
+              variant="outline"
+              onClick={() => setUpgradeDialogOpen(true)}
+            >
               Upgrade Plan
             </Button>
           </CardContent>
@@ -172,7 +182,14 @@ export default function Billing() {
                   <div className="text-lg font-bold">{pkg.price}</div>
                   <div className="text-2xl font-bold text-primary">{pkg.credits.toLocaleString()}</div>
                   <div className="text-xs text-muted-foreground mb-2">credits</div>
-                  <Button size="sm" className="w-full">
+                  <Button 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedPackage(pkg);
+                      setBuyCreditsDialogOpen(true);
+                    }}
+                  >
                     Buy Now
                   </Button>
                 </CardContent>
@@ -228,6 +245,16 @@ export default function Billing() {
           )}
         </CardContent>
       </Card>
+
+      <UpgradePlanDialog 
+        open={upgradeDialogOpen} 
+        onOpenChange={setUpgradeDialogOpen} 
+      />
+      
+      <BuyCreditsDialog 
+        open={buyCreditsDialogOpen} 
+        onOpenChange={setBuyCreditsDialogOpen} 
+      />
     </div>
   );
 }
