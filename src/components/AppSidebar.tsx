@@ -10,7 +10,8 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronRight,
-  FileText
+  FileText,
+  Link2
 } from "lucide-react";
 
 import {
@@ -31,6 +32,7 @@ const navItems = [
   { title: "Templates", url: "/templates", icon: FileText },
   { title: "Media Manager", url: "/media", icon: Images },
   { title: "Feed Manager", url: "/feeds", icon: Rss },
+  { title: "Connect", url: "/connect", icon: Link2 },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Billing", url: "/billing", icon: CreditCard },
   { title: "Support", url: "/support", icon: HelpCircle },
