@@ -18,7 +18,8 @@ import {
   Send
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { deepLinkGenerator, DeepLinkGenerator } from "@/utils/deepLinks";
+import { useAppConfig } from "@/hooks/useAppConfig";
+import { createDynamicDeepLinkGenerator } from "@/utils/dynamicDeepLinks";
 
 interface DeepLinkManagerProps {
   productId: string;
@@ -34,32 +35,52 @@ const DeepLinkManager = ({
   onLinksGenerated 
 }: DeepLinkManagerProps) => {
   const { toast } = useToast();
+  const { config: appConfig } = useAppConfig();
   const [mobileAppAvailable, setMobileAppAvailable] = useState({ ios: false, android: false });
   const [generatedLinks, setGeneratedLinks] = useState<any>(null);
   const [customParams, setCustomParams] = useState("");
 
   useEffect(() => {
     // Check if mobile app is available
-    DeepLinkGenerator.detectMobileApp().then(setMobileAppAvailable);
+    if (appConfig) {
+      const generator = createDynamicDeepLinkGenerator(appConfig);
+      if (generator) {
+        const status = generator.isConfigured();
+        setMobileAppAvailable({
+          ios: status.hasIOSApp,
+          android: status.hasAndroidApp
+        });
+      }
+    }
     
     // Generate initial links
     generateLinks();
-  }, [productId]);
+  }, [productId, appConfig]);
 
   const generateLinks = () => {
+    if (!appConfig) return;
+
+    const generator = createDynamicDeepLinkGenerator(appConfig);
+    if (!generator) return;
+
     const customParamsObj = customParams ? 
       Object.fromEntries(customParams.split('&').map(p => p.split('='))) : 
       {};
 
-    const productLinks = deepLinkGenerator.generateProductLink(productId, customParamsObj);
-    const socialLinks = deepLinkGenerator.generateSocialLinks(productId, productTitle, productImage);
-    const shortLink = deepLinkGenerator.generateShortLink(productId);
+    const productLinks = generator.generateProductLink(productId, customParamsObj);
+    const qrCode = generator.generateQRCode(productId);
+    const storeLinks = generator.generateAppStoreLinks();
 
     const links = {
       product: productLinks,
-      social: socialLinks,
-      short: shortLink,
-      qr: productLinks.universal
+      social: {
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productLinks.web)}`,
+        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(productLinks.web)}&text=${encodeURIComponent(productTitle)}`,
+        whatsapp: `https://wa.me/?text=${encodeURIComponent(productTitle + ' ' + productLinks.web)}`,
+        telegram: `https://t.me/share/url?url=${encodeURIComponent(productLinks.web)}&text=${encodeURIComponent(productTitle)}`,
+      },
+      qr: qrCode,
+      store: storeLinks
     };
 
     setGeneratedLinks(links);
@@ -87,8 +108,35 @@ const DeepLinkManager = ({
   };
 
   const smartRedirect = () => {
-    if (generatedLinks) {
-      DeepLinkGenerator.smartRedirect(generatedLinks.product);
+    if (generatedLinks && appConfig) {
+      const generator = createDynamicDeepLinkGenerator(appConfig);
+      if (generator) {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isIOS = /iphone|ipad|ipod/.test(userAgent);
+        const isAndroid = /android/.test(userAgent);
+
+        if (isIOS && generatedLinks.product.canOpenApp?.ios) {
+          window.location.href = generatedLinks.product.ios;
+          setTimeout(() => {
+            if (generatedLinks.store?.ios) {
+              window.location.href = generatedLinks.store.ios;
+            } else {
+              window.location.href = generatedLinks.product.web;
+            }
+          }, 2000);
+        } else if (isAndroid && generatedLinks.product.canOpenApp?.android) {
+          window.location.href = generatedLinks.product.android;
+          setTimeout(() => {
+            if (generatedLinks.store?.android) {
+              window.location.href = generatedLinks.store.android;
+            } else {
+              window.location.href = generatedLinks.product.web;
+            }
+          }, 2000);
+        } else {
+          window.location.href = generatedLinks.product.web;
+        }
+      }
     }
   };
 
@@ -321,7 +369,7 @@ const DeepLinkManager = ({
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => openLink(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(generatedLinks.qr)}`)}
+                    onClick={() => openLink(generatedLinks.qr)}
                   >
                     <QrCode className="w-4 h-4 mr-2" />
                     Generate QR Code

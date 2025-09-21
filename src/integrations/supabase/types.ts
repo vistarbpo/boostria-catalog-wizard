@@ -49,6 +49,78 @@ export type Database = {
           },
         ]
       }
+      app_configurations: {
+        Row: {
+          android_app_links_domain: string | null
+          android_custom_scheme: string | null
+          android_package_name: string | null
+          android_play_store_id: string | null
+          android_sha256_fingerprint: string | null
+          app_description: string | null
+          app_icon_url: string | null
+          app_name: string | null
+          created_at: string
+          custom_url_scheme: string | null
+          deep_linking_enabled: boolean
+          id: string
+          ios_app_store_id: string | null
+          ios_bundle_id: string | null
+          ios_custom_scheme: string | null
+          ios_team_id: string | null
+          universal_links_domain: string | null
+          updated_at: string
+          user_id: string
+          web_domain: string | null
+          web_fallback_url: string
+        }
+        Insert: {
+          android_app_links_domain?: string | null
+          android_custom_scheme?: string | null
+          android_package_name?: string | null
+          android_play_store_id?: string | null
+          android_sha256_fingerprint?: string | null
+          app_description?: string | null
+          app_icon_url?: string | null
+          app_name?: string | null
+          created_at?: string
+          custom_url_scheme?: string | null
+          deep_linking_enabled?: boolean
+          id?: string
+          ios_app_store_id?: string | null
+          ios_bundle_id?: string | null
+          ios_custom_scheme?: string | null
+          ios_team_id?: string | null
+          universal_links_domain?: string | null
+          updated_at?: string
+          user_id: string
+          web_domain?: string | null
+          web_fallback_url?: string
+        }
+        Update: {
+          android_app_links_domain?: string | null
+          android_custom_scheme?: string | null
+          android_package_name?: string | null
+          android_play_store_id?: string | null
+          android_sha256_fingerprint?: string | null
+          app_description?: string | null
+          app_icon_url?: string | null
+          app_name?: string | null
+          created_at?: string
+          custom_url_scheme?: string | null
+          deep_linking_enabled?: boolean
+          id?: string
+          ios_app_store_id?: string | null
+          ios_bundle_id?: string | null
+          ios_custom_scheme?: string | null
+          ios_team_id?: string | null
+          universal_links_domain?: string | null
+          updated_at?: string
+          user_id?: string
+          web_domain?: string | null
+          web_fallback_url?: string
+        }
+        Relationships: []
+      }
       billing: {
         Row: {
           created_at: string

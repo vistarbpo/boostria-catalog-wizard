@@ -16,6 +16,7 @@ import Support from "./pages/Support";
 import Templates from "./pages/Templates";
 import TemplateCreate from "./pages/TemplateCreate";
 import Connect from "./pages/Connect";
+import AppSettings from "./pages/AppSettings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -52,6 +53,7 @@ const AppRoutes = () => {
         <Route path="/billing" element={<Billing />} />
         <Route path="/connect" element={<Connect />} />
         <Route path="/support" element={<Support />} />
+        <Route path="/settings/app" element={<AppSettings />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
