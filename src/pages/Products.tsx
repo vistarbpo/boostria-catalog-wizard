@@ -29,6 +29,8 @@ import {
   Eye,
   Trash2,
   Download,
+  Smartphone,
+  Link2
 } from "lucide-react";
 
 // Mock data
@@ -252,6 +254,14 @@ export default function Products() {
                         <DropdownMenuItem className="text-foreground">
                           <Edit className="w-4 h-4 mr-2" />
                           Edit Product
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-foreground">
+                          <Smartphone className="w-4 h-4 mr-2" />
+                          Generate Deep Links
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-foreground">
+                          <Link2 className="w-4 h-4 mr-2" />
+                          Copy Product Link
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive">

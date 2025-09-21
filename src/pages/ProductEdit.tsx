@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
+import DeepLinkManager from "@/components/products/DeepLinkManager";
 
 const productSchema = z.object({
   // Basic Info
@@ -46,6 +47,11 @@ const productSchema = z.object({
   internal_labels: z.string().optional(),
   custom_labels: z.string().optional(),
   custom_numbers: z.string().optional(),
+  
+  // Deep Links
+  app_deep_link: z.string().optional(),
+  universal_link: z.string().optional(),
+  enable_deep_linking: z.boolean().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -123,11 +129,12 @@ const ProductEdit = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Tabs defaultValue="basic" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="media">Media</TabsTrigger>
               <TabsTrigger value="variants">Variants</TabsTrigger>
               <TabsTrigger value="shipping">Shipping</TabsTrigger>
+              <TabsTrigger value="deeplinks">Deep Links</TabsTrigger>
               <TabsTrigger value="labels">Labels & Tags</TabsTrigger>
             </TabsList>
 
@@ -571,6 +578,99 @@ const ProductEdit = () => {
                       </FormItem>
                     )}
                   />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Deep Links Tab */}
+            <TabsContent value="deeplinks">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Deep Links & App Integration</CardTitle>
+                  <CardDescription>
+                    Configure deep linking for mobile app integration and enhanced user experience
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="enable_deep_linking"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Enable Deep Linking</FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            Generate app deep links for this product
+                          </div>
+                        </div>
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="w-4 h-4"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch("enable_deep_linking") && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="app_deep_link"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Custom App Deep Link</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="myapp://product?id=123" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <div className="text-sm text-muted-foreground">
+                              Custom deep link scheme for your mobile app
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="universal_link"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Universal Link</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="https://yourapp.com/product/123" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <div className="text-sm text-muted-foreground">
+                              Universal link that works across platforms
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Deep Link Manager Component */}
+                      <div className="mt-6">
+                        <DeepLinkManager
+                          productId={form.watch("id") || "sample-product"}
+                          productTitle={form.watch("title") || "Sample Product"}
+                          productImage={form.watch("image_link")}
+                          onLinksGenerated={(links) => {
+                            form.setValue("universal_link", links.product.universal);
+                            form.setValue("app_deep_link", links.product.ios);
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
