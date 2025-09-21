@@ -28,11 +28,11 @@ import {
 
 const navItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Connect", url: "/connect", icon: Link2 },
   { title: "Products", url: "/products", icon: Package },
   { title: "Templates", url: "/templates", icon: FileText },
   { title: "Media Manager", url: "/media", icon: Images },
   { title: "Feed Manager", url: "/feeds", icon: Rss },
-  { title: "Connect", url: "/connect", icon: Link2 },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Billing", url: "/billing", icon: CreditCard },
   { title: "Support", url: "/support", icon: HelpCircle },
