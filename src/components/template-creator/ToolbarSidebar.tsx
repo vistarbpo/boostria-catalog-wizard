@@ -164,6 +164,21 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
           case 'id':
             dynamicValue = currentProduct.id;
             break;
+          case 'sku':
+            dynamicValue = 'WS-001'; // Example SKU
+            break;
+          case 'product_url':
+            dynamicValue = 'https://example.com/product';
+            break;
+          case 'condition':
+            dynamicValue = 'new';
+            break;
+          case 'availability':
+            dynamicValue = 'in stock';
+            break;
+          case 'currency':
+            dynamicValue = 'USD';
+            break;
           default:
             dynamicValue = `{${fieldType}}`;
         }
@@ -298,79 +313,9 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                   Add dynamic elements from your product data
                 </p>
                 
-                {/* Product Information Fields */}
+                {/* Product Images */}
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Product Information</h4>
-                  <div className="grid grid-cols-1 gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddDynamicField('title')}
-                      className="justify-start"
-                    >
-                      <Database className="w-4 h-4 mr-2" />
-                      Title
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddDynamicField('price')}
-                      className="justify-start"
-                    >
-                      <Database className="w-4 h-4 mr-2" />
-                      Price
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddDynamicField('sale_price')}
-                      className="justify-start"
-                    >
-                      <Database className="w-4 h-4 mr-2" />
-                      Sale Price
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddDynamicField('description')}
-                      className="justify-start"
-                    >
-                      <Database className="w-4 h-4 mr-2" />
-                      Description
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddDynamicField('brand')}
-                      className="justify-start"
-                    >
-                      <Database className="w-4 h-4 mr-2" />
-                      Brand
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddDynamicField('category')}
-                      className="justify-start"
-                    >
-                      <Database className="w-4 h-4 mr-2" />
-                      Category
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddDynamicField('id')}
-                      className="justify-start"
-                    >
-                      <Database className="w-4 h-4 mr-2" />
-                      Product ID
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Product Media Fields */}
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Product Media</h4>
+                  <h4 className="text-sm font-medium">Product Images</h4>
                   <div className="grid grid-cols-1 gap-2">
                     <Button
                       variant="outline"
@@ -379,7 +324,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       className="justify-start"
                     >
                       <FileImage className="w-4 h-4 mr-2" />
-                      Main Image
+                      image_link
                     </Button>
                     <Button
                       variant="outline"
@@ -388,7 +333,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       className="justify-start"
                     >
                       <FileImage className="w-4 h-4 mr-2" />
-                      Additional Image
+                      additional_image_link
                     </Button>
                     <Button
                       variant="outline"
@@ -397,7 +342,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       className="justify-start"
                     >
                       <FileImage className="w-4 h-4 mr-2" />
-                      Detail Image
+                      additional_image_link_2
                     </Button>
                     <Button
                       variant="outline"
@@ -406,7 +351,148 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       className="justify-start"
                     >
                       <FileImage className="w-4 h-4 mr-2" />
-                      Brand Logo
+                      brand_logo
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Text Columns */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Text Columns</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('price')}
+                      className="justify-start text-xs"
+                    >
+                      <Database className="w-4 h-4 mr-1" />
+                      price
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('sale_price')}
+                      className="justify-start text-xs"
+                    >
+                      <Database className="w-4 h-4 mr-1" />
+                      sale_price
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Main Attributes */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Main Attributes</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('brand')}
+                      className="justify-start text-xs"
+                    >
+                      <Database className="w-4 h-4 mr-1" />
+                      brand
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('title')}
+                      className="justify-start text-xs"
+                    >
+                      <Database className="w-4 h-4 mr-1" />
+                      title
+                    </Button>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddDynamicField('category')}
+                    className="justify-start w-full"
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    category
+                  </Button>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Description</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddDynamicField('description')}
+                    className="justify-start w-full"
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    description
+                  </Button>
+                </div>
+
+                {/* Identifiers */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Identifiers</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddDynamicField('id')}
+                    className="justify-start w-full"
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    id
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddDynamicField('sku')}
+                    className="justify-start w-full"
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    sku
+                  </Button>
+                </div>
+
+                {/* Other */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Other</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('product_url')}
+                      className="justify-start text-xs"
+                    >
+                      <Database className="w-4 h-4 mr-1" />
+                      link
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('condition')}
+                      className="justify-start text-xs"
+                    >
+                      <Database className="w-4 h-4 mr-1" />
+                      condition
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('availability')}
+                      className="justify-start text-xs"
+                    >
+                      <Database className="w-4 h-4 mr-1" />
+                      availability
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('currency')}
+                      className="justify-start text-xs"
+                    >
+                      <Database className="w-4 h-4 mr-1" />
+                      currency
                     </Button>
                   </div>
                 </div>
