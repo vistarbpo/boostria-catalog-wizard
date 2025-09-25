@@ -180,6 +180,30 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
     }, 100);
   };
 
+  const handleAddDynamicImage = (mediaKey: string) => {
+    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 100;
+    
+    // Get the media URL from the product context
+    const mediaUrl = productContext.getMediaUrl(mediaKey);
+    
+    if (mediaUrl) {
+      canvasStore.addImageElement(mediaUrl, { x: centerX, y: centerY });
+      
+      // Update the image to be dynamic
+      setTimeout(() => {
+        const selectedElement = canvasStore.getSelectedElement();
+        if (selectedElement && selectedElement.type === 'image') {
+          canvasStore.updateElement(selectedElement.id, {
+            fillType: 'dynamic',
+            fillSource: mediaKey,
+            fillImageUrl: mediaUrl
+          });
+        }
+      }, 100);
+    }
+  };
+
   const handleAddTextPreset = (preset: string) => {
     const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
     const centerY = canvasStore.canvasState.canvasSize.height / 2 - 25;
@@ -274,7 +298,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                   Add dynamic elements from your product data
                 </p>
                 
-                {/* Dynamic Fields */}
+                {/* Product Information Fields */}
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">Product Information</h4>
                   <div className="grid grid-cols-1 gap-2">
@@ -299,6 +323,15 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => handleAddDynamicField('sale_price')}
+                      className="justify-start"
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Sale Price
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleAddDynamicField('description')}
                       className="justify-start"
                     >
@@ -313,6 +346,67 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                     >
                       <Database className="w-4 h-4 mr-2" />
                       Brand
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('category')}
+                      className="justify-start"
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Category
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('id')}
+                      className="justify-start"
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Product ID
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Product Media Fields */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Product Media</h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicImage('image_link')}
+                      className="justify-start"
+                    >
+                      <FileImage className="w-4 h-4 mr-2" />
+                      Main Image
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicImage('additional_image_link')}
+                      className="justify-start"
+                    >
+                      <FileImage className="w-4 h-4 mr-2" />
+                      Additional Image
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicImage('additional_image_link_2')}
+                      className="justify-start"
+                    >
+                      <FileImage className="w-4 h-4 mr-2" />
+                      Detail Image
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicImage('brand_logo')}
+                      className="justify-start"
+                    >
+                      <FileImage className="w-4 h-4 mr-2" />
+                      Brand Logo
                     </Button>
                   </div>
                 </div>
