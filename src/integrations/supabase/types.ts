@@ -282,6 +282,101 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          additional_images: string[] | null
+          availability: string | null
+          brand: string | null
+          catalog_id: string | null
+          category: string | null
+          color: string | null
+          condition: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          gender: string | null
+          id: string
+          main_image_url: string | null
+          material: string | null
+          meta_description: string | null
+          meta_title: string | null
+          price: number | null
+          product_url: string | null
+          sale_price: number | null
+          size: string | null
+          sku: string
+          stock_quantity: number | null
+          title: string
+          updated_at: string
+          user_id: string
+          weight: string | null
+        }
+        Insert: {
+          additional_images?: string[] | null
+          availability?: string | null
+          brand?: string | null
+          catalog_id?: string | null
+          category?: string | null
+          color?: string | null
+          condition?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          gender?: string | null
+          id?: string
+          main_image_url?: string | null
+          material?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          price?: number | null
+          product_url?: string | null
+          sale_price?: number | null
+          size?: string | null
+          sku: string
+          stock_quantity?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+          weight?: string | null
+        }
+        Update: {
+          additional_images?: string[] | null
+          availability?: string | null
+          brand?: string | null
+          catalog_id?: string | null
+          category?: string | null
+          color?: string | null
+          condition?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          gender?: string | null
+          id?: string
+          main_image_url?: string | null
+          material?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          price?: number | null
+          product_url?: string | null
+          sale_price?: number | null
+          size?: string | null
+          sku?: string
+          stock_quantity?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          weight?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "catalogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           addon_credits: number
