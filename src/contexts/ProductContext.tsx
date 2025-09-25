@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface ProductMedia {
   id: string;
@@ -17,6 +18,11 @@ export interface Product {
   salePrice?: string;
   category: string;
   media: Record<string, ProductMedia>;
+  sku: string;
+  product_url?: string;
+  condition: string;
+  availability: string;
+  currency: string;
 }
 
 export interface UploadedAsset {
@@ -35,74 +41,23 @@ interface ProductContextType {
   uploadedAssets: UploadedAsset[];
   addUploadedAsset: (asset: UploadedAsset) => void;
   removeUploadedAsset: (assetId: string) => void;
+  loading: boolean;
 }
 
 const defaultProduct: Product = {
-  id: 'WS-001',
-  title: 'Premium White Suit Jacket',
-  description: 'Elegant white suit jacket crafted from premium cotton blend. Perfect for formal occasions, business meetings, and special events.',
-  brand: 'LUXE Fashion',
-  price: '$299.99',
-  salePrice: '$199.99',
-  category: 'Formal Wear',
-  media: {
-    'image_link': {
-      id: 'main-1',
-      name: 'Product Main Image',
-      url: 'https://images.unsplash.com/photo-1749096291459-32c38f03e6df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMHN1aXQlMjBqYWNrZXQlMjBwcm9kdWN0fGVufDF8fHx8MTc1ODY2MTQ3OHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      type: 'image',
-      isFromFeed: true
-    },
-    'additional_image_link': {
-      id: 'detail-1',
-      name: 'Detail View 1',
-      url: 'https://images.unsplash.com/photo-1752432133289-1c0f375819b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwcHJvZHVjdCUyMGRldGFpbCUyMGNsb3NlJTIwdXB8ZW58MXx8fHwxNzU4NzQ4NjMwfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      type: 'image',
-      isFromFeed: true
-    },
-    'additional_image_link_2': {
-      id: 'texture-1',
-      name: 'Fabric Texture',
-      url: 'https://images.unsplash.com/photo-1684779170885-a96321b17061?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwY2xvdGhpbmclMjB0ZXh0dXJlJTIwcGF0dGVybnxlbnwxfHx8fDE3NTg3NDg0MjB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      type: 'image',
-      isFromFeed: true
-    },
-    'additional_image_link_3': {
-      id: 'material-1',
-      name: 'Material Close-up',
-      url: 'https://images.unsplash.com/photo-1665764045207-a0f035401210?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9kdWN0JTIwdGV4dGlsZSUyMG1hdGVyaWFsfGVufDF8fHx8MTc1ODc0ODQyNHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      type: 'image',
-      isFromFeed: true
-    },
-    'brand_logo': {
-      id: 'logo-1',
-      name: 'Brand Logo',
-      url: 'https://images.unsplash.com/photo-1758467700789-d6f49099c884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmFuZCUyMGxvZ28lMjBkZXNpZ24lMjBtb2Rlcm58ZW58MXx8fHwxNzU4Njg2ODM1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      type: 'image',
-      isFromFeed: true
-    },
-    'manual_image_1': {
-      id: 'manual-1',
-      name: 'Lifestyle Image',
-      url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9kdWN0fGVufDB8fHx8MTc1ODY2MTQ4NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      type: 'image',
-      isFromFeed: false
-    },
-    'manual_image_2': {
-      id: 'manual-2',
-      name: 'Style Guide',
-      url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwYWNjZXNzb3J5fGVufDB8fHx8MTc1ODY2MTQ4NXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      type: 'image',
-      isFromFeed: false
-    },
-    'category_image': {
-      id: 'category-1',
-      name: 'Category Banner',
-      url: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXRlZ29yeXxlbnwwfHx8fDE3NTg2NjE0ODd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      type: 'image',
-      isFromFeed: true
-    }
-  }
+  id: 'loading',
+  title: 'Loading...',
+  description: 'Loading product data...',
+  brand: 'Loading...',
+  price: '$0.00',
+  salePrice: '$0.00',
+  category: 'Loading...',
+  sku: 'LOADING',
+  product_url: '',
+  condition: 'new',
+  availability: 'in stock', 
+  currency: 'USD',
+  media: {}
 };
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -110,6 +65,81 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 export function ProductProvider({ children }: { children: ReactNode }) {
   const [currentProduct, setCurrentProduct] = useState<Product>(defaultProduct);
   const [uploadedAssets, setUploadedAssets] = useState<UploadedAsset[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLatestProduct = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error) {
+          console.error('Error fetching product:', error);
+          return;
+        }
+
+        if (data) {
+          // Convert database product to our Product interface
+          const product: Product = {
+            id: data.id,
+            title: data.title || 'Untitled Product',
+            description: data.description || '',
+            brand: data.brand || '',
+            price: data.price ? `$${data.price}` : '$0.00',
+            salePrice: data.sale_price ? `$${data.sale_price}` : undefined,
+            category: data.category || '',
+            sku: data.sku || '',
+            product_url: data.product_url || '',
+            condition: data.condition || 'new',
+            availability: data.availability || 'in stock',
+            currency: data.currency || 'USD',
+            media: {
+              'image_link': {
+                id: 'main-image',
+                name: 'Main Image',
+                url: data.main_image_url || '/src/assets/product-images.png',
+                type: 'image',
+                isFromFeed: true
+              },
+              'additional_image_link': {
+                id: 'additional-1',
+                name: 'Additional Image 1',
+                url: data.additional_images?.[0] || '/src/assets/product-image-3.png',
+                type: 'image',
+                isFromFeed: true
+              },
+              'additional_image_link_2': {
+                id: 'additional-2', 
+                name: 'Additional Image 2',
+                url: data.additional_images?.[1] || '/src/assets/product-image-4.png',
+                type: 'image',
+                isFromFeed: true
+              },
+              'brand_logo': {
+                id: 'brand-logo',
+                name: 'Brand Logo',
+                url: data.additional_images?.[2] || '/src/assets/product-image-5.png',
+                type: 'image',
+                isFromFeed: true
+              }
+            }
+          };
+
+          setCurrentProduct(product);
+        }
+      } catch (error) {
+        console.error('Error fetching latest product:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLatestProduct();
+  }, []);
 
   const getMediaUrl = (mediaKey: string): string => {
     const media = currentProduct.media[mediaKey];
@@ -131,7 +161,8 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       getMediaUrl,
       uploadedAssets,
       addUploadedAsset,
-      removeUploadedAsset
+      removeUploadedAsset,
+      loading
     }}>
       {children}
     </ProductContext.Provider>
