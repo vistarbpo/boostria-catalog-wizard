@@ -45,7 +45,31 @@ interface ToolbarSidebarProps {
 }
 
 export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
-  const { currentProduct, uploadedAssets, addUploadedAsset } = useProduct();
+  // Add error handling for useProduct
+  let productContext;
+  try {
+    productContext = useProduct();
+  } catch (error) {
+    console.error('ProductProvider error:', error);
+    // Fallback to prevent crash
+    productContext = {
+      currentProduct: {
+        id: 'fallback',
+        title: 'Loading...',
+        description: 'Loading...',
+        brand: 'Loading...',
+        price: '$0.00',
+        salePrice: '$0.00',
+        category: 'Loading...',
+        media: {}
+      },
+      uploadedAssets: [],
+      addUploadedAsset: () => {},
+      getMediaUrl: () => ''
+    };
+  }
+  
+  const { currentProduct, uploadedAssets, addUploadedAsset } = productContext;
   const [activeSection, setActiveSection] = useState<MenuSection>("source");
   const imageUploadRef = useRef<HTMLInputElement>(null);
   const svgUploadRef = useRef<HTMLInputElement>(null);
