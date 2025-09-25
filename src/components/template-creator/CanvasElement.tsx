@@ -447,7 +447,7 @@ const CanvasElementComponent = function CanvasElement({
           <div
             className="rotation-handle absolute w-8 h-8 bg-white border-2 border-blue-500 rounded-full shadow-lg hover:bg-blue-50 hover:scale-110 transition-all duration-150 flex items-center justify-center cursor-grab active:cursor-grabbing will-change-transform"
             style={{
-              top: -36,
+              top: -48,
               left: 'calc(50% - 16px)',
             }}
           >
@@ -456,9 +456,9 @@ const CanvasElementComponent = function CanvasElement({
           
           {/* Rotation Line */}
           <div
-            className="absolute w-px h-8 bg-blue-400 pointer-events-none"
+            className="absolute w-px h-12 bg-blue-400 pointer-events-none"
             style={{
-              top: -28,
+              top: -40,
               left: 'calc(50% - 0.5px)',
             }}
           />
