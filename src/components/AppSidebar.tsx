@@ -12,7 +12,8 @@ import {
   ChevronRight,
   FileText,
   Link2,
-  Settings
+  Settings,
+  Plus
 } from "lucide-react";
 
 import {
@@ -32,6 +33,7 @@ const navItems = [
   { title: "Connect", url: "/connect", icon: Link2 },
   { title: "Products", url: "/products", icon: Package },
   { title: "Templates", url: "/templates", icon: FileText },
+  { title: "Create Template", url: "/template-create", icon: Plus },
   { title: "Media Manager", url: "/media", icon: Images },
   { title: "Feed Manager", url: "/feeds", icon: Rss },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
