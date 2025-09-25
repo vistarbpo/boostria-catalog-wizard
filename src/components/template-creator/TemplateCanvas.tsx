@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -6,12 +6,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Monitor, Smartphone, Tablet, ChevronDown } from "lucide-react";
 import { CanvasElement } from "./CanvasElement";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
+import html2canvas from "html2canvas";
+import { toast } from "sonner";
 
 interface TemplateCanvasProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
 }
 
-export function TemplateCanvas({ canvasStore }: TemplateCanvasProps) {
+export interface TemplateCanvasRef {
+  exportAsJPG: () => Promise<void>;
+}
+
+export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>(({ canvasStore }, ref) => {
   const [selectedDevice, setSelectedDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [selectedSize, setSelectedSize] = useState("pinterest-pin-standard");
   const [zoomLevel, setZoomLevel] = useState<number | "fit">("fit");
@@ -126,6 +132,67 @@ export function TemplateCanvas({ canvasStore }: TemplateCanvasProps) {
 
   const actualZoom = getActualZoom();
   const scale = actualZoom / 100;
+
+  // Export functionality
+  const exportAsJPG = useCallback(async () => {
+    if (!canvasRef.current) {
+      toast.error("Canvas not ready for export");
+      return;
+    }
+
+    try {
+      toast.loading("Preparing export...");
+      
+      // Create a temporary canvas element for export
+      const tempCanvas = document.createElement('div');
+      tempCanvas.style.position = 'absolute';
+      tempCanvas.style.left = '-9999px';
+      tempCanvas.style.top = '-9999px';
+      tempCanvas.style.width = `${currentSize.width}px`;
+      tempCanvas.style.height = `${currentSize.height}px`;
+      tempCanvas.style.backgroundColor = 'white';
+      tempCanvas.innerHTML = canvasRef.current.innerHTML;
+      
+      document.body.appendChild(tempCanvas);
+
+      const canvas = await html2canvas(tempCanvas, {
+        width: currentSize.width,
+        height: currentSize.height,
+        backgroundColor: '#ffffff',
+        scale: 2, // Higher quality
+        useCORS: true,
+        allowTaint: true,
+        removeContainer: true
+      });
+
+      // Clean up temp element
+      document.body.removeChild(tempCanvas);
+
+      // Convert to JPG and download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `template-${Date.now()}.jpg`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          toast.success("Template exported successfully!");
+        }
+      }, 'image/jpeg', 0.9);
+
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast.error("Failed to export template");
+    }
+  }, [currentSize, canvasRef]);
+
+  // Expose export function through ref
+  useImperativeHandle(ref, () => ({
+    exportAsJPG
+  }), [exportAsJPG]);
 
   return (
     <div className="flex-1 bg-muted/20 p-4 flex flex-col overflow-hidden">
@@ -246,4 +313,4 @@ export function TemplateCanvas({ canvasStore }: TemplateCanvasProps) {
       </div>
     </div>
   );
-}
+});

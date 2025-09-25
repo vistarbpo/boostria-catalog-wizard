@@ -13,7 +13,11 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export function TemplateHeader() {
+interface TemplateHeaderProps {
+  onExport?: () => Promise<void>;
+}
+
+export function TemplateHeader({ onExport }: TemplateHeaderProps) {
   const navigate = useNavigate();
 
   return (
@@ -56,7 +60,7 @@ export function TemplateHeader() {
           <Share className="w-4 h-4 mr-2" />
           Share
         </Button>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={onExport} disabled={!onExport}>
           <Download className="w-4 h-4 mr-2" />
           Export
         </Button>
