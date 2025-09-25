@@ -33,7 +33,12 @@ import {
   Flag,
   ArrowRight,
   Flower,
-  RectangleHorizontal
+  RectangleHorizontal,
+  ArrowUp,
+  ArrowDown,
+  Lock,
+  Unlock,
+  Copy
 } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { useProduct } from "../../contexts/ProductContext";
@@ -218,6 +223,77 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
         }
       }, 100);
     }
+  };
+
+  const handleMoveLayerUp = (elementId: string) => {
+    const element = canvasStore.canvasState.elements.find(el => el.id === elementId);
+    if (element) {
+      const maxZIndex = Math.max(...canvasStore.canvasState.elements.map(el => el.zIndex));
+      if (element.zIndex < maxZIndex) {
+        canvasStore.updateElement(elementId, { zIndex: element.zIndex + 1 });
+      }
+    }
+  };
+
+  const handleMoveLayerDown = (elementId: string) => {
+    const element = canvasStore.canvasState.elements.find(el => el.id === elementId);
+    if (element) {
+      const minZIndex = Math.min(...canvasStore.canvasState.elements.map(el => el.zIndex));
+      if (element.zIndex > minZIndex) {
+        canvasStore.updateElement(elementId, { zIndex: element.zIndex - 1 });
+      }
+    }
+  };
+
+  const handleDuplicateSelected = () => {
+    const selectedElements = canvasStore.getSelectedElements();
+    selectedElements.forEach((element) => {
+      const newElement = {
+        ...element,
+        id: Math.random().toString(36).substr(2, 9),
+        position: {
+          x: element.position.x + 20,
+          y: element.position.y + 20
+        },
+        zIndex: Math.max(...canvasStore.canvasState.elements.map(el => el.zIndex)) + 1
+      };
+      
+      // Add the duplicated element to canvas
+      if (element.type === 'text') {
+        canvasStore.addTextElement(newElement.position, (element as any).content);
+        setTimeout(() => {
+          const addedElement = canvasStore.getSelectedElement();
+          if (addedElement) {
+            canvasStore.updateElement(addedElement.id, {
+              ...newElement,
+              id: addedElement.id
+            });
+          }
+        }, 100);
+      } else if (element.type === 'shape') {
+        canvasStore.addShapeElement((element as any).shapeType, newElement.position);
+        setTimeout(() => {
+          const addedElement = canvasStore.getSelectedElement();
+          if (addedElement) {
+            canvasStore.updateElement(addedElement.id, {
+              ...newElement,
+              id: addedElement.id
+            });
+          }
+        }, 100);
+      } else if (element.type === 'image') {
+        canvasStore.addImageElement((element as any).src, newElement.position);
+        setTimeout(() => {
+          const addedElement = canvasStore.getSelectedElement();
+          if (addedElement) {
+            canvasStore.updateElement(addedElement.id, {
+              ...newElement,
+              id: addedElement.id
+            });
+          }
+        }, 100);
+      }
+    });
   };
 
   const handleAddTextPreset = (preset: string) => {
@@ -610,21 +686,167 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
 
             {activeSection === "layers" && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Layers</h3>
-                <div className="space-y-2">
-                  {canvasStore.canvasState.elements.map((element) => (
-                    <div key={element.id} className="flex items-center justify-between p-2 bg-muted rounded">
-                      <span className="text-sm">{element.type} - {element.id.slice(0, 8)}</span>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Layers</h3>
+                  <div className="text-xs text-muted-foreground">
+                    {canvasStore.canvasState.elements.length} layers
+                  </div>
+                </div>
+                
+                <div className="space-y-1 max-h-96 overflow-y-auto">
+                  {canvasStore.canvasState.elements
+                    .sort((a, b) => b.zIndex - a.zIndex) // Sort by z-index (top to bottom)
+                    .map((element, index) => {
+                      const isSelected = canvasStore.canvasState.selectedElementIds.includes(element.id);
+                      
+                      return (
+                        <div 
+                          key={element.id} 
+                          className={`group flex items-center gap-2 p-2 rounded border transition-colors ${
+                            isSelected 
+                              ? 'bg-primary/10 border-primary' 
+                              : 'bg-muted/50 border-border hover:bg-muted'
+                          }`}
+                        >
+                          {/* Drag Handle */}
+                          <div className="cursor-move opacity-50 hover:opacity-100">
+                            <GripVertical className="w-3 h-3" />
+                          </div>
+                          
+                          {/* Layer Info */}
+                          <div 
+                            className="flex-1 flex items-center gap-2 cursor-pointer"
+                            onClick={() => canvasStore.selectElement(element.id)}
+                          >
+                            {/* Layer Icon */}
+                            <div className="flex-shrink-0">
+                              {element.type === 'text' && <Type className="w-4 h-4" />}
+                              {element.type === 'shape' && <Shapes className="w-4 h-4" />}  
+                              {element.type === 'image' && <Image className="w-4 h-4" />}
+                              {element.type === 'svg' && <FileImage className="w-4 h-4" />}
+                            </div>
+                            
+                            {/* Layer Name & Details */}
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium truncate">
+                                {element.type === 'text' && (element as any).content?.substring(0, 20)}
+                                {element.type === 'shape' && `${(element as any).shapeType} shape`}
+                                {element.type === 'image' && 'Image'}
+                                {element.type === 'svg' && 'SVG'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {Math.round(element.size.width)} × {Math.round(element.size.height)}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Layer Controls */}
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {/* Move Up */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMoveLayerUp(element.id);
+                              }}
+                              disabled={index === 0}
+                            >
+                              <ArrowUp className="w-3 h-3" />
+                            </Button>
+                            
+                            {/* Move Down */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMoveLayerDown(element.id);
+                              }}
+                              disabled={index === canvasStore.canvasState.elements.length - 1}
+                            >
+                              <ArrowDown className="w-3 h-3" />
+                            </Button>
+                            
+                            {/* Visibility Toggle */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                canvasStore.updateElement(element.id, { visible: !element.visible });
+                              }}
+                            >
+                              {element.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                            </Button>
+                            
+                            {/* Lock Toggle */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                canvasStore.updateElement(element.id, { locked: !element.locked });
+                              }}
+                            >
+                              {element.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                            </Button>
+                            
+                            {/* Delete */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                canvasStore.deleteElement(element.id);
+                              }}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    
+                  {canvasStore.canvasState.elements.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Layers className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No layers yet</p>
+                      <p className="text-xs">Add text, shapes, or images to get started</p>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Quick Actions */}
+                {canvasStore.canvasState.selectedElementIds.length > 0 && (
+                  <div className="border-t pt-3">
+                    <div className="flex gap-2">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => canvasStore.selectElement(element.id)}
+                        onClick={() => canvasStore.deleteSelected()}
+                        className="flex-1"
                       >
-                        <Eye className="w-4 h-4" />
+                        <X className="w-4 h-4 mr-1" />
+                        Delete Selected
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDuplicateSelected}
+                        className="flex-1"
+                      >
+                        <Copy className="w-4 h-4 mr-1" />
+                        Duplicate
                       </Button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
