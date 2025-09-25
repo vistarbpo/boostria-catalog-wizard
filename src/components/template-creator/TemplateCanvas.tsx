@@ -141,7 +141,14 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
     }
 
     try {
-      toast.loading("Preparing export...");
+      const loadingToast = toast.loading("Preparing export...");
+      
+      // Clear selection to hide nodes/handles
+      const originalSelection = [...canvasStore.canvasState.selectedElementIds];
+      canvasStore.clearSelection();
+      
+      // Wait for re-render without selection
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Create a temporary canvas element for export
       const tempCanvas = document.createElement('div');
@@ -151,8 +158,18 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       tempCanvas.style.width = `${currentSize.width}px`;
       tempCanvas.style.height = `${currentSize.height}px`;
       tempCanvas.style.backgroundColor = 'white';
-      tempCanvas.innerHTML = canvasRef.current.innerHTML;
       
+      // Clone only the content without selection handles
+      const canvasContent = canvasRef.current;
+      const elementsOnly = canvasContent.cloneNode(true) as HTMLElement;
+      
+      // Remove all selection handles and controls from the clone
+      const controlsToRemove = elementsOnly.querySelectorAll(
+        '.resize-handle, .rotation-handle, .selection-outline, [class*="handle"], [class*="control"]'
+      );
+      controlsToRemove.forEach(control => control.remove());
+      
+      tempCanvas.appendChild(elementsOnly);
       document.body.appendChild(tempCanvas);
 
       const canvas = await html2canvas(tempCanvas, {
@@ -167,9 +184,13 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
 
       // Clean up temp element
       document.body.removeChild(tempCanvas);
+      
+      // Restore original selection
+      originalSelection.forEach(id => canvasStore.selectElement(id, true));
 
       // Convert to JPG and download
       canvas.toBlob((blob) => {
+        toast.dismiss(loadingToast);
         if (blob) {
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');
@@ -187,7 +208,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       console.error('Export failed:', error);
       toast.error("Failed to export template");
     }
-  }, [currentSize, canvasRef]);
+  }, [currentSize, canvasRef, canvasStore]);
 
   // Expose export function through ref
   useImperativeHandle(ref, () => ({
