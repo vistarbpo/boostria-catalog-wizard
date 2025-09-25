@@ -422,6 +422,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      create_sample_products: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       create_sample_products_for_user: {
         Args: { p_user_id: string }
         Returns: undefined
