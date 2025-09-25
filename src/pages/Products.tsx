@@ -37,6 +37,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const getStatusBadge = (status: string) => {
   return status === "active" 
@@ -46,6 +47,7 @@ const getStatusBadge = (status: string) => {
 
 export default function Products() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [selectedCatalogs, setSelectedCatalogs] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [catalogs, setCatalogs] = useState<any[]>([]);
@@ -148,7 +150,7 @@ export default function Products() {
           </Button>
           <Button 
             className="bg-gradient-primary hover:opacity-90 transition-opacity"
-            onClick={() => window.location.href = '/products/new'}
+            onClick={() => navigate('/products/new')}
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Catalog
@@ -288,7 +290,10 @@ export default function Products() {
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-foreground">
+                          <DropdownMenuItem 
+                            className="text-foreground"
+                            onClick={() => navigate(`/products/edit/${catalog.id}`)}
+                          >
                             <Edit className="w-4 h-4 mr-2" />
                             Edit Catalog
                           </DropdownMenuItem>
