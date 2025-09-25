@@ -31,13 +31,6 @@ export function TemplateHeader() {
         </Button>
         
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
-            <span className="text-primary-foreground text-sm font-bold">T</span>
-          </div>
-          <span className="font-medium">Template Creator</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm">
             <Undo className="w-4 h-4" />
           </Button>
