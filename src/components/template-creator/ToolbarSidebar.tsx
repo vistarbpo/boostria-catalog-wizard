@@ -321,37 +321,77 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddDynamicImage('image_link')}
-                      className="justify-start"
+                      className="justify-start h-auto p-2"
                     >
-                      <FileImage className="w-4 h-4 mr-2" />
-                      image_link
+                      <div className="flex items-center gap-2">
+                        {productContext.getMediaUrl('image_link') ? (
+                          <img 
+                            src={productContext.getMediaUrl('image_link')} 
+                            alt="Main product"
+                            className="w-8 h-8 object-cover rounded border"
+                          />
+                        ) : (
+                          <FileImage className="w-8 h-8" />
+                        )}
+                        <span className="text-xs">image_link</span>
+                      </div>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddDynamicImage('additional_image_link')}
-                      className="justify-start"
+                      className="justify-start h-auto p-2"
                     >
-                      <FileImage className="w-4 h-4 mr-2" />
-                      additional_image_link
+                      <div className="flex items-center gap-2">
+                        {productContext.getMediaUrl('additional_image_link') ? (
+                          <img 
+                            src={productContext.getMediaUrl('additional_image_link')} 
+                            alt="Additional product"
+                            className="w-8 h-8 object-cover rounded border"
+                          />
+                        ) : (
+                          <FileImage className="w-8 h-8" />
+                        )}
+                        <span className="text-xs">additional_image_link</span>
+                      </div>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddDynamicImage('additional_image_link_2')}
-                      className="justify-start"
+                      className="justify-start h-auto p-2"
                     >
-                      <FileImage className="w-4 h-4 mr-2" />
-                      additional_image_link_2
+                      <div className="flex items-center gap-2">
+                        {productContext.getMediaUrl('additional_image_link_2') ? (
+                          <img 
+                            src={productContext.getMediaUrl('additional_image_link_2')} 
+                            alt="Detail product"
+                            className="w-8 h-8 object-cover rounded border"
+                          />
+                        ) : (
+                          <FileImage className="w-8 h-8" />
+                        )}
+                        <span className="text-xs">additional_image_link_2</span>
+                      </div>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddDynamicImage('brand_logo')}
-                      className="justify-start"
+                      className="justify-start h-auto p-2"
                     >
-                      <FileImage className="w-4 h-4 mr-2" />
-                      brand_logo
+                      <div className="flex items-center gap-2">
+                        {productContext.getMediaUrl('brand_logo') ? (
+                          <img 
+                            src={productContext.getMediaUrl('brand_logo')} 
+                            alt="Brand logo"
+                            className="w-8 h-8 object-cover rounded border"
+                          />
+                        ) : (
+                          <FileImage className="w-8 h-8" />
+                        )}
+                        <span className="text-xs">brand_logo</span>
+                      </div>
                     </Button>
                   </div>
                 </div>
