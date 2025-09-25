@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, memo } from 'react';
+import React, { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { CanvasElement as CanvasElementType, TextElement, ShapeElement, ImageElement, SVGElement, Position } from '../../types/canvas';
 import { RotateCw } from 'lucide-react';
 
@@ -26,115 +26,262 @@ const CanvasElementComponent = function CanvasElement({
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
-  const [resizeHandle, setResizeHandle] = useState<string>('');
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0, elementX: 0, elementY: 0 });
-  const [rotationStart, setRotationStart] = useState({ angle: 0, startAngle: 0 });
+  
   const elementRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const isResizingRef = useRef(false);
+  const isRotatingRef = useRef(false);
+  const dragDataRef = useRef<any>({});
+  const animationFrameRef = useRef<number>();
+
+  // Optimized DOM manipulation for 60fps performance
+  const updateElementStyle = useCallback((pos: Position, size: { width: number; height: number }, rotation: number) => {
+    if (elementRef.current && contentRef.current) {
+      // Use GPU-accelerated transforms
+      elementRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) rotate(${rotation}deg)`;
+      contentRef.current.style.width = `${size.width}px`;
+      contentRef.current.style.height = `${size.height}px`;
+    }
+  }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (element.locked) return;
     
+    e.preventDefault();
     e.stopPropagation();
     
-    const rect = e.currentTarget.getBoundingClientRect();
     const isMultiSelect = e.ctrlKey || e.metaKey;
     onSelect(element.id, isMultiSelect);
 
-    if (e.target instanceof HTMLElement) {
-      if (e.target.classList.contains('resize-handle')) {
-        setIsResizing(true);
-        setResizeHandle(e.target.dataset.handle || '');
-        setDragStart({
-          x: e.clientX,
-          y: e.clientY,
-          elementX: element.position.x,
-          elementY: element.position.y
-        });
-      } else if (e.target.classList.contains('rotation-handle')) {
-        setIsRotating(true);
-        const elementCenter = {
-          x: element.position.x + element.size.width / 2,
-          y: element.position.y + element.size.height / 2
-        };
-        const angle = Math.atan2(e.clientY - elementCenter.y, e.clientX - elementCenter.x) * (180 / Math.PI);
-        setRotationStart({
-          angle: element.rotation,
-          startAngle: angle
-        });
-      } else {
-        setIsDragging(true);
-        setDragStart({
-          x: e.clientX,
-          y: e.clientY,
-          elementX: element.position.x,
-          elementY: element.position.y
-        });
-      }
-    }
-  }, [element.id, element.locked, element.position, element.rotation, element.size, onSelect]);
+    if (!(e.target instanceof HTMLElement)) return;
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (element.locked) return;
+    const startX = e.clientX;
+    const startY = e.clientY;
 
-    if (isDragging) {
-      const deltaX = (e.clientX - dragStart.x) / scale;
-      const deltaY = (e.clientY - dragStart.y) / scale;
+    if (e.target.classList.contains('resize-handle')) {
+      // Resize mode
+      setIsResizing(true);
+      isResizingRef.current = true;
       
-      onMove(element.id, {
-        x: Math.max(0, dragStart.elementX + deltaX),
-        y: Math.max(0, dragStart.elementY + deltaY)
-      });
-    } else if (isResizing) {
-      const deltaX = (e.clientX - dragStart.x) / scale;
-      const deltaY = (e.clientY - dragStart.y) / scale;
+      dragDataRef.current = {
+        startX,
+        startY,
+        handle: e.target.dataset.handle,
+        startWidth: element.size.width,
+        startHeight: element.size.height,
+        startLeft: element.position.x,
+        startTop: element.position.y
+      };
+    } else if (e.target.classList.contains('rotation-handle')) {
+      // Rotation mode
+      setIsRotating(true);
+      isRotatingRef.current = true;
       
-      let newWidth = element.size.width;
-      let newHeight = element.size.height;
-      
-      if (resizeHandle.includes('e')) newWidth = Math.max(20, element.size.width + deltaX);
-      if (resizeHandle.includes('w')) newWidth = Math.max(20, element.size.width - deltaX);
-      if (resizeHandle.includes('s')) newHeight = Math.max(20, element.size.height + deltaY);
-      if (resizeHandle.includes('n')) newHeight = Math.max(20, element.size.height - deltaY);
-      
-      onResize(element.id, { width: newWidth, height: newHeight });
-    } else if (isRotating && onRotate) {
       const elementCenter = {
         x: element.position.x + element.size.width / 2,
         y: element.position.y + element.size.height / 2
       };
-      const currentAngle = Math.atan2(e.clientY - elementCenter.y, e.clientX - elementCenter.x) * (180 / Math.PI);
-      const deltaAngle = currentAngle - rotationStart.startAngle;
-      let newRotation = rotationStart.angle + deltaAngle;
       
-      // Snap to 15-degree increments when holding Shift
+      const startAngle = Math.atan2(startY - elementCenter.y, startX - elementCenter.x) * (180 / Math.PI);
+      
+      dragDataRef.current = {
+        startAngle,
+        startRotation: element.rotation,
+        centerX: elementCenter.x,
+        centerY: elementCenter.y
+      };
+    } else {
+      // Move mode
+      setIsDragging(true);
+      isDraggingRef.current = true;
+      
+      dragDataRef.current = {
+        startX,
+        startY,
+        startLeft: element.position.x,
+        startTop: element.position.y
+      };
+    }
+  }, [element, onSelect]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDraggingRef.current && !isResizingRef.current && !isRotatingRef.current) return;
+    
+    e.preventDefault();
+    
+    // Use requestAnimationFrame for smooth 60fps updates
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    
+    animationFrameRef.current = requestAnimationFrame(() => {
+      const currentX = e.clientX;
+      const currentY = e.clientY;
+      
+      if (isDraggingRef.current) {
+        // Smooth drag
+        const deltaX = (currentX - dragDataRef.current.startX) / scale;
+        const deltaY = (currentY - dragDataRef.current.startY) / scale;
+        
+        const newX = Math.max(0, dragDataRef.current.startLeft + deltaX);
+        const newY = Math.max(0, dragDataRef.current.startTop + deltaY);
+        
+        updateElementStyle(
+          { x: newX, y: newY },
+          element.size,
+          element.rotation
+        );
+      } else if (isResizingRef.current) {
+        // Smooth resize
+        const deltaX = (currentX - dragDataRef.current.startX) / scale;
+        const deltaY = (currentY - dragDataRef.current.startY) / scale;
+        const handle = dragDataRef.current.handle;
+        
+        let newWidth = dragDataRef.current.startWidth;
+        let newHeight = dragDataRef.current.startHeight;
+        let newX = element.position.x;
+        let newY = element.position.y;
+        
+        // Handle proportional resize with Shift
+        const isProportional = e.shiftKey;
+        const aspectRatio = dragDataRef.current.startWidth / dragDataRef.current.startHeight;
+        
+        if (handle.includes('e')) {
+          newWidth = Math.max(20, dragDataRef.current.startWidth + deltaX);
+          if (isProportional) newHeight = newWidth / aspectRatio;
+        }
+        if (handle.includes('w')) {
+          newWidth = Math.max(20, dragDataRef.current.startWidth - deltaX);
+          if (isProportional) newHeight = newWidth / aspectRatio;
+          newX = dragDataRef.current.startLeft + (dragDataRef.current.startWidth - newWidth);
+        }
+        if (handle.includes('s')) {
+          newHeight = Math.max(20, dragDataRef.current.startHeight + deltaY);
+          if (isProportional) newWidth = newHeight * aspectRatio;
+        }
+        if (handle.includes('n')) {
+          newHeight = Math.max(20, dragDataRef.current.startHeight - deltaY);
+          if (isProportional) newWidth = newHeight * aspectRatio;
+          newY = dragDataRef.current.startTop + (dragDataRef.current.startHeight - newHeight);
+        }
+        
+        updateElementStyle(
+          { x: newX, y: newY },
+          { width: newWidth, height: newHeight },
+          element.rotation
+        );
+      } else if (isRotatingRef.current && onRotate) {
+        // Smooth rotation
+        const centerX = dragDataRef.current.centerX;
+        const centerY = dragDataRef.current.centerY;
+        
+        const currentAngle = Math.atan2(currentY - centerY, currentX - centerX) * (180 / Math.PI);
+        const deltaAngle = currentAngle - dragDataRef.current.startAngle;
+        let newRotation = dragDataRef.current.startRotation + deltaAngle;
+        
+        // Snap to 15-degree increments when holding Shift
+        if (e.shiftKey) {
+          newRotation = Math.round(newRotation / 15) * 15;
+        }
+        
+        // Normalize rotation
+        newRotation = ((newRotation % 360) + 360) % 360;
+        
+        updateElementStyle(
+          element.position,
+          element.size,
+          newRotation
+        );
+      }
+    });
+  }, [element, scale, updateElementStyle, onRotate]);
+
+  const handleMouseUp = useCallback((e: MouseEvent) => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    
+    // Apply final state to React state
+    if (isDraggingRef.current) {
+      const deltaX = (e.clientX - dragDataRef.current.startX) / scale;
+      const deltaY = (e.clientY - dragDataRef.current.startY) / scale;
+      
+      const newX = Math.max(0, dragDataRef.current.startLeft + deltaX);
+      const newY = Math.max(0, dragDataRef.current.startTop + deltaY);
+      
+      onMove(element.id, { x: newX, y: newY });
+    } else if (isResizingRef.current) {
+      const deltaX = (e.clientX - dragDataRef.current.startX) / scale;
+      const deltaY = (e.clientY - dragDataRef.current.startY) / scale;
+      const handle = dragDataRef.current.handle;
+      
+      let newWidth = dragDataRef.current.startWidth;
+      let newHeight = dragDataRef.current.startHeight;
+      
+      const isProportional = e.shiftKey;
+      const aspectRatio = dragDataRef.current.startWidth / dragDataRef.current.startHeight;
+      
+      if (handle.includes('e')) {
+        newWidth = Math.max(20, dragDataRef.current.startWidth + deltaX);
+        if (isProportional) newHeight = newWidth / aspectRatio;
+      }
+      if (handle.includes('w')) {
+        newWidth = Math.max(20, dragDataRef.current.startWidth - deltaX);
+        if (isProportional) newHeight = newWidth / aspectRatio;
+      }
+      if (handle.includes('s')) {
+        newHeight = Math.max(20, dragDataRef.current.startHeight + deltaY);
+        if (isProportional) newWidth = newHeight * aspectRatio;
+      }
+      if (handle.includes('n')) {
+        newHeight = Math.max(20, dragDataRef.current.startHeight - deltaY);
+        if (isProportional) newWidth = newHeight * aspectRatio;
+      }
+      
+      onResize(element.id, { width: newWidth, height: newHeight });
+    } else if (isRotatingRef.current && onRotate) {
+      const centerX = dragDataRef.current.centerX;
+      const centerY = dragDataRef.current.centerY;
+      
+      const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+      const deltaAngle = currentAngle - dragDataRef.current.startAngle;
+      let newRotation = dragDataRef.current.startRotation + deltaAngle;
+      
       if (e.shiftKey) {
         newRotation = Math.round(newRotation / 15) * 15;
       }
       
-      // Normalize rotation to 0-360 degrees
       newRotation = ((newRotation % 360) + 360) % 360;
-      
       onRotate(element.id, newRotation);
     }
-  }, [isDragging, isResizing, isRotating, resizeHandle, dragStart, rotationStart, element, scale, onMove, onResize, onRotate]);
-
-  const handleMouseUp = useCallback(() => {
+    
+    // Reset states
     setIsDragging(false);
     setIsResizing(false);
-    setResizeHandle('');
-  }, []);
+    setIsRotating(false);
+    isDraggingRef.current = false;
+    isResizingRef.current = false;
+    isRotatingRef.current = false;
+    dragDataRef.current = {};
+  }, [element.id, scale, onMove, onResize, onRotate]);
 
-  React.useEffect(() => {
-    if (isDragging || isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+  useEffect(() => {
+    if (isDragging || isResizing || isRotating) {
+      document.addEventListener('mousemove', handleMouseMove, { passive: false });
+      document.addEventListener('mouseup', handleMouseUp, { passive: false });
+      document.body.style.userSelect = 'none';
+      document.body.style.pointerEvents = 'none';
+      if (elementRef.current) elementRef.current.style.pointerEvents = 'auto';
       
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.userSelect = '';
+        document.body.style.pointerEvents = '';
       };
     }
-  }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
+  }, [isDragging, isResizing, isRotating, handleMouseMove, handleMouseUp]);
 
   const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     if (element.locked) return;
@@ -144,9 +291,8 @@ const CanvasElementComponent = function CanvasElement({
 
   const renderElement = () => {
     const baseStyle: React.CSSProperties = {
-      width: element.size.width,
-      height: element.size.height,
-      transform: `rotate(${element.rotation}deg)`,
+      width: '100%',
+      height: '100%',
       opacity: element.opacity / 100,
       visibility: element.visible ? 'visible' : 'hidden',
     };
@@ -245,40 +391,50 @@ const CanvasElementComponent = function CanvasElement({
   };
 
   const resizeHandles = [
-    { position: 'nw', cursor: 'nw-resize', style: { top: -6, left: -6 } },
-    { position: 'n', cursor: 'n-resize', style: { top: -6, left: '50%', transform: 'translateX(-50%)' } },
-    { position: 'ne', cursor: 'ne-resize', style: { top: -6, right: -6 } },
-    { position: 'e', cursor: 'e-resize', style: { top: '50%', right: -6, transform: 'translateY(-50%)' } },
-    { position: 'se', cursor: 'se-resize', style: { bottom: -6, right: -6 } },
-    { position: 's', cursor: 's-resize', style: { bottom: -6, left: '50%', transform: 'translateX(-50%)' } },
-    { position: 'sw', cursor: 'sw-resize', style: { bottom: -6, left: -6 } },
-    { position: 'w', cursor: 'w-resize', style: { top: '50%', left: -6, transform: 'translateY(-50%)' } },
+    { position: 'nw', cursor: 'nw-resize', style: { top: -8, left: -8 } },
+    { position: 'n', cursor: 'n-resize', style: { top: -8, left: 'calc(50% - 8px)' } },
+    { position: 'ne', cursor: 'ne-resize', style: { top: -8, right: -8 } },
+    { position: 'e', cursor: 'e-resize', style: { top: 'calc(50% - 8px)', right: -8 } },
+    { position: 'se', cursor: 'se-resize', style: { bottom: -8, right: -8 } },
+    { position: 's', cursor: 's-resize', style: { bottom: -8, left: 'calc(50% - 8px)' } },
+    { position: 'sw', cursor: 'sw-resize', style: { bottom: -8, left: -8 } },
+    { position: 'w', cursor: 'w-resize', style: { top: 'calc(50% - 8px)', left: -8 } },
   ];
 
   return (
     <div
       ref={elementRef}
-      className={`absolute cursor-move transition-all duration-150 ${
+      className={`absolute select-none will-change-transform transition-shadow duration-200 ${
         isSelected 
-          ? 'ring-2 ring-blue-500 ring-opacity-50 shadow-lg' 
-          : 'hover:ring-1 hover:ring-blue-300 hover:ring-opacity-30'
-      } ${element.locked ? 'cursor-not-allowed opacity-50' : ''}`}
+          ? 'ring-2 ring-blue-500 ring-opacity-60 shadow-lg z-10' 
+          : 'hover:ring-1 hover:ring-blue-300 hover:ring-opacity-40 hover:shadow-md'
+      } ${element.locked ? 'cursor-not-allowed opacity-50' : 'cursor-move'}`}
       style={{
-        left: element.position.x,
-        top: element.position.y,
+        left: 0,
+        top: 0,
         zIndex: element.zIndex,
+        transform: `translate3d(${element.position.x}px, ${element.position.y}px, 0) rotate(${element.rotation}deg)`,
+        transformOrigin: 'center center',
       }}
       onMouseDown={handleMouseDown}
     >
-      {renderElement()}
+      <div 
+        ref={contentRef}
+        style={{ 
+          width: element.size.width, 
+          height: element.size.height 
+        }}
+      >
+        {renderElement()}
+      </div>
       
       {isSelected && !element.locked && (
-        <>
+        <div className="absolute inset-0" style={{ transform: `rotate(-${element.rotation}deg)` }}>
           {/* Resize Handles */}
           {resizeHandles.map((handle) => (
             <div
               key={handle.position}
-              className="resize-handle absolute w-3 h-3 bg-white border-2 border-blue-500 rounded-sm shadow-sm hover:bg-blue-50 transition-colors duration-150"
+              className="resize-handle absolute w-4 h-4 bg-white border-2 border-blue-500 rounded-sm shadow-lg hover:bg-blue-50 hover:scale-110 transition-all duration-150 will-change-transform"
               data-handle={handle.position}
               style={{
                 ...handle.style,
@@ -289,26 +445,24 @@ const CanvasElementComponent = function CanvasElement({
           
           {/* Rotation Handle */}
           <div
-            className="rotation-handle absolute w-6 h-6 bg-white border-2 border-blue-500 rounded-full shadow-sm hover:bg-blue-50 transition-all duration-150 flex items-center justify-center cursor-grab active:cursor-grabbing"
+            className="rotation-handle absolute w-8 h-8 bg-white border-2 border-blue-500 rounded-full shadow-lg hover:bg-blue-50 hover:scale-110 transition-all duration-150 flex items-center justify-center cursor-grab active:cursor-grabbing will-change-transform"
             style={{
-              top: -24,
-              left: '50%',
-              transform: 'translateX(-50%)',
+              top: -36,
+              left: 'calc(50% - 16px)',
             }}
           >
-            <RotateCw className="w-3 h-3 text-blue-600" />
+            <RotateCw className="w-4 h-4 text-blue-600" />
           </div>
           
           {/* Rotation Line */}
           <div
-            className="absolute w-px h-4 bg-blue-400 pointer-events-none"
+            className="absolute w-px h-8 bg-blue-400 pointer-events-none"
             style={{
-              top: -20,
-              left: '50%',
-              transform: 'translateX(-50%)',
+              top: -28,
+              left: 'calc(50% - 0.5px)',
             }}
           />
-        </>
+        </div>
       )}
     </div>
   );
