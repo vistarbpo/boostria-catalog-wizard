@@ -228,6 +228,11 @@ export function TemplateCanvas({ canvasStore }: TemplateCanvasProps) {
                 onSelect={canvasStore.selectElement}
                 onMove={canvasStore.moveElement}
                 onResize={canvasStore.resizeElement}
+                onRotate={canvasStore.rotateElement}
+                onDoubleClick={(elementId) => {
+                  // Handle double click for editing
+                  console.log('Double clicked element:', elementId);
+                }}
               />
             ))}
           </div>

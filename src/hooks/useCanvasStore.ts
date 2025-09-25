@@ -197,6 +197,10 @@ export function useCanvasStore() {
     }));
   }, []);
 
+  const rotateElement = useCallback((elementId: string, rotation: number) => {
+    updateElement(elementId, { rotation });
+  }, [updateElement]);
+
   const selectElement = useCallback((elementId: string, multiSelect = false) => {
     setCanvasState(prev => ({
       ...prev,
@@ -285,6 +289,7 @@ export function useCanvasStore() {
     addImageElement,
     addSVGElement,
     updateElement,
+    rotateElement,
     selectElement,
     selectElements,
     clearSelection,

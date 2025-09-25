@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, memo } from 'react';
 import { CanvasElement as CanvasElementType, TextElement, ShapeElement, ImageElement, SVGElement, Position } from '../../types/canvas';
+import { RotateCw } from 'lucide-react';
 
 interface CanvasElementProps {
   element: CanvasElementType;
@@ -8,6 +9,7 @@ interface CanvasElementProps {
   onSelect: (elementId: string, multiSelect?: boolean) => void;
   onMove: (elementId: string, newPosition: Position) => void;
   onResize: (elementId: string, newSize: { width: number; height: number }) => void;
+  onRotate?: (elementId: string, rotation: number) => void;
   onDoubleClick?: (elementId: string) => void;
 }
 
@@ -18,12 +20,15 @@ const CanvasElementComponent = function CanvasElement({
   onSelect, 
   onMove, 
   onResize,
+  onRotate,
   onDoubleClick
 }: CanvasElementProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<string>('');
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, elementX: 0, elementY: 0 });
+  const [rotationStart, setRotationStart] = useState({ angle: 0, startAngle: 0 });
   const elementRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -35,19 +40,38 @@ const CanvasElementComponent = function CanvasElement({
     const isMultiSelect = e.ctrlKey || e.metaKey;
     onSelect(element.id, isMultiSelect);
 
-    if (e.target instanceof HTMLElement && e.target.classList.contains('resize-handle')) {
-      setIsResizing(true);
-      setResizeHandle(e.target.dataset.handle || '');
-    } else {
-      setIsDragging(true);
-      setDragStart({
-        x: e.clientX,
-        y: e.clientY,
-        elementX: element.position.x,
-        elementY: element.position.y
-      });
+    if (e.target instanceof HTMLElement) {
+      if (e.target.classList.contains('resize-handle')) {
+        setIsResizing(true);
+        setResizeHandle(e.target.dataset.handle || '');
+        setDragStart({
+          x: e.clientX,
+          y: e.clientY,
+          elementX: element.position.x,
+          elementY: element.position.y
+        });
+      } else if (e.target.classList.contains('rotation-handle')) {
+        setIsRotating(true);
+        const elementCenter = {
+          x: element.position.x + element.size.width / 2,
+          y: element.position.y + element.size.height / 2
+        };
+        const angle = Math.atan2(e.clientY - elementCenter.y, e.clientX - elementCenter.x) * (180 / Math.PI);
+        setRotationStart({
+          angle: element.rotation,
+          startAngle: angle
+        });
+      } else {
+        setIsDragging(true);
+        setDragStart({
+          x: e.clientX,
+          y: e.clientY,
+          elementX: element.position.x,
+          elementY: element.position.y
+        });
+      }
     }
-  }, [element.id, element.locked, element.position, onSelect]);
+  }, [element.id, element.locked, element.position, element.rotation, element.size, onSelect]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (element.locked) return;
@@ -73,8 +97,26 @@ const CanvasElementComponent = function CanvasElement({
       if (resizeHandle.includes('n')) newHeight = Math.max(20, element.size.height - deltaY);
       
       onResize(element.id, { width: newWidth, height: newHeight });
+    } else if (isRotating && onRotate) {
+      const elementCenter = {
+        x: element.position.x + element.size.width / 2,
+        y: element.position.y + element.size.height / 2
+      };
+      const currentAngle = Math.atan2(e.clientY - elementCenter.y, e.clientX - elementCenter.x) * (180 / Math.PI);
+      const deltaAngle = currentAngle - rotationStart.startAngle;
+      let newRotation = rotationStart.angle + deltaAngle;
+      
+      // Snap to 15-degree increments when holding Shift
+      if (e.shiftKey) {
+        newRotation = Math.round(newRotation / 15) * 15;
+      }
+      
+      // Normalize rotation to 0-360 degrees
+      newRotation = ((newRotation % 360) + 360) % 360;
+      
+      onRotate(element.id, newRotation);
     }
-  }, [isDragging, isResizing, resizeHandle, dragStart, element.id, element.size, scale, onMove, onResize, element.locked]);
+  }, [isDragging, isResizing, isRotating, resizeHandle, dragStart, rotationStart, element, scale, onMove, onResize, onRotate]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -203,20 +245,24 @@ const CanvasElementComponent = function CanvasElement({
   };
 
   const resizeHandles = [
-    { position: 'nw', cursor: 'nw-resize', style: { top: -4, left: -4 } },
-    { position: 'n', cursor: 'n-resize', style: { top: -4, left: '50%', transform: 'translateX(-50%)' } },
-    { position: 'ne', cursor: 'ne-resize', style: { top: -4, right: -4 } },
-    { position: 'e', cursor: 'e-resize', style: { top: '50%', right: -4, transform: 'translateY(-50%)' } },
-    { position: 'se', cursor: 'se-resize', style: { bottom: -4, right: -4 } },
-    { position: 's', cursor: 's-resize', style: { bottom: -4, left: '50%', transform: 'translateX(-50%)' } },
-    { position: 'sw', cursor: 'sw-resize', style: { bottom: -4, left: -4 } },
-    { position: 'w', cursor: 'w-resize', style: { top: '50%', left: -4, transform: 'translateY(-50%)' } },
+    { position: 'nw', cursor: 'nw-resize', style: { top: -6, left: -6 } },
+    { position: 'n', cursor: 'n-resize', style: { top: -6, left: '50%', transform: 'translateX(-50%)' } },
+    { position: 'ne', cursor: 'ne-resize', style: { top: -6, right: -6 } },
+    { position: 'e', cursor: 'e-resize', style: { top: '50%', right: -6, transform: 'translateY(-50%)' } },
+    { position: 'se', cursor: 'se-resize', style: { bottom: -6, right: -6 } },
+    { position: 's', cursor: 's-resize', style: { bottom: -6, left: '50%', transform: 'translateX(-50%)' } },
+    { position: 'sw', cursor: 'sw-resize', style: { bottom: -6, left: -6 } },
+    { position: 'w', cursor: 'w-resize', style: { top: '50%', left: -6, transform: 'translateY(-50%)' } },
   ];
 
   return (
     <div
       ref={elementRef}
-      className={`absolute cursor-move ${isSelected ? 'ring-2 ring-blue-500' : ''} ${element.locked ? 'cursor-not-allowed opacity-50' : ''}`}
+      className={`absolute cursor-move transition-all duration-150 ${
+        isSelected 
+          ? 'ring-2 ring-blue-500 ring-opacity-50 shadow-lg' 
+          : 'hover:ring-1 hover:ring-blue-300 hover:ring-opacity-30'
+      } ${element.locked ? 'cursor-not-allowed opacity-50' : ''}`}
       style={{
         left: element.position.x,
         top: element.position.y,
@@ -228,10 +274,11 @@ const CanvasElementComponent = function CanvasElement({
       
       {isSelected && !element.locked && (
         <>
+          {/* Resize Handles */}
           {resizeHandles.map((handle) => (
             <div
               key={handle.position}
-              className="resize-handle absolute w-2 h-2 bg-blue-500 border border-white"
+              className="resize-handle absolute w-3 h-3 bg-white border-2 border-blue-500 rounded-sm shadow-sm hover:bg-blue-50 transition-colors duration-150"
               data-handle={handle.position}
               style={{
                 ...handle.style,
@@ -239,6 +286,28 @@ const CanvasElementComponent = function CanvasElement({
               }}
             />
           ))}
+          
+          {/* Rotation Handle */}
+          <div
+            className="rotation-handle absolute w-6 h-6 bg-white border-2 border-blue-500 rounded-full shadow-sm hover:bg-blue-50 transition-all duration-150 flex items-center justify-center cursor-grab active:cursor-grabbing"
+            style={{
+              top: -24,
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <RotateCw className="w-3 h-3 text-blue-600" />
+          </div>
+          
+          {/* Rotation Line */}
+          <div
+            className="absolute w-px h-4 bg-blue-400 pointer-events-none"
+            style={{
+              top: -20,
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }}
+          />
         </>
       )}
     </div>
