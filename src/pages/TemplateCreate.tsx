@@ -15,7 +15,7 @@ export default function TemplateCreate() {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <TemplateHeader fabricCanvas={fabricCanvas} />
+      <TemplateHeader />
       
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">

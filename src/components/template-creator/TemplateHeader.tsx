@@ -1,66 +1,86 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft, Share2, Download } from "lucide-react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import { 
+  Save, 
+  Download, 
+  Share, 
+  Undo, 
+  Redo,
+  Settings,
+  User,
+  ArrowLeft
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
-interface TemplateHeaderProps {
-  fabricCanvas?: any;
-}
-
-export function TemplateHeader({ fabricCanvas }: TemplateHeaderProps) {
+export function TemplateHeader() {
   const navigate = useNavigate();
-  
-  const handleExport = () => {
-    if (!fabricCanvas) {
-      toast.error("Canvas not ready for export");
-      return;
-    }
-    
-    // Export as PNG
-    const dataURL = fabricCanvas.toDataURL({
-      format: 'png',
-      quality: 1,
-      multiplier: 2, // For higher resolution
-    });
-    
-    // Create download link
-    const link = document.createElement('a');
-    link.download = 'template-preview.png';
-    link.href = dataURL;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast.success("Template exported successfully!");
-  };
-  
+
   return (
-    <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6">
+    <div className="h-14 bg-card border-b border-border flex items-center justify-between px-4">
+      {/* Left Section */}
       <div className="flex items-center gap-4">
         <Button 
           variant="ghost" 
-          size="icon"
-          onClick={() => navigate(-1)}
+          size="sm"
+          onClick={() => navigate("/templates")}
+          className="flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
+          Back to Templates
         </Button>
-        <Input 
-          defaultValue="Untitled Template"
-          className="w-64 bg-background"
-        />
+        
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+            <span className="text-primary-foreground text-sm font-bold">T</span>
+          </div>
+          <span className="font-medium">Template Creator</span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm">
+            <Undo className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm">
+            <Redo className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
-      
+
+      {/* Center Section */}
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={handleExport}>
+        <Input 
+          placeholder="Untitled Template" 
+          className="w-48 h-8 text-center"
+          defaultValue="My Template"
+        />
+        <Badge variant="secondary">Draft</Badge>
+      </div>
+
+      {/* Right Section */}
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="sm">
+          <Share className="w-4 h-4 mr-2" />
+          Share
+        </Button>
+        <Button variant="outline" size="sm">
           <Download className="w-4 h-4 mr-2" />
           Export
         </Button>
-        <Button variant="outline" size="sm">
-          <Share2 className="w-4 h-4 mr-2" />
-          Share
+        <Button size="sm">
+          <Save className="w-4 h-4 mr-2" />
+          Save
         </Button>
+        
+        <div className="ml-2 flex items-center gap-2">
+          <Button variant="ghost" size="sm">
+            <Settings className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm">
+            <User className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
-    </header>
+    </div>
   );
 }

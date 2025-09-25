@@ -65,7 +65,7 @@ export default function Templates() {
           </p>
         </div>
         <Button 
-          onClick={() => navigate("/templates/create")}
+          onClick={() => navigate("/template-create")}
           className="flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
@@ -117,7 +117,7 @@ export default function Templates() {
                   <Button 
                     size="sm" 
                     variant="secondary"
-                    onClick={() => navigate(`/templates/edit/${template.id}`)}
+                    onClick={() => navigate(`/template-create?edit=${template.id}`)}
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -167,7 +167,7 @@ export default function Templates() {
           <p className="text-muted-foreground mb-4">
             Try adjusting your search criteria or create a new template.
           </p>
-          <Button onClick={() => navigate("/templates/create")}>
+          <Button onClick={() => navigate("/template-create")}>
             <Plus className="w-4 h-4 mr-2" />
             Create Template
           </Button>
