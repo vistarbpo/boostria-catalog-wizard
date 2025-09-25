@@ -12,7 +12,7 @@ export function useCanvasStore() {
     panOffset: { x: 0, y: 0 }
   });
 
-  const addTextElement = useCallback((position: Position) => {
+  const addTextElement = useCallback((position: Position, initialContent?: string) => {
     setCanvasState(prev => {
       const newElement: TextElement = {
         id: generateId(),
@@ -24,7 +24,7 @@ export function useCanvasStore() {
         visible: true,
         locked: false,
         zIndex: prev.elements.length + 1,
-        content: 'Text',
+        content: initialContent || 'Text',
         fontFamily: 'Space Grotesk',
         fontSize: 32,
         fontWeight: 'Regular',

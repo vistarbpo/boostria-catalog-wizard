@@ -178,15 +178,14 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
         dynamicValue = `{${fieldType}}`;
     }
     
-    // Create text element and immediately update it with dynamic properties
-    canvasStore.addTextElement({ x: centerX, y: centerY });
+    // Create text element with dynamic content from the start
+    canvasStore.addTextElement({ x: centerX, y: centerY }, dynamicValue);
     
-    // Use requestAnimationFrame to ensure the element is created and selected
+    // Immediately update it with dynamic properties
     requestAnimationFrame(() => {
       const selectedElement = canvasStore.getSelectedElement();
       if (selectedElement && selectedElement.type === 'text') {
         canvasStore.updateElement(selectedElement.id, { 
-          content: dynamicValue, // Show actual content, not placeholder
           isDynamic: true,
           dynamicField: fieldType,
           dynamicContent: dynamicValue,
