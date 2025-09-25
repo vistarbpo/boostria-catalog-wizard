@@ -134,57 +134,59 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   const handleAddDynamicField = (fieldType: string) => {
     const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
     const centerY = canvasStore.canvasState.canvasSize.height / 2 - 25;
+    
+    // Get the actual value from current product first
+    let dynamicValue = '';
+    switch (fieldType) {
+      case 'title':
+        dynamicValue = currentProduct.title;
+        break;
+      case 'description':
+        dynamicValue = currentProduct.description;
+        break;
+      case 'price':
+        dynamicValue = currentProduct.price;
+        break;
+      case 'sale_price':
+        dynamicValue = currentProduct.salePrice || '';
+        break;
+      case 'brand':
+        dynamicValue = currentProduct.brand;
+        break;
+      case 'category':
+        dynamicValue = currentProduct.category;
+        break;
+      case 'id':
+        dynamicValue = currentProduct.id;
+        break;
+      case 'sku':
+        dynamicValue = currentProduct.sku || 'WS-001';
+        break;
+      case 'product_url':
+        dynamicValue = currentProduct.product_url || 'https://example.com/product';
+        break;
+      case 'condition':
+        dynamicValue = currentProduct.condition || 'new';
+        break;
+      case 'availability':
+        dynamicValue = currentProduct.availability || 'in stock';
+        break;
+      case 'currency':
+        dynamicValue = currentProduct.currency || 'USD';
+        break;
+      default:
+        dynamicValue = `{${fieldType}}`;
+    }
+    
+    // Create text element and immediately update it with dynamic properties
     canvasStore.addTextElement({ x: centerX, y: centerY });
     
-    // Update the text content to show it's dynamic
-    setTimeout(() => {
+    // Use requestAnimationFrame to ensure the element is created and selected
+    requestAnimationFrame(() => {
       const selectedElement = canvasStore.getSelectedElement();
       if (selectedElement && selectedElement.type === 'text') {
-        // Get the actual value from current product
-        let dynamicValue = '';
-        switch (fieldType) {
-          case 'title':
-            dynamicValue = currentProduct.title;
-            break;
-          case 'description':
-            dynamicValue = currentProduct.description;
-            break;
-          case 'price':
-            dynamicValue = currentProduct.price;
-            break;
-          case 'sale_price':
-            dynamicValue = currentProduct.salePrice || '';
-            break;
-          case 'brand':
-            dynamicValue = currentProduct.brand;
-            break;
-          case 'category':
-            dynamicValue = currentProduct.category;
-            break;
-          case 'id':
-            dynamicValue = currentProduct.id;
-            break;
-          case 'sku':
-            dynamicValue = 'WS-001'; // Example SKU
-            break;
-          case 'product_url':
-            dynamicValue = 'https://example.com/product';
-            break;
-          case 'condition':
-            dynamicValue = 'new';
-            break;
-          case 'availability':
-            dynamicValue = 'in stock';
-            break;
-          case 'currency':
-            dynamicValue = 'USD';
-            break;
-          default:
-            dynamicValue = `{${fieldType}}`;
-        }
-        
         canvasStore.updateElement(selectedElement.id, { 
-          content: `{${fieldType}}`,
+          content: dynamicValue, // Show actual content, not placeholder
           isDynamic: true,
           dynamicField: fieldType,
           dynamicContent: dynamicValue,
@@ -192,7 +194,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
           autoSize: true // Auto-size text for dynamic content
         });
       }
-    }, 100);
+    });
   };
 
   const handleAddDynamicImage = (mediaKey: string) => {
