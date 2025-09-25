@@ -1,208 +1,390 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useRef } from "react";
+import { Button } from "../ui/button";
+import { Card } from "../ui/card";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import { ScrollArea } from "../ui/scroll-area";
 import { 
-  MousePointer2, 
-  Type, 
-  Square, 
-  Circle, 
-  Image, 
+  Database,
+  Image,
   Shapes,
-  Palette,
+  Type,
+  Layers,
   Upload,
-  Database
+  Search,
+  Circle, 
+  Square, 
+  Triangle, 
+  Star, 
+  Heart, 
+  Diamond,
+  Plus,
+  GripVertical,
+  Eye,
+  EyeOff,
+  X,
+  FileImage,
+  Hexagon,
+  Pentagon,
+  Settings,
+  MessageCircle,
+  MessageSquare,
+  Shield,
+  Flag,
+  ArrowRight,
+  Flower,
+  RectangleHorizontal
 } from "lucide-react";
+import { useCanvasStore } from "../../hooks/useCanvasStore";
+import { useProduct } from "../../contexts/ProductContext";
+
+type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | null;
 
 interface ToolbarSidebarProps {
-  selectedTool: string;
-  onToolSelect: (tool: string) => void;
+  canvasStore: ReturnType<typeof useCanvasStore>;
 }
 
-export function ToolbarSidebar({ selectedTool, onToolSelect }: ToolbarSidebarProps) {
-  const tools = [
-    { id: "select", icon: MousePointer2, label: "Select" },
-    { id: "text", icon: Type, label: "Text" },
-    { id: "rectangle", icon: Square, label: "Rectangle" },
-    { id: "circle", icon: Circle, label: "Circle" },
-    { id: "image", icon: Image, label: "Image" },
-  ];
+export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
+  const { currentProduct, uploadedAssets, addUploadedAsset } = useProduct();
+  const [activeSection, setActiveSection] = useState<MenuSection>("source");
+  const imageUploadRef = useRef<HTMLInputElement>(null);
+  const svgUploadRef = useRef<HTMLInputElement>(null);
+  const [layerVisibility, setLayerVisibility] = useState<Record<string, boolean>>({
+    'layer-1': true,
+    'layer-2': true,
+    'layer-3': true,
+    'layer-4': true,
+    'layer-5': true,
+    'layer-6': true,
+    'layer-7': true,
+    'layer-8': true,
+    'layer-9': true,
+    'layer-10': true,
+    'layer-11': true,
+    'layer-12': true,
+  });
 
-  const textStyles = [
-    "Heading 1",
-    "Heading 2", 
-    "Subtitle",
-    "Body Text",
-    "Caption"
+  const menuItems = [
+    { id: "source" as const, icon: Database, label: "Source Feed" },
+    { id: "images" as const, icon: Image, label: "Images" },
+    { id: "shapes" as const, icon: Shapes, label: "Shapes" },
+    { id: "text" as const, icon: Type, label: "Text" },
+    { id: "layers" as const, icon: Layers, label: "Layers" },
   ];
 
   const shapes = [
-    "Rectangle",
-    "Circle", 
-    "Triangle",
-    "Arrow",
-    "Star",
-    "Line"
+    { icon: RectangleHorizontal, name: "Oval", type: "circle" as const },
+    { icon: Square, name: "Rectangle", type: "rectangle" as const },
+    { icon: Square, name: "Rounded Rect", type: "rectangle" as const, rounded: true },
+    { icon: Circle, name: "Circle", type: "circle" as const },
+    { icon: Triangle, name: "Triangle", type: "triangle" as const },
+    { icon: Pentagon, name: "Pentagon", type: "polygon" as const },
+    { icon: Hexagon, name: "Hexagon", type: "polygon" as const },
+    { icon: Circle, name: "Filled Circle", type: "circle" as const, filled: true },
+    { icon: Star, name: "Star", type: "star" as const },
+    { icon: Star, name: "Star 6", type: "star" as const, variant: "6-point" },
+    { icon: Plus, name: "Cross", type: "polygon" as const },
+    { icon: Settings, name: "Gear", type: "polygon" as const },
+    { icon: Flower, name: "Flower", type: "polygon" as const },
+    { icon: Circle, name: "Scalloped", type: "circle" as const, scalloped: true },
+    { icon: Heart, name: "Heart", type: "heart" as const },
+    { icon: MessageCircle, name: "Speech", type: "polygon" as const },
+    { icon: MessageSquare, name: "Message", type: "rectangle" as const },
+    { icon: Shield, name: "Shield", type: "polygon" as const },
+    { icon: Flag, name: "Flag", type: "polygon" as const },
+    { icon: ArrowRight, name: "Arrow", type: "polygon" as const }
   ];
 
-  const colors = [
-    "#000000", "#ffffff", "#ff0000", "#00ff00", 
-    "#0000ff", "#ffff00", "#ff00ff", "#00ffff",
-    "#800000", "#008000", "#000080", "#800080"
-  ];
+  const handleAddShape = (shapeType: "rectangle" | "circle" | "triangle" | "star" | "heart" | "polygon") => {
+    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 60;
+    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 40;
+    canvasStore.addShapeElement(shapeType, { x: centerX, y: centerY });
+  };
+
+  const handleAddText = () => {
+    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 25;
+    canvasStore.addTextElement({ x: centerX, y: centerY });
+  };
+
+  const handleAddDynamicField = (fieldType: string) => {
+    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 25;
+    canvasStore.addTextElement({ x: centerX, y: centerY });
+    
+    // Update the text content to show it's dynamic
+    setTimeout(() => {
+      const selectedElement = canvasStore.getSelectedElement();
+      if (selectedElement && selectedElement.type === 'text') {
+        // Get the actual value from current product
+        let dynamicValue = '';
+        switch (fieldType) {
+          case 'title':
+            dynamicValue = currentProduct.title;
+            break;
+          case 'description':
+            dynamicValue = currentProduct.description;
+            break;
+          case 'price':
+            dynamicValue = currentProduct.price;
+            break;
+          case 'sale_price':
+            dynamicValue = currentProduct.salePrice || '';
+            break;
+          case 'brand':
+            dynamicValue = currentProduct.brand;
+            break;
+          case 'category':
+            dynamicValue = currentProduct.category;
+            break;
+          case 'id':
+            dynamicValue = currentProduct.id;
+            break;
+          default:
+            dynamicValue = `{${fieldType}}`;
+        }
+        
+        canvasStore.updateElement(selectedElement.id, { 
+          content: `{${fieldType}}`,
+          isDynamic: true,
+          dynamicField: fieldType,
+          dynamicContent: dynamicValue,
+          color: '#3b82f6', // Blue color to indicate dynamic field
+          autoSize: true // Auto-size text for dynamic content
+        });
+      }
+    }, 100);
+  };
+
+  const handleAddTextPreset = (preset: string) => {
+    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 25;
+    canvasStore.addTextElement({ x: centerX, y: centerY });
+    
+    // Update the text properties based on preset
+    setTimeout(() => {
+      const selectedElement = canvasStore.getSelectedElement();
+      if (selectedElement && selectedElement.type === 'text') {
+        let updates: Partial<any> = {};
+        
+        switch (preset) {
+          case 'heading1':
+            updates = { 
+              content: 'Heading 1',
+              fontSize: 48,
+              fontWeight: 'Bold'
+            };
+            break;
+          case 'heading2':
+            updates = { 
+              content: 'Heading 2',
+              fontSize: 32,
+              fontWeight: 'Bold'
+            };
+            break;
+          case 'heading3':
+            updates = { 
+              content: 'Heading 3',
+              fontSize: 24,
+              fontWeight: 'Medium'
+            };
+            break;
+          case 'body':
+            updates = { 
+              content: 'Body text paragraph',
+              fontSize: 16,
+              fontWeight: 'Regular'
+            };
+            break;
+          case 'caption':
+            updates = { 
+              content: 'Caption text',
+              fontSize: 12,
+              fontWeight: 'Regular'
+            };
+            break;
+          case 'button':
+            updates = { 
+              content: 'Button Text',
+              fontSize: 14,
+              fontWeight: 'Medium'
+            };
+            break;
+          default:
+            updates = { content: 'Text' };
+        }
+        
+        canvasStore.updateElement(selectedElement.id, updates);
+      }
+    }, 100);
+  };
 
   return (
-    <div className="w-80 border-r border-border bg-card">
-      {/* Quick Tools */}
-      <div className="p-4 border-b border-border">
-        <div className="grid grid-cols-5 gap-2">
-          {tools.map((tool) => (
-            <Button
-              key={tool.id}
-              variant={selectedTool === tool.id ? "default" : "outline"}
-              size="sm"
-              className="flex-col h-12 w-12 p-1"
-              onClick={() => onToolSelect(tool.id)}
-            >
-              <tool.icon className="w-4 h-4 mb-1" />
-              <span className="text-xs">{tool.label}</span>
-            </Button>
-          ))}
-        </div>
+    <div className="w-80 bg-card border-r border-border h-full flex flex-col">
+      {/* Menu Tabs */}
+      <div className="flex border-b border-border">
+        {menuItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setActiveSection(item.id)}
+            className={`flex-1 p-3 text-xs font-medium transition-colors ${
+              activeSection === item.id 
+                ? 'bg-primary text-primary-foreground border-b-2 border-primary' 
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <item.icon className="w-4 h-4 mx-auto mb-1" />
+            {item.label}
+          </button>
+        ))}
       </div>
 
-      {/* Content Tabs */}
-      <Tabs defaultValue="elements" className="flex-1">
-        <TabsList className="grid w-full grid-cols-4 rounded-none border-b">
-          <TabsTrigger value="elements" className="text-xs">
-            <Shapes className="w-3 h-3 mr-1" />
-            Elements
-          </TabsTrigger>
-          <TabsTrigger value="text" className="text-xs">
-            <Type className="w-3 h-3 mr-1" />
-            Text
-          </TabsTrigger>
-          <TabsTrigger value="media" className="text-xs">
-            <Image className="w-3 h-3 mr-1" />
-            Media
-          </TabsTrigger>
-          <TabsTrigger value="data" className="text-xs">
-            <Database className="w-3 h-3 mr-1" />
-            Data
-          </TabsTrigger>
-        </TabsList>
-
-        <ScrollArea className="h-[calc(100vh-180px)]">
-          <TabsContent value="elements" className="p-4 space-y-4">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Shapes</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {shapes.map((shape) => (
-                  <Button 
-                    key={shape}
-                    variant="outline" 
-                    className="h-20 flex-col"
-                    onClick={() => onToolSelect(shape.toLowerCase())}
-                  >
-                    <div className="w-8 h-8 bg-primary/20 rounded mb-1"></div>
-                    <span className="text-xs">{shape}</span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-medium mb-2">Custom Shapes</h3>
-              <Button 
-                variant="outline" 
-                className="w-full h-20 flex-col"
-                onClick={() => onToolSelect("custom-shape")}
-              >
-                <Upload className="w-8 h-8 mb-1" />
-                <span className="text-xs">Upload Shape</span>
-              </Button>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-medium mb-2">Colors</h3>
-              <div className="grid grid-cols-6 gap-2">
-                {colors.map((color) => (
-                  <button
-                    key={color}
-                    className="w-8 h-8 rounded border-2 border-border"
-                    style={{ backgroundColor: color }}
-                    onClick={() => {/* Handle color selection */}}
-                  />
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="text" className="p-4 space-y-4">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Text Styles</h3>
-              <div className="space-y-2">
-                {textStyles.map((style) => (
-                  <Button
-                    key={style}
-                    variant="outline"
-                    className="w-full justify-start text-left"
-                    onClick={() => onToolSelect("text")}
-                  >
-                    <Type className="w-4 h-4 mr-2" />
-                    {style}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="media" className="p-4 space-y-4">
-            <Button className="w-full" variant="outline">
-              <Upload className="w-4 h-4 mr-2" />
-              Upload Image
-            </Button>
-            
-            <div>
-              <h3 className="text-sm font-medium mb-2">Stock Images</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div 
-                    key={i}
-                    className="aspect-square bg-muted rounded border cursor-pointer hover:border-primary"
-                  >
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 rounded"></div>
+      {/* Content */}
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="p-4">
+            {activeSection === "source" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Source Feed</h3>
+                <p className="text-sm text-muted-foreground">
+                  Add dynamic elements from your product data
+                </p>
+                
+                {/* Dynamic Fields */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Product Information</h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('title')}
+                      className="justify-start"
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Title
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('price')}
+                      className="justify-start"
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Price
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('description')}
+                      className="justify-start"
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Description
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddDynamicField('brand')}
+                      className="justify-start"
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Brand
+                    </Button>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          </TabsContent>
+            )}
 
-          <TabsContent value="data" className="p-4 space-y-4">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Dynamic Fields</h3>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  <Database className="w-4 h-4 mr-2" />
-                  Product Title
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Database className="w-4 h-4 mr-2" />
-                  Product Price
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Database className="w-4 h-4 mr-2" />
-                  Product Image
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Database className="w-4 h-4 mr-2" />
-                  Brand Name
-                </Button>
+            {activeSection === "shapes" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Shapes</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {shapes.map((shape, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddShape(shape.type)}
+                      className="flex flex-col h-16 p-2"
+                    >
+                      <shape.icon className="w-6 h-6 mb-1" />
+                      <span className="text-xs">{shape.name}</span>
+                    </Button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </TabsContent>
+            )}
+
+            {activeSection === "text" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Text</h3>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Text Presets</h4>
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddTextPreset('heading1')}
+                      className="justify-start w-full"
+                    >
+                      <Type className="w-4 h-4 mr-2" />
+                      Heading 1
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddTextPreset('heading2')}
+                      className="justify-start w-full"
+                    >
+                      <Type className="w-4 h-4 mr-2" />
+                      Heading 2
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddTextPreset('body')}
+                      className="justify-start w-full"
+                    >
+                      <Type className="w-4 h-4 mr-2" />
+                      Body Text
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddText}
+                      className="justify-start w-full"
+                    >
+                      <Type className="w-4 h-4 mr-2" />
+                      Custom Text
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeSection === "layers" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Layers</h3>
+                <div className="space-y-2">
+                  {canvasStore.canvasState.elements.map((element) => (
+                    <div key={element.id} className="flex items-center justify-between p-2 bg-muted rounded">
+                      <span className="text-sm">{element.type} - {element.id.slice(0, 8)}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => canvasStore.selectElement(element.id)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </ScrollArea>
-      </Tabs>
+      </div>
     </div>
   );
 }

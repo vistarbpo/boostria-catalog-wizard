@@ -1,224 +1,243 @@
-import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, Circle, Rect, Textbox, FabricImage, Polygon, Line } from "fabric";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Monitor, Smartphone, Tablet, ChevronDown } from "lucide-react";
+import { CanvasElement } from "./CanvasElement";
+import { useCanvasStore } from "../../hooks/useCanvasStore";
 
 interface TemplateCanvasProps {
-  selectedTool: string;
-  onElementSelect: (element: any) => void;
-  canvasSize: { width: number; height: number };
-  onCanvasReady?: (canvas: any) => void;
+  canvasStore: ReturnType<typeof useCanvasStore>;
 }
 
-export function TemplateCanvas({ selectedTool, onElementSelect, canvasSize, onCanvasReady }: TemplateCanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+export function TemplateCanvas({ canvasStore }: TemplateCanvasProps) {
+  const [selectedDevice, setSelectedDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const [selectedSize, setSelectedSize] = useState("pinterest-pin-standard");
+  const [zoomLevel, setZoomLevel] = useState<number | "fit">("fit");
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [lastPanOffset, setLastPanOffset] = useState({ x: 0, y: 0 });
+  
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const canvasSizes = {
+    // Meta (Facebook/Instagram)
+    "facebook-feed": { width: 1200, height: 630, label: "Facebook Feed", platform: "Meta", color: "bg-blue-600" },
+    "facebook-story": { width: 1080, height: 1920, label: "Facebook Story", platform: "Meta", color: "bg-blue-600" },
+    "instagram-post-square": { width: 1080, height: 1080, label: "Instagram Post (Square)", platform: "Meta", color: "bg-gradient-to-br from-purple-500 to-pink-500" },
+    "instagram-story": { width: 1080, height: 1920, label: "Instagram Story", platform: "Meta", color: "bg-gradient-to-br from-purple-500 to-pink-500" },
+    
+    // Google
+    "google-display-banner": { width: 728, height: 90, label: "Display Banner", platform: "Google", color: "bg-red-500" },
+    "youtube-thumbnail": { width: 1280, height: 720, label: "YouTube Thumbnail", platform: "Google", color: "bg-red-600" },
+    
+    // Pinterest
+    "pinterest-pin-standard": { width: 1000, height: 1500, label: "Pinterest Pin (Standard)", platform: "Pinterest", color: "bg-red-600" },
+    "pinterest-pin-square": { width: 1080, height: 1080, label: "Pinterest Pin (Square)", platform: "Pinterest", color: "bg-red-600" },
+    
+    // Custom
+    "custom-square": { width: 800, height: 800, label: "Custom Square", platform: "Custom", color: "bg-gray-600" },
+    "custom-landscape": { width: 1200, height: 800, label: "Custom Landscape", platform: "Custom", color: "bg-gray-600" },
+    "custom-portrait": { width: 800, height: 1200, label: "Custom Portrait", platform: "Custom", color: "bg-gray-600" }
+  };
 
+  const devices = [
+    { id: "desktop" as const, icon: Monitor, label: "Desktop" },
+    { id: "tablet" as const, icon: Tablet, label: "Tablet" },
+    { id: "mobile" as const, icon: Smartphone, label: "Mobile" }
+  ];
+
+  const zoomOptions = [
+    { value: "fit", label: "Fit to Screen" },
+    { value: 25, label: "25%" },
+    { value: 50, label: "50%" },
+    { value: 100, label: "100%" },
+    { value: 200, label: "200%" },
+    { value: 400, label: "400%" }
+  ];
+
+  const currentSize = canvasSizes[selectedSize as keyof typeof canvasSizes];
+  
+  // Update canvas store when size changes
   useEffect(() => {
-    if (!canvasRef.current) return;
+    canvasStore.updateCanvasSize({ width: currentSize.width, height: currentSize.height });
+  }, [currentSize.width, currentSize.height, canvasStore]);
+  
+  // Calculate fit to screen zoom
+  const calculateFitToScreenZoom = useCallback(() => {
+    if (!containerRef.current) return 50;
+    
+    const container = containerRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const containerWidth = containerRect.width - 120;
+    const containerHeight = containerRect.height - 120;
+    
+    const scaleX = containerWidth / currentSize.width;
+    const scaleY = containerHeight / currentSize.height;
+    return Math.min(scaleX, scaleY, 1) * 100;
+  }, [currentSize]);
 
-    const canvas = new FabricCanvas(canvasRef.current, {
-      width: canvasSize.width,
-      height: canvasSize.height,
-      backgroundColor: "#ffffff",
-    });
+  const getActualZoom = useCallback(() => {
+    return zoomLevel === "fit" ? calculateFitToScreenZoom() : zoomLevel;
+  }, [zoomLevel, calculateFitToScreenZoom]);
 
-    // Enable selection and manipulation
-    canvas.selection = true;
-    canvas.preserveObjectStacking = true;
-
-    // Handle object selection
-    canvas.on('selection:created', (e) => {
-      onElementSelect(e.selected?.[0]);
-    });
-
-    canvas.on('selection:updated', (e) => {
-      onElementSelect(e.selected?.[0]);
-    });
-
-    canvas.on('selection:cleared', () => {
-      onElementSelect(null);
-    });
-
-    setFabricCanvas(canvas);
-    onCanvasReady?.(canvas);
-
-    return () => {
-      canvas.dispose();
-    };
-  }, [onElementSelect]);
-
-  // Update canvas size when canvasSize changes
-  useEffect(() => {
-    if (fabricCanvas) {
-      fabricCanvas.setWidth(canvasSize.width);
-      fabricCanvas.setHeight(canvasSize.height);
-      fabricCanvas.renderAll();
+  // Handle mouse wheel zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      
+      const delta = e.deltaY;
+      const currentZoom = getActualZoom();
+      const zoomFactor = delta > 0 ? 0.9 : 1.1;
+      const newZoom = Math.max(10, Math.min(500, currentZoom * zoomFactor));
+      
+      setZoomLevel(Math.round(newZoom));
     }
-  }, [canvasSize, fabricCanvas]);
+  }, [getActualZoom]);
 
-  // Handle tool selection
-  useEffect(() => {
-    if (!fabricCanvas) return;
-
-    switch (selectedTool) {
-      case "text":
-        addText();
-        break;
-      case "rectangle":
-        addRectangle();
-        break;
-      case "circle":
-        addCircle();
-        break;
-      case "triangle":
-        addTriangle();
-        break;
-      case "star":
-        addStar();
-        break;
-      case "line":
-        addLine();
-        break;
-      case "custom-shape":
-        addCustomShape();
-        break;
+  // Handle mouse drag panning
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 0) {
+      canvasStore.clearSelection();
+      setIsDragging(true);
+      setDragStart({ x: e.clientX, y: e.clientY });
+      setLastPanOffset(panOffset);
     }
-  }, [selectedTool, fabricCanvas]);
+  }, [panOffset, canvasStore]);
 
-  const addText = () => {
-    const text = new Textbox("Click to edit text", {
-      left: 50,
-      top: 50,
-      fontFamily: "Arial",
-      fontSize: 20,
-      fill: "#000000",
-      width: 200,
-    });
-    fabricCanvas?.add(text);
-    fabricCanvas?.setActiveObject(text);
-  };
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isDragging) {
+      const deltaX = e.clientX - dragStart.x;
+      const deltaY = e.clientY - dragStart.y;
+      
+      setPanOffset({
+        x: lastPanOffset.x + deltaX,
+        y: lastPanOffset.y + deltaY
+      });
+    }
+  }, [isDragging, dragStart, lastPanOffset]);
 
-  const addRectangle = () => {
-    const rect = new Rect({
-      left: 50,
-      top: 50,
-      width: 100,
-      height: 100,
-      fill: "#3b82f6",
-      stroke: "",
-      strokeWidth: 0,
-    });
-    fabricCanvas?.add(rect);
-    fabricCanvas?.setActiveObject(rect);
-  };
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
-  const addCircle = () => {
-    const circle = new Circle({
-      left: 50,
-      top: 50,
-      radius: 50,
-      fill: "#ef4444",
-      stroke: "",
-      strokeWidth: 0,
-    });
-    fabricCanvas?.add(circle);
-    fabricCanvas?.setActiveObject(circle);
-  };
-
-  const addTriangle = () => {
-    const triangle = new Polygon([
-      { x: 50, y: 0 },
-      { x: 0, y: 100 },
-      { x: 100, y: 100 }
-    ], {
-      left: 50,
-      top: 50,
-      fill: "#10b981",
-      stroke: "",
-      strokeWidth: 0,
-    });
-    fabricCanvas?.add(triangle);
-    fabricCanvas?.setActiveObject(triangle);
-  };
-
-  const addStar = () => {
-    const star = new Polygon([
-      { x: 50, y: 0 },
-      { x: 61, y: 35 },
-      { x: 98, y: 35 },
-      { x: 68, y: 57 },
-      { x: 79, y: 91 },
-      { x: 50, y: 70 },
-      { x: 21, y: 91 },
-      { x: 32, y: 57 },
-      { x: 2, y: 35 },
-      { x: 39, y: 35 }
-    ], {
-      left: 50,
-      top: 50,
-      fill: "#f59e0b",
-      stroke: "",
-      strokeWidth: 0,
-    });
-    fabricCanvas?.add(star);
-    fabricCanvas?.setActiveObject(star);
-  };
-
-  const addLine = () => {
-    const line = new Line([50, 50, 150, 50], {
-      stroke: "#6b7280",
-      strokeWidth: 3,
-    });
-    fabricCanvas?.add(line);
-    fabricCanvas?.setActiveObject(line);
-  };
-
-  const addCustomShape = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*,.svg';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const imgUrl = event.target?.result as string;
-          FabricImage.fromURL(imgUrl).then((img) => {
-            img.set({
-              left: 50,
-              top: 50,
-              scaleX: 0.5,
-              scaleY: 0.5,
-            });
-            fabricCanvas?.add(img);
-            fabricCanvas?.setActiveObject(img);
-          });
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
-  };
+  const actualZoom = getActualZoom();
+  const scale = actualZoom / 100;
 
   return (
-    <div className="flex justify-center items-center min-h-0 w-full p-4 overflow-auto">
+    <div className="flex-1 bg-muted/20 p-4 flex flex-col overflow-hidden">
+      {/* Top Controls */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <Select value={selectedSize} onValueChange={setSelectedSize}>
+            <SelectTrigger className="w-64">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="max-h-96">
+              <SelectItem value="pinterest-pin-standard">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-red-600 rounded"></div>
+                  <span>Pinterest Pin (Standard)</span>
+                  <span className="text-xs text-muted-foreground ml-auto">1000×1500</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="instagram-post-square">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded"></div>
+                  <span>Instagram Post (Square)</span>
+                  <span className="text-xs text-muted-foreground ml-auto">1080×1080</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="facebook-feed">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-600 rounded"></div>
+                  <span>Facebook Feed</span>
+                  <span className="text-xs text-muted-foreground ml-auto">1200×630</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="custom-square">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-gray-600 rounded"></div>
+                  <span>Custom Square</span>
+                  <span className="text-xs text-muted-foreground ml-auto">800×800</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="text-sm text-muted-foreground">
+            {currentSize.width} × {currentSize.height}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Select value={zoomLevel.toString()} onValueChange={(value) => setZoomLevel(value === "fit" ? "fit" : Number(value))}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {zoomOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value.toString()}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Canvas Container */}
       <div 
-        className="border-2 border-dashed border-border bg-white shadow-lg"
-        style={{ 
-          padding: 20,
-          maxWidth: '100%',
-          maxHeight: 'calc(100vh - 200px)'
-        }}
+        ref={containerRef}
+        className="flex-1 overflow-hidden bg-muted/50 rounded-lg relative"
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
       >
-        <canvas 
-          ref={canvasRef}
-          className="border border-border"
+        {/* Canvas */}
+        <div 
+          className="absolute"
           style={{
-            width: Math.min(canvasSize.width, window.innerWidth - 200),
-            height: Math.min(canvasSize.height, window.innerHeight - 300),
-            maxWidth: '100%',
-            maxHeight: '100%'
+            left: '50%',
+            top: '50%',
+            transform: `translate(-50%, -50%) translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
+            transformOrigin: 'center center'
           }}
-        />
+        >
+          <div
+            ref={canvasRef}
+            className="relative bg-white shadow-lg"
+            style={{
+              width: currentSize.width,
+              height: currentSize.height,
+              minWidth: currentSize.width,
+              minHeight: currentSize.height
+            }}
+          >
+            {/* Canvas Elements */}
+            {canvasStore.canvasState.elements.map((element) => (
+              <CanvasElement
+                key={element.id}
+                element={element}
+                isSelected={canvasStore.canvasState.selectedElementIds.includes(element.id)}
+                scale={scale}
+                onSelect={canvasStore.selectElement}
+                onMove={canvasStore.moveElement}
+                onResize={canvasStore.resizeElement}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Canvas Info Overlay */}
+        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 text-sm">
+          <div className="font-medium">{currentSize.label}</div>
+          <div className="text-muted-foreground">{Math.round(actualZoom)}% zoom</div>
+        </div>
       </div>
     </div>
   );
