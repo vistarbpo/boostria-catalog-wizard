@@ -330,16 +330,109 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
               <Separator />
               <h4 className="text-sm font-medium">Shape Properties</h4>
               
-              {/* Fill Color */}
+              {/* Fill Source */}
               <div>
-                <Label className="text-xs">Fill Color</Label>
-                <Input
-                  type="color"
-                  value={(selectedElement as ShapeElement).fillColor}
-                  onChange={(e) => updateElementProperty('fillColor', e.target.value)}
-                  className="h-8"
-                />
+                <Label className="text-xs">Fill Source</Label>
+                <Select
+                  value={(selectedElement as ShapeElement).fillType || 'solid'}
+                  onValueChange={(value) => {
+                    updateElementProperty('fillType', value);
+                    if (value === 'solid') {
+                      updateElementProperty('fillSource', undefined);
+                      updateElementProperty('fillImageUrl', undefined);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="solid">Solid Fill</SelectItem>
+                    <SelectItem value="image">Media Fill</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Fill Color (only for solid fill) */}
+              {((selectedElement as ShapeElement).fillType === 'solid' || !(selectedElement as ShapeElement).fillType) && (
+                <div>
+                  <Label className="text-xs">Fill Color</Label>
+                  <Input
+                    type="color"
+                    value={(selectedElement as ShapeElement).fillColor}
+                    onChange={(e) => updateElementProperty('fillColor', e.target.value)}
+                    className="h-8"
+                  />
+                </div>
+              )}
+
+              {/* Media Source (only for image fill) */}
+              {(selectedElement as ShapeElement).fillType === 'image' && (
+                <div className="space-y-2">
+                  <div>
+                    <Label className="text-xs">Media Source</Label>
+                    <Select
+                      value={(selectedElement as ShapeElement).fillSource || ''}
+                      onValueChange={(value) => {
+                        updateElementProperty('fillSource', value);
+                        const imageUrl = getMediaUrl(value);
+                        if (imageUrl) {
+                          updateElementProperty('fillImageUrl', imageUrl);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="Select media source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="image_link">Main Image</SelectItem>
+                        <SelectItem value="additional_image_link">Additional Image</SelectItem>
+                        <SelectItem value="additional_image_link_2">Detail Image</SelectItem>
+                        <SelectItem value="brand_logo">Brand Logo</SelectItem>
+                        {uploadedAssets.map((asset) => (
+                          <SelectItem key={asset.id} value={asset.id}>
+                            {asset.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Fill Mode */}
+                  <div>
+                    <Label className="text-xs">Fill Mode</Label>
+                    <Select
+                      value={(selectedElement as ShapeElement).fillMode || 'cover'}
+                      onValueChange={(value) => updateElementProperty('fillMode', value)}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cover">Cover (Crop to fill)</SelectItem>
+                        <SelectItem value="contain">Contain (Fit inside)</SelectItem>
+                        <SelectItem value="stretch">Stretch (Distort to fit)</SelectItem>
+                        <SelectItem value="center">Center (Original size)</SelectItem>
+                        <SelectItem value="tile">Tile (Repeat pattern)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Preview */}
+                  {(selectedElement as ShapeElement).fillImageUrl && (
+                    <div className="mt-2">
+                      <Label className="text-xs">Preview</Label>
+                      <div className="w-full h-20 border rounded overflow-hidden bg-muted flex items-center justify-center">
+                        <img 
+                          src={(selectedElement as ShapeElement).fillImageUrl}
+                          alt="Fill preview"
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Stroke */}
               <div className="grid grid-cols-2 gap-2">

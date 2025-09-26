@@ -616,6 +616,159 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
               </div>
             )}
 
+            {activeSection === "images" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Image Assets</h3>
+                
+                {/* Filter Tabs */}
+                <div className="flex gap-1 mb-4">
+                  <Button variant="default" size="sm" className="flex-1 text-xs">
+                    All
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1 text-xs">
+                    Tags
+                  </Button>
+                </div>
+
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search" 
+                    className="pl-10 h-8 text-sm"
+                  />
+                </div>
+                
+                {/* Upload Images */}
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => imageUploadRef.current?.click()}
+                  className="w-full"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Images
+                </Button>
+                
+                <input
+                  type="file"
+                  ref={imageUploadRef}
+                  className="hidden"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    files.forEach(file => {
+                      const url = URL.createObjectURL(file);
+                      addUploadedAsset({
+                        id: Math.random().toString(36).substr(2, 9),
+                        name: file.name,
+                        type: 'image',
+                        url: url,
+                        isFromFeed: false
+                      });
+                    });
+                  }}
+                />
+
+                {/* Stock Images Section */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Stock Images</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Product Images from Feed */}
+                    {productContext.getMediaUrl('image_link') && (
+                      <div className="relative">
+                        <Button
+                          variant="outline"
+                          className="h-20 w-full p-0 overflow-hidden"
+                          onClick={() => {
+                            const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+                            const centerY = canvasStore.canvasState.canvasSize.height / 2 - 100;
+                            canvasStore.addImageElement(productContext.getMediaUrl('image_link'), { x: centerX, y: centerY });
+                          }}
+                        >
+                          <img
+                            src={productContext.getMediaUrl('image_link')}
+                            alt="Main product"
+                            className="w-full h-full object-cover"
+                          />
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {productContext.getMediaUrl('additional_image_link') && (
+                      <div className="relative">
+                        <Button
+                          variant="outline"
+                          className="h-20 w-full p-0 overflow-hidden"
+                          onClick={() => {
+                            const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+                            const centerY = canvasStore.canvasState.canvasSize.height / 2 - 100;
+                            canvasStore.addImageElement(productContext.getMediaUrl('additional_image_link'), { x: centerX, y: centerY });
+                          }}
+                        >
+                          <img
+                            src={productContext.getMediaUrl('additional_image_link')}
+                            alt="Additional product"
+                            className="w-full h-full object-cover"
+                          />
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Placeholder boxes for empty slots */}
+                    {Array.from({ length: Math.max(0, 6 - (uploadedAssets.filter(a => a.type === 'image').length + 
+                      (productContext.getMediaUrl('image_link') ? 1 : 0) + 
+                      (productContext.getMediaUrl('additional_image_link') ? 1 : 0))) }).map((_, i) => (
+                      <div key={i} className="relative">
+                        <Button
+                          variant="outline"
+                          className="h-20 w-full p-0 overflow-hidden bg-muted/30"
+                          disabled
+                        >
+                          <FileImage className="w-6 h-6 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              
+                {/* Uploaded Images */}
+                {uploadedAssets.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">Uploaded Images</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {uploadedAssets.filter(asset => asset.type === 'image').map((asset) => (
+                        <div key={asset.id} className="relative">
+                          <Button
+                            variant="outline"
+                            className="h-20 w-full p-0 overflow-hidden"
+                            onClick={() => {
+                              if (asset.url) {
+                                const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+                                const centerY = canvasStore.canvasState.canvasSize.height / 2 - 100;
+                                canvasStore.addImageElement(asset.url, { x: centerX, y: centerY });
+                              }
+                            }}
+                          >
+                            {asset.url ? (
+                              <img
+                                src={asset.url}
+                                alt={asset.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <FileImage className="w-8 h-8" />
+                            )}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {activeSection === "shapes" && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Shapes</h3>
