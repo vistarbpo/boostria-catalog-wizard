@@ -303,7 +303,8 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
               width: currentSize.width,
               height: currentSize.height,
               minWidth: currentSize.width,
-              minHeight: currentSize.height
+              minHeight: currentSize.height,
+              backgroundColor: '#ffffff'
             }}
           >
             {/* Canvas Elements */}
