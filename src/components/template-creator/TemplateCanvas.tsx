@@ -157,11 +157,15 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       tempCanvas.style.top = '-9999px';
       tempCanvas.style.width = `${currentSize.width}px`;
       tempCanvas.style.height = `${currentSize.height}px`;
-      tempCanvas.style.backgroundColor = 'white';
+      tempCanvas.style.backgroundColor = '#ffffff';
       
       // Clone only the content without selection handles
       const canvasContent = canvasRef.current;
       const elementsOnly = canvasContent.cloneNode(true) as HTMLElement;
+      
+      // Ensure pure white background on the cloned element
+      elementsOnly.style.backgroundColor = '#ffffff';
+      elementsOnly.style.background = '#ffffff';
       
       // Remove all selection handles and controls from the clone
       const controlsToRemove = elementsOnly.querySelectorAll(
