@@ -176,7 +176,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
         width: currentSize.width,
         height: currentSize.height,
         backgroundColor: '#ffffff',
-        scale: 2, // Higher quality
+        scale: 1, // Exact canvas size
         useCORS: true,
         allowTaint: true,
         removeContainer: true
