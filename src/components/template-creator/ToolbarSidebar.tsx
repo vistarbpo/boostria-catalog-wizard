@@ -102,29 +102,17 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   ];
 
   const shapes = [
-    { icon: RectangleHorizontal, name: "Oval", type: "circle" as const },
-    { icon: Square, name: "Rectangle", type: "rectangle" as const },
-    { icon: Square, name: "Rounded Rect", type: "rectangle" as const, rounded: true },
     { icon: Circle, name: "Circle", type: "circle" as const },
+    { icon: Square, name: "Rectangle", type: "rectangle" as const },
     { icon: Triangle, name: "Triangle", type: "triangle" as const },
-    { icon: Pentagon, name: "Pentagon", type: "polygon" as const },
-    { icon: Hexagon, name: "Hexagon", type: "polygon" as const },
-    { icon: Circle, name: "Filled Circle", type: "circle" as const, filled: true },
     { icon: Star, name: "Star", type: "star" as const },
-    { icon: Star, name: "Star 6", type: "star" as const, variant: "6-point" },
-    { icon: Plus, name: "Cross", type: "polygon" as const },
-    { icon: Settings, name: "Gear", type: "polygon" as const },
-    { icon: Flower, name: "Flower", type: "polygon" as const },
-    { icon: Circle, name: "Scalloped", type: "circle" as const, scalloped: true },
     { icon: Heart, name: "Heart", type: "heart" as const },
-    { icon: MessageCircle, name: "Speech", type: "polygon" as const },
-    { icon: MessageSquare, name: "Message", type: "rectangle" as const },
-    { icon: Shield, name: "Shield", type: "polygon" as const },
-    { icon: Flag, name: "Flag", type: "polygon" as const },
-    { icon: ArrowRight, name: "Arrow", type: "polygon" as const }
+    { icon: Plus, name: "Plus", type: "plus" as const },
+    { icon: ArrowRight, name: "Arrow", type: "arrow" as const },
+    { icon: Diamond, name: "Diamond", type: "diamond" as const }
   ];
 
-  const handleAddShape = (shapeType: "rectangle" | "circle" | "triangle" | "star" | "heart" | "polygon") => {
+  const handleAddShape = (shapeType: "rectangle" | "circle" | "triangle" | "star" | "heart" | "plus" | "arrow" | "diamond") => {
     const centerX = canvasStore.canvasState.canvasSize.width / 2 - 60;
     const centerY = canvasStore.canvasState.canvasSize.height / 2 - 40;
     canvasStore.addShapeElement(shapeType, { x: centerX, y: centerY });
@@ -785,6 +773,34 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       <span className="text-xs">{shape.name}</span>
                     </Button>
                   ))}
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Custom SVG</h4>
+                  <Button
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => svgUploadRef.current?.click()}
+                    className="w-full"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload SVG
+                  </Button>
+                  <input
+                    ref={svgUploadRef}
+                    type="file"
+                    accept=".svg,image/svg+xml"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const centerX = canvasStore.canvasState.canvasSize.width / 2 - 60;
+                        const centerY = canvasStore.canvasState.canvasSize.height / 2 - 60;
+                        canvasStore.uploadCustomSVG(file, { x: centerX, y: centerY });
+                      }
+                      e.target.value = '';
+                    }}
+                  />
                 </div>
               </div>
             )}

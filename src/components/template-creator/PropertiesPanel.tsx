@@ -32,6 +32,7 @@ import {
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement } from "../../types/canvas";
 import { useProduct } from "../../contexts/ProductContext";
+import { CanvasSettings } from "./CanvasSettings";
 
 interface PropertiesPanelProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
@@ -91,10 +92,15 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
 
   if (!selectedElement) {
     return (
-      <div className="w-80 border-l bg-muted/20 p-4 space-y-4">
-        <div className="text-center text-muted-foreground mb-4">
-          Select an element to edit properties
+      <div className="w-80 bg-card border-l border-border h-full flex flex-col">
+        <div className="p-4 border-b border-border">
+          <h3 className="text-lg font-semibold">Canvas Settings</h3>
         </div>
+        <ScrollArea className="flex-1">
+          <div className="p-4">
+            <CanvasSettings canvasStore={canvasStore} />
+          </div>
+        </ScrollArea>
       </div>
     );
   }
@@ -452,23 +458,117 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
               <Separator />
               <h4 className="text-sm font-medium">Image Properties</h4>
               
-              {/* Object Fit */}
+              {/* Image Source */}
               <div>
-                <Label className="text-xs">Object Fit</Label>
+                <Label className="text-xs">Image Source</Label>
                 <Select
-                  value={(selectedElement as ImageElement).objectFit}
-                  onValueChange={(value) => updateElementProperty('objectFit', value)}
+                  value={(selectedElement as ImageElement).fillType || 'original'}
+                  onValueChange={(value) => {
+                    updateElementProperty('fillType', value);
+                    if (value === 'original') {
+                      updateElementProperty('fillSource', undefined);
+                      updateElementProperty('fillImageUrl', undefined);
+                    }
+                  }}
                 >
                   <SelectTrigger className="h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cover">Cover</SelectItem>
-                    <SelectItem value="contain">Contain</SelectItem>
-                    <SelectItem value="fill">Fill</SelectItem>
+                    <SelectItem value="original">Original Image</SelectItem>
+                    <SelectItem value="dynamic">Dynamic Media</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Dynamic Media Source */}
+              {(selectedElement as ImageElement).fillType === 'dynamic' && (
+                <div className="space-y-2">
+                  <div>
+                    <Label className="text-xs">Media Source</Label>
+                    <Select
+                      value={(selectedElement as ImageElement).fillSource || ''}
+                      onValueChange={(value) => {
+                        updateElementProperty('fillSource', value);
+                        const imageUrl = getMediaUrl(value);
+                        if (imageUrl) {
+                          updateElementProperty('fillImageUrl', imageUrl);
+                          updateElementProperty('src', imageUrl);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="Select media source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="image_link">Main Image</SelectItem>
+                        <SelectItem value="additional_image_link">Additional Image</SelectItem>
+                        <SelectItem value="additional_image_link_2">Detail Image</SelectItem>
+                        <SelectItem value="brand_logo">Brand Logo</SelectItem>
+                        {uploadedAssets.map((asset) => (
+                          <SelectItem key={asset.id} value={asset.id}>
+                            {asset.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Fill Mode */}
+                  <div>
+                    <Label className="text-xs">Fill Mode</Label>
+                    <Select
+                      value={(selectedElement as ImageElement).fillMode || 'cover'}
+                      onValueChange={(value) => updateElementProperty('fillMode', value)}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cover">Cover (Crop to fill)</SelectItem>
+                        <SelectItem value="contain">Contain (Fit inside)</SelectItem>
+                        <SelectItem value="stretch">Stretch (Distort to fit)</SelectItem>
+                        <SelectItem value="center">Center (Original size)</SelectItem>
+                        <SelectItem value="tile">Tile (Repeat pattern)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Preview */}
+                  {(selectedElement as ImageElement).fillImageUrl && (
+                    <div className="mt-2">
+                      <Label className="text-xs">Preview</Label>
+                      <div className="w-full h-20 border rounded overflow-hidden bg-muted flex items-center justify-center">
+                        <img 
+                          src={(selectedElement as ImageElement).fillImageUrl}
+                          alt="Fill preview"
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Object Fit (only for original images) */}
+              {((selectedElement as ImageElement).fillType === 'original' || !(selectedElement as ImageElement).fillType) && (
+                <div>
+                  <Label className="text-xs">Object Fit</Label>
+                  <Select
+                    value={(selectedElement as ImageElement).objectFit}
+                    onValueChange={(value) => updateElementProperty('objectFit', value)}
+                  >
+                    <SelectTrigger className="h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cover">Cover</SelectItem>
+                      <SelectItem value="contain">Contain</SelectItem>
+                      <SelectItem value="fill">Fill</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Corner Radius */}
               <div>

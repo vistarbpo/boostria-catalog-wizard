@@ -566,15 +566,46 @@ const CanvasElementComponent = function CanvasElement({
 
       case 'image': {
         const imageElement = element as ImageElement;
+        
+        // Use dynamic image URL if fillType is 'dynamic' and fillImageUrl is set
+        const imageSrc = imageElement.fillType === 'dynamic' && imageElement.fillImageUrl 
+          ? imageElement.fillImageUrl 
+          : imageElement.src;
+        
+        const imageStyle: React.CSSProperties = {
+          ...baseStyle,
+          borderRadius: imageElement.cornerRadius || 0,
+        };
+
+        // Handle dynamic fill modes for images
+        if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl) {
+          if (imageElement.fillMode) {
+            imageStyle.objectFit = 
+              imageElement.fillMode === 'cover' ? 'cover' :
+              imageElement.fillMode === 'contain' ? 'contain' :
+              imageElement.fillMode === 'stretch' ? 'fill' :
+              imageElement.fillMode === 'center' ? 'none' :
+              'cover';
+            
+            if (imageElement.fillMode === 'tile') {
+              imageStyle.backgroundImage = `url(${imageElement.fillImageUrl})`;
+              imageStyle.backgroundRepeat = 'repeat';
+              imageStyle.backgroundSize = 'auto';
+              imageStyle.backgroundPosition = 'center';
+              // Return empty div with background for tiling
+              return <div style={imageStyle} />;
+            }
+          }
+        } else {
+          // Use original objectFit for non-dynamic images
+          imageStyle.objectFit = imageElement.objectFit;
+        }
+        
         return (
           <img
-            src={imageElement.src}
+            src={imageSrc}
             alt={imageElement.alt || ''}
-            style={{
-              ...baseStyle,
-              objectFit: imageElement.objectFit,
-              borderRadius: imageElement.cornerRadius || 0,
-            }}
+            style={imageStyle}
             draggable={false}
           />
         );
