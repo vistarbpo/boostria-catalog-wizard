@@ -49,7 +49,7 @@ export interface TextElement extends BaseElement {
 
 export interface ShapeElement extends BaseElement {
   type: 'shape';
-  shapeType: 'rectangle' | 'circle' | 'triangle' | 'star' | 'heart' | 'polygon';
+  shapeType: 'rectangle' | 'circle' | 'triangle' | 'star' | 'heart' | 'polygon' | 'plus' | 'arrow' | 'diamond';
   fillColor: string;
   fillType: 'solid' | 'image';
   fillSource?: string; // For dynamic fills like 'image_link', 'additional_image_link', etc.
@@ -106,4 +106,8 @@ export interface CanvasState {
   };
   zoom: number;
   panOffset: Position;
+  backgroundColor: string;
+  backgroundType: 'solid' | 'image';
+  backgroundImageUrl?: string;
+  backgroundMode?: 'cover' | 'contain' | 'stretch' | 'center' | 'tile';
 }

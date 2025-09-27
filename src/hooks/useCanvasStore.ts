@@ -9,7 +9,9 @@ export function useCanvasStore() {
     selectedElementIds: [],
     canvasSize: { width: 1000, height: 1500 },
     zoom: 100,
-    panOffset: { x: 0, y: 0 }
+    panOffset: { x: 0, y: 0 },
+    backgroundColor: '#ffffff',
+    backgroundType: 'solid'
   });
 
   const addTextElement = useCallback((position: Position, initialContent?: string) => {
@@ -80,7 +82,7 @@ export function useCanvasStore() {
     });
   }, []);
 
-  const addImageElement = useCallback((src: string, position: Position) => {
+  const addImageElement = useCallback((src: string, position?: Position) => {
     // Create a temporary image to get natural dimensions
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -105,10 +107,16 @@ export function useCanvasStore() {
       }
       
       setCanvasState(prev => {
+        // Calculate center position if not provided
+        const finalPosition = position || {
+          x: (prev.canvasSize.width - Math.round(width)) / 2,
+          y: (prev.canvasSize.height - Math.round(height)) / 2
+        };
+        
         const newElement: ImageElement = {
           id: generateId(),
           type: 'image',
-          position,
+          position: finalPosition,
           size: { width: Math.round(width), height: Math.round(height) },
           rotation: 0,
           opacity: 100,
@@ -132,10 +140,16 @@ export function useCanvasStore() {
     img.onerror = () => {
       // Fallback to default size if image fails to load
       setCanvasState(prev => {
+        // Calculate center position if not provided
+        const finalPosition = position || {
+          x: (prev.canvasSize.width - 200) / 2,
+          y: (prev.canvasSize.height - 200) / 2
+        };
+        
         const newElement: ImageElement = {
           id: generateId(),
           type: 'image',
-          position,
+          position: finalPosition,
           size: { width: 200, height: 200 },
           rotation: 0,
           opacity: 100,
@@ -271,6 +285,29 @@ export function useCanvasStore() {
     }));
   }, []);
 
+  const updateCanvasBackground = useCallback((backgroundColor: string, backgroundType: 'solid' | 'image' = 'solid', backgroundImageUrl?: string, backgroundMode?: 'cover' | 'contain' | 'stretch' | 'center' | 'tile') => {
+    setCanvasState(prev => ({
+      ...prev,
+      backgroundColor,
+      backgroundType,
+      backgroundImageUrl,
+      backgroundMode
+    }));
+  }, []);
+
+  const uploadCustomSVG = useCallback((file: File, position?: Position) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const svgContent = e.target?.result as string;
+      const finalPosition = position || {
+        x: (canvasState.canvasSize.width - 120) / 2,
+        y: (canvasState.canvasSize.height - 120) / 2
+      };
+      addSVGElement(svgContent, finalPosition);
+    };
+    reader.readAsText(file);
+  }, [canvasState.canvasSize, addSVGElement]);
+
   const getSelectedElement = useCallback(() => {
     if (canvasState.selectedElementIds.length === 1) {
       return canvasState.elements.find(el => el.id === canvasState.selectedElementIds[0]);
@@ -300,6 +337,8 @@ export function useCanvasStore() {
     updateCanvasSize,
     updateZoom,
     updatePanOffset,
+    updateCanvasBackground,
+    uploadCustomSVG,
     getSelectedElement,
     getSelectedElements
   };

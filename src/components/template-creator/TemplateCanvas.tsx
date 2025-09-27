@@ -157,15 +157,23 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       tempCanvas.style.top = '-9999px';
       tempCanvas.style.width = `${currentSize.width}px`;
       tempCanvas.style.height = `${currentSize.height}px`;
-      tempCanvas.style.backgroundColor = '#ffffff';
+      tempCanvas.style.backgroundColor = canvasStore.canvasState.backgroundColor;
       
       // Clone only the content without selection handles
       const canvasContent = canvasRef.current;
       const elementsOnly = canvasContent.cloneNode(true) as HTMLElement;
       
-      // Ensure pure white background on the cloned element
-      elementsOnly.style.backgroundColor = '#ffffff';
-      elementsOnly.style.background = '#ffffff';
+      // Apply canvas background to cloned element
+      elementsOnly.style.backgroundColor = canvasStore.canvasState.backgroundColor;
+      if (canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl) {
+        elementsOnly.style.backgroundImage = `url(${canvasStore.canvasState.backgroundImageUrl})`;
+        elementsOnly.style.backgroundSize = canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' :
+                                          canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' :
+                                          canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' :
+                                          canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto';
+        elementsOnly.style.backgroundRepeat = canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat';
+        elementsOnly.style.backgroundPosition = 'center';
+      }
       
       // Remove all selection handles and controls from the clone
       const controlsToRemove = elementsOnly.querySelectorAll(
@@ -179,7 +187,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       const canvas = await html2canvas(tempCanvas, {
         width: currentSize.width,
         height: currentSize.height,
-        backgroundColor: '#ffffff',
+        backgroundColor: canvasStore.canvasState.backgroundColor,
         scale: 1, // Exact canvas size
         useCORS: true,
         allowTaint: true,
@@ -302,13 +310,22 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
         >
           <div
             ref={canvasRef}
-            className="relative bg-white shadow-lg"
+            className="relative shadow-lg"
             style={{
               width: currentSize.width,
               height: currentSize.height,
               minWidth: currentSize.width,
               minHeight: currentSize.height,
-              backgroundColor: '#ffffff'
+              backgroundColor: canvasStore.canvasState.backgroundColor,
+              backgroundImage: canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl 
+                ? `url(${canvasStore.canvasState.backgroundImageUrl})` 
+                : undefined,
+              backgroundSize: canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' :
+                           canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' :
+                           canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' :
+                           canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto',
+              backgroundRepeat: canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat',
+              backgroundPosition: 'center'
             }}
           >
             {/* Canvas Elements */}

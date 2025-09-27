@@ -41,30 +41,7 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
   const selectedElement = canvasStore.getSelectedElement();
   
   // Add error handling for useProduct
-  let productContext;
-  try {
-    productContext = useProduct();
-  } catch (error) {
-    console.error('ProductProvider error in PropertiesPanel:', error);
-    // Fallback to prevent crash
-    productContext = {
-      currentProduct: {
-        id: 'fallback',
-        title: 'Loading...',
-        description: 'Loading...',
-        brand: 'Loading...',
-        price: '$0.00',
-        salePrice: '$0.00',
-        category: 'Loading...',
-        media: {}
-      },
-      uploadedAssets: [],
-      addUploadedAsset: () => {},
-      getMediaUrl: () => ''
-    };
-  }
-  
-  const { currentProduct, getMediaUrl, uploadedAssets } = productContext;
+  const { currentProduct, getMediaUrl, uploadedAssets } = useProduct();
   
   // Local state for controlled inputs
   const [localValues, setLocalValues] = useState({
@@ -114,12 +91,9 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
 
   if (!selectedElement) {
     return (
-      <div className="w-80 bg-card border-l border-border h-full">
-        <div className="p-4">
-          <div className="text-center text-muted-foreground mt-8">
-            <div className="text-lg mb-2">No element selected</div>
-            <div className="text-sm">Select an element on the canvas to edit its properties</div>
-          </div>
+      <div className="w-80 border-l bg-muted/20 p-4 space-y-4">
+        <div className="text-center text-muted-foreground mb-4">
+          Select an element to edit properties
         </div>
       </div>
     );
