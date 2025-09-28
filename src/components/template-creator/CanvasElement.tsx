@@ -305,7 +305,7 @@ const CanvasElementComponent = function CanvasElement({
             style={{
               ...baseStyle,
               color: textElement.color,
-              fontSize: textElement.fontSize,
+              fontSize: `${textElement.fontSize}px`,
               fontFamily: textElement.fontFamily,
               fontWeight: textElement.fontWeight,
               textAlign: textElement.textAlign,
