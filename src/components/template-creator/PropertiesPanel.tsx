@@ -340,32 +340,65 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
               </div>
 
               {/* Font Properties */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-3">
+                {/* Font Family */}
                 <div>
-                  <Label className="text-xs">Font Size</Label>
-                  <Input
-                    type="number"
-                    value={localValues.fontSize}
-                    onChange={(e) => handleInputChange('fontSize', e.target.value)}
-                    onBlur={(e) => handleInputBlur('fontSize', e.target.value)}
-                    className="h-8"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">Font Weight</Label>
+                  <Label className="text-xs">Font Family</Label>
                   <Select
-                    value={(selectedElement as TextElement).fontWeight}
-                    onValueChange={(value) => updateElementProperty('fontWeight', value)}
+                    value={(selectedElement as TextElement).fontFamily || 'Inter'}
+                    onValueChange={(value) => updateElementProperty('fontFamily', value)}
                   >
                     <SelectTrigger className="h-8">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Regular">Regular</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Bold">Bold</SelectItem>
+                    <SelectContent className="z-50 bg-popover">
+                      <SelectItem value="Inter">Inter (Modern Sans)</SelectItem>
+                      <SelectItem value="Roboto">Roboto</SelectItem>
+                      <SelectItem value="Open Sans">Open Sans</SelectItem>
+                      <SelectItem value="Lato">Lato</SelectItem>
+                      <SelectItem value="Montserrat">Montserrat</SelectItem>
+                      <SelectItem value="Poppins">Poppins</SelectItem>
+                      <SelectItem value="Nunito">Nunito</SelectItem>
+                      <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                      <SelectItem value="Raleway">Raleway</SelectItem>
+                      <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                      <SelectItem value="Oswald">Oswald (Display)</SelectItem>
+                      <SelectItem value="Playfair Display">Playfair Display (Serif)</SelectItem>
+                      <SelectItem value="Merriweather">Merriweather (Serif)</SelectItem>
+                      <SelectItem value="Lora">Lora (Serif)</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Font Size</Label>
+                    <Input
+                      type="number"
+                      value={localValues.fontSize}
+                      onChange={(e) => handleInputChange('fontSize', e.target.value)}
+                      onBlur={(e) => handleInputBlur('fontSize', e.target.value)}
+                      className="h-8"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Font Weight</Label>
+                    <Select
+                      value={(selectedElement as TextElement).fontWeight}
+                      onValueChange={(value) => updateElementProperty('fontWeight', value)}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="z-50 bg-popover">
+                        <SelectItem value="300">Light (300)</SelectItem>
+                        <SelectItem value="400">Regular (400)</SelectItem>
+                        <SelectItem value="500">Medium (500)</SelectItem>
+                        <SelectItem value="600">Semi Bold (600)</SelectItem>
+                        <SelectItem value="700">Bold (700)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
