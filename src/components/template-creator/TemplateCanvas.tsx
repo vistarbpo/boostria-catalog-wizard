@@ -227,14 +227,22 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       tempCanvas.style.top = '-9999px';
       tempCanvas.style.width = `${currentSize.width}px`;
       tempCanvas.style.height = `${currentSize.height}px`;
-      tempCanvas.style.backgroundColor = canvasStore.canvasState.backgroundColor;
+      
+      // Force solid background color
+      const bgColor = canvasStore.canvasState.backgroundColor;
+      tempCanvas.style.backgroundColor = bgColor;
+      tempCanvas.style.opacity = '1';
 
       // Clone only the content without selection handles
       const canvasContent = canvasRef.current;
       const elementsOnly = canvasContent.cloneNode(true) as HTMLElement;
 
-      // Apply canvas background to cloned element
-      elementsOnly.style.backgroundColor = canvasStore.canvasState.backgroundColor;
+      // Force pure background on cloned element
+      elementsOnly.style.backgroundColor = bgColor;
+      elementsOnly.style.opacity = '1';
+      elementsOnly.style.backgroundImage = 'none'; // Remove any background image for pure color
+      
+      // Apply background image only if specified
       if (canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl) {
         elementsOnly.style.backgroundImage = `url(${canvasStore.canvasState.backgroundImageUrl})`;
         elementsOnly.style.backgroundSize = canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' : canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' : canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' : canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto';
@@ -245,17 +253,20 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       // Remove all selection handles and controls from the clone
       const controlsToRemove = elementsOnly.querySelectorAll('.resize-handle, .rotation-handle, .selection-outline, [class*="handle"], [class*="control"]');
       controlsToRemove.forEach(control => control.remove());
+      
       tempCanvas.appendChild(elementsOnly);
       document.body.appendChild(tempCanvas);
+      
       const canvas = await html2canvas(tempCanvas, {
         width: currentSize.width,
         height: currentSize.height,
-        backgroundColor: canvasStore.canvasState.backgroundColor,
+        backgroundColor: bgColor,
         scale: 1,
-        // Exact canvas size
         useCORS: true,
         allowTaint: true,
-        removeContainer: true
+        removeContainer: true,
+        logging: false,
+        imageTimeout: 0
       });
 
       // Clean up temp element
