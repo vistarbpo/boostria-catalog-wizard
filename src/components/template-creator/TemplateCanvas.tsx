@@ -8,88 +8,158 @@ import { CanvasElement } from "./CanvasElement";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
-
 interface TemplateCanvasProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
 }
-
 export interface TemplateCanvasRef {
   exportAsJPG: () => Promise<void>;
 }
-
-export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>(({ canvasStore }, ref) => {
+export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>(({
+  canvasStore
+}, ref) => {
   const [selectedDevice, setSelectedDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [selectedSize, setSelectedSize] = useState("instagram-post");
   const [zoomLevel, setZoomLevel] = useState<number | "fit">("fit");
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [panOffset, setPanOffset] = useState({
+    x: 0,
+    y: 0
+  });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [lastPanOffset, setLastPanOffset] = useState({ x: 0, y: 0 });
-  
+  const [dragStart, setDragStart] = useState({
+    x: 0,
+    y: 0
+  });
+  const [lastPanOffset, setLastPanOffset] = useState({
+    x: 0,
+    y: 0
+  });
   const canvasRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  
   const canvasSizes = {
     // Instagram
-    "instagram-post": { width: 1080, height: 1080, label: "Instagram Post", platform: "Instagram", color: "bg-gradient-to-br from-purple-500 to-pink-500" },
-    "instagram-story": { width: 1080, height: 1920, label: "Instagram Story", platform: "Instagram", color: "bg-gradient-to-br from-purple-500 to-pink-500" },
-    
+    "instagram-post": {
+      width: 1080,
+      height: 1080,
+      label: "Instagram Post",
+      platform: "Instagram",
+      color: "bg-gradient-to-br from-purple-500 to-pink-500"
+    },
+    "instagram-story": {
+      width: 1080,
+      height: 1920,
+      label: "Instagram Story",
+      platform: "Instagram",
+      color: "bg-gradient-to-br from-purple-500 to-pink-500"
+    },
     // Facebook
-    "facebook-post": { width: 1200, height: 630, label: "Facebook Post", platform: "Facebook", color: "bg-blue-600" },
-    "facebook-story": { width: 1080, height: 1920, label: "Facebook Story", platform: "Facebook", color: "bg-blue-600" },
-    
+    "facebook-post": {
+      width: 1200,
+      height: 630,
+      label: "Facebook Post",
+      platform: "Facebook",
+      color: "bg-blue-600"
+    },
+    "facebook-story": {
+      width: 1080,
+      height: 1920,
+      label: "Facebook Story",
+      platform: "Facebook",
+      color: "bg-blue-600"
+    },
     // Twitter/X
-    "twitter-header": { width: 1500, height: 500, label: "Twitter Header", platform: "Twitter", color: "bg-black" },
-    
+    "twitter-header": {
+      width: 1500,
+      height: 500,
+      label: "Twitter Header",
+      platform: "Twitter",
+      color: "bg-black"
+    },
     // LinkedIn
-    "linkedin-post": { width: 1200, height: 627, label: "LinkedIn Post", platform: "LinkedIn", color: "bg-blue-700" },
-    
+    "linkedin-post": {
+      width: 1200,
+      height: 627,
+      label: "LinkedIn Post",
+      platform: "LinkedIn",
+      color: "bg-blue-700"
+    },
     // YouTube
-    "youtube-thumbnail": { width: 1280, height: 720, label: "YouTube Thumbnail", platform: "YouTube", color: "bg-red-600" },
-    
+    "youtube-thumbnail": {
+      width: 1280,
+      height: 720,
+      label: "YouTube Thumbnail",
+      platform: "YouTube",
+      color: "bg-red-600"
+    },
     // Pinterest
-    "pinterest-pin": { width: 1000, height: 1500, label: "Pinterest Pin", platform: "Pinterest", color: "bg-red-600" },
-    
+    "pinterest-pin": {
+      width: 1000,
+      height: 1500,
+      label: "Pinterest Pin",
+      platform: "Pinterest",
+      color: "bg-red-600"
+    },
     // TikTok
-    "tiktok-video": { width: 1080, height: 1920, label: "TikTok Video", platform: "TikTok", color: "bg-black" }
+    "tiktok-video": {
+      width: 1080,
+      height: 1920,
+      label: "TikTok Video",
+      platform: "TikTok",
+      color: "bg-black"
+    }
   };
-
-  const devices = [
-    { id: "desktop" as const, icon: Monitor, label: "Desktop" },
-    { id: "tablet" as const, icon: Tablet, label: "Tablet" },
-    { id: "mobile" as const, icon: Smartphone, label: "Mobile" }
-  ];
-
-  const zoomOptions = [
-    { value: "fit", label: "Fit to Screen" },
-    { value: 25, label: "25%" },
-    { value: 50, label: "50%" },
-    { value: 100, label: "100%" },
-    { value: 200, label: "200%" },
-    { value: 400, label: "400%" }
-  ];
-
+  const devices = [{
+    id: "desktop" as const,
+    icon: Monitor,
+    label: "Desktop"
+  }, {
+    id: "tablet" as const,
+    icon: Tablet,
+    label: "Tablet"
+  }, {
+    id: "mobile" as const,
+    icon: Smartphone,
+    label: "Mobile"
+  }];
+  const zoomOptions = [{
+    value: "fit",
+    label: "Fit to Screen"
+  }, {
+    value: 25,
+    label: "25%"
+  }, {
+    value: 50,
+    label: "50%"
+  }, {
+    value: 100,
+    label: "100%"
+  }, {
+    value: 200,
+    label: "200%"
+  }, {
+    value: 400,
+    label: "400%"
+  }];
   const currentSize = canvasSizes[selectedSize as keyof typeof canvasSizes];
-  
+
   // Update canvas store when size changes
   useEffect(() => {
-    canvasStore.updateCanvasSize({ width: currentSize.width, height: currentSize.height });
+    canvasStore.updateCanvasSize({
+      width: currentSize.width,
+      height: currentSize.height
+    });
   }, [currentSize.width, currentSize.height, canvasStore]);
-  
+
   // Calculate fit to screen zoom
   const calculateFitToScreenZoom = useCallback(() => {
     if (!containerRef.current) return 50;
-    
     const container = containerRef.current;
     const containerRect = container.getBoundingClientRect();
     const containerWidth = containerRect.width - 120;
     const containerHeight = containerRect.height - 120;
-    
     const scaleX = containerWidth / currentSize.width;
     const scaleY = containerHeight / currentSize.height;
     return Math.min(scaleX, scaleY, 1) * 100;
   }, [currentSize]);
-
   const getActualZoom = useCallback(() => {
     return zoomLevel === "fit" ? calculateFitToScreenZoom() : zoomLevel;
   }, [zoomLevel, calculateFitToScreenZoom]);
@@ -98,12 +168,10 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
-      
       const delta = e.deltaY;
       const currentZoom = getActualZoom();
       const zoomFactor = delta > 0 ? 0.9 : 1.1;
       const newZoom = Math.max(10, Math.min(500, currentZoom * zoomFactor));
-      
       setZoomLevel(Math.round(newZoom));
     }
   }, [getActualZoom]);
@@ -113,27 +181,26 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
     if (e.button === 0) {
       canvasStore.clearSelection();
       setIsDragging(true);
-      setDragStart({ x: e.clientX, y: e.clientY });
+      setDragStart({
+        x: e.clientX,
+        y: e.clientY
+      });
       setLastPanOffset(panOffset);
     }
   }, [panOffset, canvasStore]);
-
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isDragging) {
       const deltaX = e.clientX - dragStart.x;
       const deltaY = e.clientY - dragStart.y;
-      
       setPanOffset({
         x: lastPanOffset.x + deltaX,
         y: lastPanOffset.y + deltaY
       });
     }
   }, [isDragging, dragStart, lastPanOffset]);
-
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
-
   const actualZoom = getActualZoom();
   const scale = actualZoom / 100;
 
@@ -143,17 +210,16 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       toast.error("Canvas not ready for export");
       return;
     }
-
     try {
       const loadingToast = toast.loading("Preparing export...");
-      
+
       // Clear selection to hide nodes/handles
       const originalSelection = [...canvasStore.canvasState.selectedElementIds];
       canvasStore.clearSelection();
-      
+
       // Wait for re-render without selection
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Create a temporary canvas element for export
       const tempCanvas = document.createElement('div');
       tempCanvas.style.position = 'absolute';
@@ -162,37 +228,31 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       tempCanvas.style.width = `${currentSize.width}px`;
       tempCanvas.style.height = `${currentSize.height}px`;
       tempCanvas.style.backgroundColor = canvasStore.canvasState.backgroundColor;
-      
+
       // Clone only the content without selection handles
       const canvasContent = canvasRef.current;
       const elementsOnly = canvasContent.cloneNode(true) as HTMLElement;
-      
+
       // Apply canvas background to cloned element
       elementsOnly.style.backgroundColor = canvasStore.canvasState.backgroundColor;
       if (canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl) {
         elementsOnly.style.backgroundImage = `url(${canvasStore.canvasState.backgroundImageUrl})`;
-        elementsOnly.style.backgroundSize = canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' :
-                                          canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' :
-                                          canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' :
-                                          canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto';
+        elementsOnly.style.backgroundSize = canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' : canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' : canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' : canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto';
         elementsOnly.style.backgroundRepeat = canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat';
         elementsOnly.style.backgroundPosition = 'center';
       }
-      
+
       // Remove all selection handles and controls from the clone
-      const controlsToRemove = elementsOnly.querySelectorAll(
-        '.resize-handle, .rotation-handle, .selection-outline, [class*="handle"], [class*="control"]'
-      );
+      const controlsToRemove = elementsOnly.querySelectorAll('.resize-handle, .rotation-handle, .selection-outline, [class*="handle"], [class*="control"]');
       controlsToRemove.forEach(control => control.remove());
-      
       tempCanvas.appendChild(elementsOnly);
       document.body.appendChild(tempCanvas);
-
       const canvas = await html2canvas(tempCanvas, {
         width: currentSize.width,
         height: currentSize.height,
         backgroundColor: canvasStore.canvasState.backgroundColor,
-        scale: 1, // Exact canvas size
+        scale: 1,
+        // Exact canvas size
         useCORS: true,
         allowTaint: true,
         removeContainer: true
@@ -200,12 +260,12 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
 
       // Clean up temp element
       document.body.removeChild(tempCanvas);
-      
+
       // Restore original selection
       originalSelection.forEach(id => canvasStore.selectElement(id, true));
 
       // Convert to JPG and download
-      canvas.toBlob((blob) => {
+      canvas.toBlob(blob => {
         toast.dismiss(loadingToast);
         if (blob) {
           const url = URL.createObjectURL(blob);
@@ -219,7 +279,6 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
           toast.success("Template exported successfully!");
         }
       }, 'image/jpeg', 0.9);
-
     } catch (error) {
       console.error('Export failed:', error);
       toast.error("Failed to export template");
@@ -230,9 +289,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
   useImperativeHandle(ref, () => ({
     exportAsJPG
   }), [exportAsJPG]);
-
-  return (
-    <div className="flex-1 bg-muted/20 p-4 flex flex-col overflow-hidden">
+  return <div className="flex-1 bg-muted/20 p-4 flex flex-col overflow-hidden">
       {/* Top Controls */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
@@ -241,105 +298,64 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="max-h-96">
-              {Object.entries(canvasSizes).map(([key, size]) => (
-                <SelectItem key={key} value={key}>
+              {Object.entries(canvasSizes).map(([key, size]) => <SelectItem key={key} value={key}>
                   <div className="flex items-center gap-2">
                     <div className={`w-4 h-4 ${size.color} rounded`}></div>
                     <span>{size.label}</span>
                     <span className="text-xs text-muted-foreground ml-auto">{size.width}×{size.height}</span>
                   </div>
-                </SelectItem>
-              ))}
+                </SelectItem>)}
             </SelectContent>
           </Select>
 
-          <div className="text-sm text-muted-foreground">
-            {currentSize.width} × {currentSize.height}
-          </div>
+          
         </div>
 
         <div className="flex items-center gap-2">
-          <Select value={zoomLevel.toString()} onValueChange={(value) => setZoomLevel(value === "fit" ? "fit" : Number(value))}>
+          <Select value={zoomLevel.toString()} onValueChange={value => setZoomLevel(value === "fit" ? "fit" : Number(value))}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {zoomOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value.toString()}>
+              {zoomOptions.map(option => <SelectItem key={option.value} value={option.value.toString()}>
                   {option.label}
-                </SelectItem>
-              ))}
+                </SelectItem>)}
             </SelectContent>
           </Select>
         </div>
       </div>
 
       {/* Canvas Container */}
-      <div 
-        ref={containerRef}
-        className="flex-1 overflow-hidden bg-muted/50 rounded-lg relative"
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      >
+      <div ref={containerRef} className="flex-1 overflow-hidden bg-muted/50 rounded-lg relative" onWheel={handleWheel} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
         {/* Canvas */}
-        <div 
-          className="absolute"
-          style={{
-            left: '50%',
-            top: '50%',
-            transform: `translate(-50%, -50%) translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
-            transformOrigin: 'center center'
-          }}
-        >
-          <div
-            ref={canvasRef}
-            className="relative shadow-lg overflow-hidden"
-            style={{
-              width: currentSize.width,
-              height: currentSize.height,
-              minWidth: currentSize.width,
-              minHeight: currentSize.height,
-              backgroundColor: canvasStore.canvasState.backgroundColor,
-              backgroundImage: canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl 
-                ? `url(${canvasStore.canvasState.backgroundImageUrl})` 
-                : undefined,
-              backgroundSize: canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' :
-                           canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' :
-                           canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' :
-                           canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto',
-              backgroundRepeat: canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat',
-              backgroundPosition: 'center',
-              opacity: 1
-            }}
-          >
+        <div className="absolute" style={{
+        left: '50%',
+        top: '50%',
+        transform: `translate(-50%, -50%) translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
+        transformOrigin: 'center center'
+      }}>
+          <div ref={canvasRef} className="relative shadow-lg overflow-hidden" style={{
+          width: currentSize.width,
+          height: currentSize.height,
+          minWidth: currentSize.width,
+          minHeight: currentSize.height,
+          backgroundColor: canvasStore.canvasState.backgroundColor,
+          backgroundImage: canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl ? `url(${canvasStore.canvasState.backgroundImageUrl})` : undefined,
+          backgroundSize: canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' : canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' : canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' : canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto',
+          backgroundRepeat: canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat',
+          backgroundPosition: 'center',
+          opacity: 1
+        }}>
             {/* Canvas Elements */}
-            {canvasStore.canvasState.elements.map((element) => (
-              <CanvasElement
-                key={element.id}
-                element={element}
-                isSelected={canvasStore.canvasState.selectedElementIds.includes(element.id)}
-                scale={scale}
-                onSelect={canvasStore.selectElement}
-                onMove={canvasStore.moveElement}
-                onResize={canvasStore.resizeElement}
-                onRotate={canvasStore.rotateElement}
-                onDoubleClick={(elementId) => {
-                  // Handle double click for editing
-                  console.log('Double clicked element:', elementId);
-                }}
-              />
-            ))}
+            {canvasStore.canvasState.elements.map(element => <CanvasElement key={element.id} element={element} isSelected={canvasStore.canvasState.selectedElementIds.includes(element.id)} scale={scale} onSelect={canvasStore.selectElement} onMove={canvasStore.moveElement} onResize={canvasStore.resizeElement} onRotate={canvasStore.rotateElement} onDoubleClick={elementId => {
+            // Handle double click for editing
+            console.log('Double clicked element:', elementId);
+          }} />)}
           </div>
         </div>
 
         {/* Canvas Info Overlay */}
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 text-sm">
-          <div className="font-medium">{currentSize.label}</div>
-          <div className="text-muted-foreground">{Math.round(actualZoom)}% zoom</div>
-        </div>
+        
       </div>
-    </div>
-  );
+    </div>;
 });
