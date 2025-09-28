@@ -18,6 +18,27 @@ export const CanvasSettings = ({ canvasStore }: CanvasSettingsProps) => {
   const [colorInput, setColorInput] = useState(canvasStore.canvasState.backgroundColor);
   const { currentProduct } = useProduct();
 
+  const presetSizes = [
+    { label: "Instagram Post", width: 1080, height: 1080 },
+    { label: "Instagram Story", width: 1080, height: 1920 },
+    { label: "Facebook Post", width: 1200, height: 630 },
+    { label: "Twitter Header", width: 1500, height: 500 },
+    { label: "LinkedIn Post", width: 1200, height: 627 },
+    { label: "YouTube Thumbnail", width: 1280, height: 720 },
+    { label: "Pinterest Pin", width: 1000, height: 1500 },
+    { label: "A4 Document", width: 595, height: 842 },
+    { label: "US Letter", width: 612, height: 792 },
+    { label: "Custom Square", width: 800, height: 800 }
+  ];
+
+  const handleSizeChange = (sizeLabel: string) => {
+    const selectedSize = presetSizes.find(size => size.label === sizeLabel);
+    if (selectedSize) {
+      canvasStore.updateCanvasSize({ width: selectedSize.width, height: selectedSize.height });
+      toast.success(`Canvas size changed to ${selectedSize.width}x${selectedSize.height}`);
+    }
+  };
+
   const handleColorChange = (color: string) => {
     setColorInput(color);
     canvasStore.updateCanvasBackground(color, 'solid');
@@ -67,11 +88,38 @@ export const CanvasSettings = ({ canvasStore }: CanvasSettingsProps) => {
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Canvas Background</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Canvas Size</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Preset Dimensions</Label>
+            <Select onValueChange={handleSizeChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a preset size" />
+              </SelectTrigger>
+              <SelectContent>
+                {presetSizes.map((size) => (
+                  <SelectItem key={size.label} value={size.label}>
+                    {size.label} ({size.width}×{size.height})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Current: {canvasStore.canvasState.canvasSize.width}×{canvasStore.canvasState.canvasSize.height}px
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Canvas Background</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
         <Tabs value={canvasStore.canvasState.backgroundType} onValueChange={(value) => {
           if (value === 'solid') {
             canvasStore.updateCanvasBackground(colorInput, 'solid');
@@ -180,5 +228,6 @@ export const CanvasSettings = ({ canvasStore }: CanvasSettingsProps) => {
         </Tabs>
       </CardContent>
     </Card>
+    </div>
   );
 };
