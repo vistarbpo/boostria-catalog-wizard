@@ -27,7 +27,9 @@ import {
   Maximize2,
   RotateCcw,
   Type,
-  Grid3X3
+  Grid3X3,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement } from "../../types/canvas";
@@ -88,6 +90,40 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
       
       canvasStore.updateElement(selectedElement.id, { [property]: processedValue });
     }
+  };
+
+  const alignToCanvas = (alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => {
+    if (!selectedElement) return;
+    
+    const canvasWidth = canvasStore.canvasState.canvasSize.width;
+    const canvasHeight = canvasStore.canvasState.canvasSize.height;
+    const elementWidth = selectedElement.size.width;
+    const elementHeight = selectedElement.size.height;
+    
+    let newPosition = { ...selectedElement.position };
+    
+    switch (alignment) {
+      case 'left':
+        newPosition.x = 0;
+        break;
+      case 'center':
+        newPosition.x = (canvasWidth - elementWidth) / 2;
+        break;
+      case 'right':
+        newPosition.x = canvasWidth - elementWidth;
+        break;
+      case 'top':
+        newPosition.y = 0;
+        break;
+      case 'middle':
+        newPosition.y = (canvasHeight - elementHeight) / 2;
+        break;
+      case 'bottom':
+        newPosition.y = canvasHeight - elementHeight;
+        break;
+    }
+    
+    updateElementProperty('position', newPosition);
   };
 
   if (!selectedElement) {
@@ -200,6 +236,69 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                   onChange={(e) => updateElementProperty('opacity', parseFloat(e.target.value) || 0)}
                   className="h-8"
                 />
+              </div>
+            </div>
+
+            {/* Alignment */}
+            <div>
+              <Label className="text-xs mb-2 block">Align to Canvas</Label>
+              <div className="grid grid-cols-3 gap-1 mb-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alignToCanvas('left')}
+                  className="h-8 p-0"
+                  title="Align Left"
+                >
+                  <AlignLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alignToCanvas('center')}
+                  className="h-8 p-0"
+                  title="Align Center"
+                >
+                  <AlignCenter className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alignToCanvas('right')}
+                  className="h-8 p-0"
+                  title="Align Right"
+                >
+                  <AlignRight className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-3 gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alignToCanvas('top')}
+                  className="h-8 p-0"
+                  title="Align Top"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alignToCanvas('middle')}
+                  className="h-8 p-0"
+                  title="Align Middle"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alignToCanvas('bottom')}
+                  className="h-8 p-0"
+                  title="Align Bottom"
+                >
+                  <ArrowDown className="w-4 h-4" />
+                </Button>
               </div>
             </div>
 
