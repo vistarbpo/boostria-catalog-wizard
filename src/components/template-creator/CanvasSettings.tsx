@@ -88,34 +88,7 @@ export const CanvasSettings = ({ canvasStore }: CanvasSettingsProps) => {
   ];
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Canvas Size</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Preset Dimensions</Label>
-            <Select onValueChange={handleSizeChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a preset size" />
-              </SelectTrigger>
-              <SelectContent>
-                {presetSizes.map((size) => (
-                  <SelectItem key={size.label} value={size.label}>
-                    {size.label} ({size.width}×{size.height})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Current: {canvasStore.canvasState.canvasSize.width}×{canvasStore.canvasState.canvasSize.height}px
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
+    <Card>
         <CardHeader>
           <CardTitle className="text-lg">Canvas Background</CardTitle>
         </CardHeader>
@@ -228,6 +201,5 @@ export const CanvasSettings = ({ canvasStore }: CanvasSettingsProps) => {
         </Tabs>
       </CardContent>
     </Card>
-    </div>
   );
 };

@@ -19,7 +19,7 @@ export interface TemplateCanvasRef {
 
 export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>(({ canvasStore }, ref) => {
   const [selectedDevice, setSelectedDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
-  const [selectedSize, setSelectedSize] = useState("pinterest-pin-standard");
+  const [selectedSize, setSelectedSize] = useState("instagram-post");
   const [zoomLevel, setZoomLevel] = useState<number | "fit">("fit");
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -30,24 +30,28 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
   const containerRef = useRef<HTMLDivElement>(null);
   
   const canvasSizes = {
-    // Meta (Facebook/Instagram)
-    "facebook-feed": { width: 1200, height: 630, label: "Facebook Feed", platform: "Meta", color: "bg-blue-600" },
-    "facebook-story": { width: 1080, height: 1920, label: "Facebook Story", platform: "Meta", color: "bg-blue-600" },
-    "instagram-post-square": { width: 1080, height: 1080, label: "Instagram Post (Square)", platform: "Meta", color: "bg-gradient-to-br from-purple-500 to-pink-500" },
-    "instagram-story": { width: 1080, height: 1920, label: "Instagram Story", platform: "Meta", color: "bg-gradient-to-br from-purple-500 to-pink-500" },
+    // Instagram
+    "instagram-post": { width: 1080, height: 1080, label: "Instagram Post", platform: "Instagram", color: "bg-gradient-to-br from-purple-500 to-pink-500" },
+    "instagram-story": { width: 1080, height: 1920, label: "Instagram Story", platform: "Instagram", color: "bg-gradient-to-br from-purple-500 to-pink-500" },
     
-    // Google
-    "google-display-banner": { width: 728, height: 90, label: "Display Banner", platform: "Google", color: "bg-red-500" },
-    "youtube-thumbnail": { width: 1280, height: 720, label: "YouTube Thumbnail", platform: "Google", color: "bg-red-600" },
+    // Facebook
+    "facebook-post": { width: 1200, height: 630, label: "Facebook Post", platform: "Facebook", color: "bg-blue-600" },
+    "facebook-story": { width: 1080, height: 1920, label: "Facebook Story", platform: "Facebook", color: "bg-blue-600" },
+    
+    // Twitter/X
+    "twitter-header": { width: 1500, height: 500, label: "Twitter Header", platform: "Twitter", color: "bg-black" },
+    
+    // LinkedIn
+    "linkedin-post": { width: 1200, height: 627, label: "LinkedIn Post", platform: "LinkedIn", color: "bg-blue-700" },
+    
+    // YouTube
+    "youtube-thumbnail": { width: 1280, height: 720, label: "YouTube Thumbnail", platform: "YouTube", color: "bg-red-600" },
     
     // Pinterest
-    "pinterest-pin-standard": { width: 1000, height: 1500, label: "Pinterest Pin (Standard)", platform: "Pinterest", color: "bg-red-600" },
-    "pinterest-pin-square": { width: 1080, height: 1080, label: "Pinterest Pin (Square)", platform: "Pinterest", color: "bg-red-600" },
+    "pinterest-pin": { width: 1000, height: 1500, label: "Pinterest Pin", platform: "Pinterest", color: "bg-red-600" },
     
-    // Custom
-    "custom-square": { width: 800, height: 800, label: "Custom Square", platform: "Custom", color: "bg-gray-600" },
-    "custom-landscape": { width: 1200, height: 800, label: "Custom Landscape", platform: "Custom", color: "bg-gray-600" },
-    "custom-portrait": { width: 800, height: 1200, label: "Custom Portrait", platform: "Custom", color: "bg-gray-600" }
+    // TikTok
+    "tiktok-video": { width: 1080, height: 1920, label: "TikTok Video", platform: "TikTok", color: "bg-black" }
   };
 
   const devices = [
@@ -237,34 +241,15 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="max-h-96">
-              <SelectItem value="pinterest-pin-standard">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-red-600 rounded"></div>
-                  <span>Pinterest Pin (Standard)</span>
-                  <span className="text-xs text-muted-foreground ml-auto">1000×1500</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="instagram-post-square">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded"></div>
-                  <span>Instagram Post (Square)</span>
-                  <span className="text-xs text-muted-foreground ml-auto">1080×1080</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="facebook-feed">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-600 rounded"></div>
-                  <span>Facebook Feed</span>
-                  <span className="text-xs text-muted-foreground ml-auto">1200×630</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="custom-square">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-gray-600 rounded"></div>
-                  <span>Custom Square</span>
-                  <span className="text-xs text-muted-foreground ml-auto">800×800</span>
-                </div>
-              </SelectItem>
+              {Object.entries(canvasSizes).map(([key, size]) => (
+                <SelectItem key={key} value={key}>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 ${size.color} rounded`}></div>
+                    <span>{size.label}</span>
+                    <span className="text-xs text-muted-foreground ml-auto">{size.width}×{size.height}</span>
+                  </div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -310,7 +295,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
         >
           <div
             ref={canvasRef}
-            className="relative shadow-lg"
+            className="relative shadow-lg overflow-hidden"
             style={{
               width: currentSize.width,
               height: currentSize.height,
@@ -325,7 +310,8 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
                            canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' :
                            canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto',
               backgroundRepeat: canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat',
-              backgroundPosition: 'center'
+              backgroundPosition: 'center',
+              opacity: 1
             }}
           >
             {/* Canvas Elements */}
