@@ -10,6 +10,17 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
 import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 import { 
   AlignLeft, 
   AlignCenter, 
@@ -29,7 +40,8 @@ import {
   Type,
   Grid3X3,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Trash2
 } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement } from "../../types/canvas";
@@ -329,6 +341,32 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                 />
                 <Label className="text-xs">Locked</Label>
               </div>
+            </div>
+
+            {/* Delete Button */}
+            <div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" className="w-full">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Element
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Element</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this {selectedElement.type} element? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => canvasStore.deleteElement(selectedElement.id)}>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
 
