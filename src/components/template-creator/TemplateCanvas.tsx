@@ -234,34 +234,41 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       // Wait for re-render without selection
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Create a temporary canvas element for export
+      // Create a temporary wrapper with pure white base
+      const tempWrapper = document.createElement('div');
+      tempWrapper.style.position = 'absolute';
+      tempWrapper.style.left = '-9999px';
+      tempWrapper.style.top = '-9999px';
+      tempWrapper.style.width = `${currentSize.width}px`;
+      tempWrapper.style.height = `${currentSize.height}px`;
+      tempWrapper.style.backgroundColor = '#ffffff';
+      
+      // Create the canvas container
       const tempCanvas = document.createElement('div');
-      tempCanvas.style.position = 'absolute';
-      tempCanvas.style.left = '-9999px';
-      tempCanvas.style.top = '-9999px';
+      tempCanvas.style.position = 'relative';
       tempCanvas.style.width = `${currentSize.width}px`;
       tempCanvas.style.height = `${currentSize.height}px`;
-      
-      // Force pure white background or use canvas background
-      const bgColor = canvasStore.canvasState.backgroundColor || '#ffffff';
       tempCanvas.style.backgroundColor = '#ffffff';
-      tempCanvas.style.opacity = '1';
 
-      // Clone only the content without selection handles
+      // Clone the canvas content
       const canvasContent = canvasRef.current;
       const elementsOnly = canvasContent.cloneNode(true) as HTMLElement;
 
-      // Force pure white background on cloned element
-      elementsOnly.style.backgroundColor = '#ffffff';
-      elementsOnly.style.opacity = '1';
-      elementsOnly.style.backgroundImage = 'none'; // Remove any background image for pure color
+      // Remove the canvas background and make it transparent so wrapper shows through
+      elementsOnly.style.backgroundColor = 'transparent';
+      elementsOnly.style.backgroundImage = 'none';
+      
+      // Apply canvas background from settings on top of white base
+      if (canvasStore.canvasState.backgroundType === 'solid') {
+        tempCanvas.style.backgroundColor = canvasStore.canvasState.backgroundColor;
+      }
       
       // Apply background image only if specified
       if (canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl) {
-        elementsOnly.style.backgroundImage = `url(${canvasStore.canvasState.backgroundImageUrl})`;
-        elementsOnly.style.backgroundSize = canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' : canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' : canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' : canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto';
-        elementsOnly.style.backgroundRepeat = canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat';
-        elementsOnly.style.backgroundPosition = 'center';
+        tempCanvas.style.backgroundImage = `url(${canvasStore.canvasState.backgroundImageUrl})`;
+        tempCanvas.style.backgroundSize = canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' : canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' : canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' : canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto';
+        tempCanvas.style.backgroundRepeat = canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat';
+        tempCanvas.style.backgroundPosition = 'center';
       }
 
       // Remove all selection handles and controls from the clone
@@ -269,22 +276,23 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       controlsToRemove.forEach(control => control.remove());
       
       tempCanvas.appendChild(elementsOnly);
-      document.body.appendChild(tempCanvas);
+      tempWrapper.appendChild(tempCanvas);
+      document.body.appendChild(tempWrapper);
       
       const canvas = await html2canvas(tempCanvas, {
         width: currentSize.width,
         height: currentSize.height,
-        backgroundColor: '#ffffff',
+        backgroundColor: canvasStore.canvasState.backgroundColor,
         scale: 1,
         useCORS: true,
         allowTaint: true,
-        removeContainer: true,
+        removeContainer: false,
         logging: false,
         imageTimeout: 0
       });
 
       // Clean up temp element
-      document.body.removeChild(tempCanvas);
+      document.body.removeChild(tempWrapper);
 
       // Restore original selection
       originalSelection.forEach(id => canvasStore.selectElement(id, true));
