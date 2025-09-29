@@ -3,6 +3,16 @@ import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { Monitor, Smartphone, Tablet, ChevronDown } from "lucide-react";
 import { CanvasElement } from "./CanvasElement";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
@@ -35,6 +45,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
   });
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const editInputRef = useRef<HTMLTextAreaElement>(null);
@@ -303,6 +314,33 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
   useImperativeHandle(ref, () => ({
     exportAsJPG
   }), [exportAsJPG]);
+
+  // Handle keyboard delete
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if we're editing text
+      if (editingElementId) return;
+      
+      // Check if Delete or Backspace was pressed
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        // Check if there's a selected element
+        const selectedElements = canvasStore.getSelectedElements();
+        if (selectedElements.length > 0) {
+          e.preventDefault();
+          setShowDeleteConfirm(true);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canvasStore, editingElementId]);
+
+  const handleConfirmDelete = () => {
+    canvasStore.deleteSelected();
+    setShowDeleteConfirm(false);
+    toast.success("Element(s) deleted");
+  };
   return <div className="flex-1 bg-muted/20 p-4 flex flex-col overflow-hidden">
       {/* Top Controls */}
       <div className="flex items-center justify-between mb-4">
@@ -447,5 +485,23 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
         {/* Canvas Info Overlay */}
         
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Element(s)</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the selected element(s)? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 });
