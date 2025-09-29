@@ -28,6 +28,7 @@ export interface TextElement extends BaseElement {
   fontWeight: string;
   color: string;
   textAlign: 'left' | 'center' | 'right';
+  direction?: 'ltr' | 'rtl';
   letterSpacing: number;
   lineHeight: number;
   autoSize: boolean;

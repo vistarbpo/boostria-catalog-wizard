@@ -190,14 +190,12 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   };
 
   const handleAddDynamicImage = (mediaKey: string) => {
-    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
-    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 100;
-    
     // Get the media URL from the product context
     const mediaUrl = productContext.getMediaUrl(mediaKey);
     
     if (mediaUrl) {
-      canvasStore.addImageElement(mediaUrl, { x: centerX, y: centerY });
+      // Let addImageElement calculate the center position based on actual image dimensions
+      canvasStore.addImageElement(mediaUrl);
       
       // Update the image to be dynamic
       setTimeout(() => {
@@ -670,9 +668,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                           variant="outline"
                           className="h-20 w-full p-0 overflow-hidden"
                           onClick={() => {
-                            const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
-                            const centerY = canvasStore.canvasState.canvasSize.height / 2 - 100;
-                            canvasStore.addImageElement(productContext.getMediaUrl('image_link'), { x: centerX, y: centerY });
+                            canvasStore.addImageElement(productContext.getMediaUrl('image_link'));
                           }}
                         >
                           <img
@@ -690,9 +686,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                           variant="outline"
                           className="h-20 w-full p-0 overflow-hidden"
                           onClick={() => {
-                            const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
-                            const centerY = canvasStore.canvasState.canvasSize.height / 2 - 100;
-                            canvasStore.addImageElement(productContext.getMediaUrl('additional_image_link'), { x: centerX, y: centerY });
+                            canvasStore.addImageElement(productContext.getMediaUrl('additional_image_link'));
                           }}
                         >
                           <img
@@ -733,9 +727,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                             className="h-20 w-full p-0 overflow-hidden"
                             onClick={() => {
                               if (asset.url) {
-                                const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
-                                const centerY = canvasStore.canvasState.canvasSize.height / 2 - 100;
-                                canvasStore.addImageElement(asset.url, { x: centerX, y: centerY });
+                                canvasStore.addImageElement(asset.url);
                               }
                             }}
                           >

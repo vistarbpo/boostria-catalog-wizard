@@ -434,6 +434,51 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                   ))}
                 </div>
               </div>
+
+              {/* Text Direction (RTL/LTR) */}
+              <div>
+                <Label className="text-xs">Text Direction</Label>
+                <Select
+                  value={(selectedElement as TextElement).direction || 'ltr'}
+                  onValueChange={(value) => updateElementProperty('direction', value)}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-popover">
+                    <SelectItem value="ltr">Left to Right (LTR)</SelectItem>
+                    <SelectItem value="rtl">Right to Left (RTL)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Letter Spacing */}
+              <div>
+                <Label className="text-xs">Letter Spacing (px)</Label>
+                <Input
+                  type="number"
+                  value={localValues.letterSpacing}
+                  onChange={(e) => handleInputChange('letterSpacing', e.target.value)}
+                  onBlur={(e) => handleInputBlur('letterSpacing', e.target.value)}
+                  className="h-8"
+                  step="0.1"
+                />
+              </div>
+
+              {/* Line Height */}
+              <div>
+                <Label className="text-xs">Line Height</Label>
+                <Input
+                  type="number"
+                  value={localValues.lineSpacing}
+                  onChange={(e) => handleInputChange('lineSpacing', e.target.value)}
+                  onBlur={(e) => handleInputBlur('lineHeight', e.target.value)}
+                  className="h-8"
+                  step="0.1"
+                  min="0.5"
+                  max="3"
+                />
+              </div>
             </div>
           )}
 

@@ -32,6 +32,7 @@ export function useCanvasStore() {
         fontWeight: '400',
         color: '#000000',
         textAlign: 'left',
+        direction: 'ltr',
         letterSpacing: 0,
         lineHeight: 1.2,
         autoSize: false,
