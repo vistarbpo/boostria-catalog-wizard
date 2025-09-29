@@ -10,54 +10,27 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
 import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../ui/alert-dialog";
-import { 
-  AlignLeft, 
-  AlignCenter, 
-  AlignRight,
-  Bold,
-  Italic,
-  Underline,
-  Palette,
-  Plus,
-  MoreHorizontal,
-  ChevronDown,
-  Link,
-  Eye,
-  Square,
-  Maximize2,
-  RotateCcw,
-  Type,
-  Grid3X3,
-  ArrowUp,
-  ArrowDown,
-  Trash2
-} from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, Palette, Plus, MoreHorizontal, ChevronDown, Link, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement } from "../../types/canvas";
 import { useProduct } from "../../contexts/ProductContext";
 import { CanvasSettings } from "./CanvasSettings";
-
 interface PropertiesPanelProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
 }
-
-export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
+export function PropertiesPanel({
+  canvasStore
+}: PropertiesPanelProps) {
   const selectedElement = canvasStore.getSelectedElement();
-  
+
   // Add error handling for useProduct
-  const { currentProduct, getMediaUrl, uploadedAssets } = useProduct();
-  
+  const {
+    currentProduct,
+    getMediaUrl,
+    uploadedAssets
+  } = useProduct();
+
   // Local state for controlled inputs
   const [localValues, setLocalValues] = useState({
     content: '',
@@ -78,21 +51,23 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
       });
     }
   }, [selectedElement?.id, selectedElement?.type]);
-
   const updateElementProperty = (property: string, value: any) => {
     if (selectedElement) {
-      canvasStore.updateElement(selectedElement.id, { [property]: value });
+      canvasStore.updateElement(selectedElement.id, {
+        [property]: value
+      });
     }
   };
-
   const handleInputChange = (property: keyof typeof localValues, value: string) => {
-    setLocalValues(prev => ({ ...prev, [property]: value }));
+    setLocalValues(prev => ({
+      ...prev,
+      [property]: value
+    }));
   };
-
   const handleInputBlur = (property: string, value: string) => {
     if (selectedElement) {
       let processedValue: any = value;
-      
+
       // Convert string values to appropriate types
       if (property === 'fontSize' || property === 'letterSpacing') {
         const numValue = parseFloat(value);
@@ -101,30 +76,31 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
         const numValue = parseFloat(value);
         processedValue = isNaN(numValue) ? 1.2 : Math.max(0.5, numValue);
       }
-      
-      canvasStore.updateElement(selectedElement.id, { [property]: processedValue });
+      canvasStore.updateElement(selectedElement.id, {
+        [property]: processedValue
+      });
     }
   };
-  
+
   // Real-time font size updates
   const handleFontSizeChange = (value: string) => {
     handleInputChange('fontSize', value);
     const numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue > 0 && selectedElement) {
-      canvasStore.updateElement(selectedElement.id, { fontSize: numValue });
+      canvasStore.updateElement(selectedElement.id, {
+        fontSize: numValue
+      });
     }
   };
-
   const alignToCanvas = (alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => {
     if (!selectedElement) return;
-    
     const canvasWidth = canvasStore.canvasState.canvasSize.width;
     const canvasHeight = canvasStore.canvasState.canvasSize.height;
     const elementWidth = selectedElement.size.width;
     const elementHeight = selectedElement.size.height;
-    
-    let newPosition = { ...selectedElement.position };
-    
+    let newPosition = {
+      ...selectedElement.position
+    };
     switch (alignment) {
       case 'left':
         newPosition.x = 0;
@@ -145,13 +121,10 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
         newPosition.y = canvasHeight - elementHeight;
         break;
     }
-    
     updateElementProperty('position', newPosition);
   };
-
   if (!selectedElement) {
-    return (
-      <div className="w-80 bg-card border-l border-border h-full flex flex-col">
+    return <div className="w-80 bg-card border-l border-border h-full flex flex-col">
         <div className="p-4 border-b border-border">
           <h3 className="text-lg font-semibold">Canvas Settings</h3>
         </div>
@@ -160,12 +133,9 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
             <CanvasSettings canvasStore={canvasStore} />
           </div>
         </ScrollArea>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="w-80 bg-card border-l border-border h-full flex flex-col">
+  return <div className="w-80 bg-card border-l border-border h-full flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-2">
@@ -186,27 +156,17 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label className="text-xs">X Position</Label>
-                <Input
-                  type="number"
-                  value={Math.round(selectedElement.position.x)}
-                  onChange={(e) => updateElementProperty('position', {
-                    ...selectedElement.position,
-                    x: parseFloat(e.target.value) || 0
-                  })}
-                  className="h-8"
-                />
+                <Input type="number" value={Math.round(selectedElement.position.x)} onChange={e => updateElementProperty('position', {
+                ...selectedElement.position,
+                x: parseFloat(e.target.value) || 0
+              })} className="h-8" />
               </div>
               <div>
                 <Label className="text-xs">Y Position</Label>
-                <Input
-                  type="number"
-                  value={Math.round(selectedElement.position.y)}
-                  onChange={(e) => updateElementProperty('position', {
-                    ...selectedElement.position,
-                    y: parseFloat(e.target.value) || 0
-                  })}
-                  className="h-8"
-                />
+                <Input type="number" value={Math.round(selectedElement.position.y)} onChange={e => updateElementProperty('position', {
+                ...selectedElement.position,
+                y: parseFloat(e.target.value) || 0
+              })} className="h-8" />
               </div>
             </div>
 
@@ -214,27 +174,17 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label className="text-xs">Width</Label>
-                <Input
-                  type="number"
-                  value={Math.round(selectedElement.size.width)}
-                  onChange={(e) => updateElementProperty('size', {
-                    ...selectedElement.size,
-                    width: parseFloat(e.target.value) || 1
-                  })}
-                  className="h-8"
-                />
+                <Input type="number" value={Math.round(selectedElement.size.width)} onChange={e => updateElementProperty('size', {
+                ...selectedElement.size,
+                width: parseFloat(e.target.value) || 1
+              })} className="h-8" />
               </div>
               <div>
                 <Label className="text-xs">Height</Label>
-                <Input
-                  type="number"
-                  value={Math.round(selectedElement.size.height)}
-                  onChange={(e) => updateElementProperty('size', {
-                    ...selectedElement.size,
-                    height: parseFloat(e.target.value) || 1
-                  })}
-                  className="h-8"
-                />
+                <Input type="number" value={Math.round(selectedElement.size.height)} onChange={e => updateElementProperty('size', {
+                ...selectedElement.size,
+                height: parseFloat(e.target.value) || 1
+              })} className="h-8" />
               </div>
             </div>
 
@@ -242,23 +192,11 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label className="text-xs">Rotation (°)</Label>
-                <Input
-                  type="number"
-                  value={selectedElement.rotation}
-                  onChange={(e) => updateElementProperty('rotation', parseFloat(e.target.value) || 0)}
-                  className="h-8"
-                />
+                <Input type="number" value={selectedElement.rotation} onChange={e => updateElementProperty('rotation', parseFloat(e.target.value) || 0)} className="h-8" />
               </div>
               <div>
                 <Label className="text-xs">Opacity (%)</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={selectedElement.opacity}
-                  onChange={(e) => updateElementProperty('opacity', parseFloat(e.target.value) || 0)}
-                  className="h-8"
-                />
+                <Input type="number" min="0" max="100" value={selectedElement.opacity} onChange={e => updateElementProperty('opacity', parseFloat(e.target.value) || 0)} className="h-8" />
               </div>
             </div>
 
@@ -266,60 +204,24 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
             <div>
               <Label className="text-xs mb-2 block">Align to Canvas</Label>
               <div className="grid grid-cols-3 gap-1 mb-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => alignToCanvas('left')}
-                  className="h-8 p-0"
-                  title="Align Left"
-                >
+                <Button variant="outline" size="sm" onClick={() => alignToCanvas('left')} className="h-8 p-0" title="Align Left">
                   <AlignLeft className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => alignToCanvas('center')}
-                  className="h-8 p-0"
-                  title="Align Center"
-                >
+                <Button variant="outline" size="sm" onClick={() => alignToCanvas('center')} className="h-8 p-0" title="Align Center">
                   <AlignCenter className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => alignToCanvas('right')}
-                  className="h-8 p-0"
-                  title="Align Right"
-                >
+                <Button variant="outline" size="sm" onClick={() => alignToCanvas('right')} className="h-8 p-0" title="Align Right">
                   <AlignRight className="w-4 h-4" />
                 </Button>
               </div>
               <div className="grid grid-cols-3 gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => alignToCanvas('top')}
-                  className="h-8 p-0"
-                  title="Align Top"
-                >
+                <Button variant="outline" size="sm" onClick={() => alignToCanvas('top')} className="h-8 p-0" title="Align Top">
                   <ArrowUp className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => alignToCanvas('middle')}
-                  className="h-8 p-0"
-                  title="Align Middle"
-                >
+                <Button variant="outline" size="sm" onClick={() => alignToCanvas('middle')} className="h-8 p-0" title="Align Middle">
                   <Maximize2 className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => alignToCanvas('bottom')}
-                  className="h-8 p-0"
-                  title="Align Bottom"
-                >
+                <Button variant="outline" size="sm" onClick={() => alignToCanvas('bottom')} className="h-8 p-0" title="Align Bottom">
                   <ArrowDown className="w-4 h-4" />
                 </Button>
               </div>
@@ -328,17 +230,11 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
             {/* Visibility & Lock */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Switch
-                  checked={selectedElement.visible}
-                  onCheckedChange={(checked) => updateElementProperty('visible', checked)}
-                />
+                <Switch checked={selectedElement.visible} onCheckedChange={checked => updateElementProperty('visible', checked)} />
                 <Label className="text-xs">Visible</Label>
               </div>
               <div className="flex items-center gap-2">
-                <Switch
-                  checked={selectedElement.locked}
-                  onCheckedChange={(checked) => updateElementProperty('locked', checked)}
-                />
+                <Switch checked={selectedElement.locked} onCheckedChange={checked => updateElementProperty('locked', checked)} />
                 <Label className="text-xs">Locked</Label>
               </div>
             </div>
@@ -371,21 +267,14 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
           </div>
 
           {/* Element-specific properties */}
-          {selectedElement.type === 'text' && (
-            <div className="space-y-4">
+          {selectedElement.type === 'text' && <div className="space-y-4">
               <Separator />
               <h4 className="text-sm font-medium">Text Properties</h4>
               
               {/* Text Content */}
               <div>
                 <Label className="text-xs">Content</Label>
-                <Input
-                  value={localValues.content}
-                  onChange={(e) => handleInputChange('content', e.target.value)}
-                  onBlur={(e) => handleInputBlur('content', e.target.value)}
-                  placeholder="Enter text..."
-                  className="h-8"
-                />
+                <Input value={localValues.content} onChange={e => handleInputChange('content', e.target.value)} onBlur={e => handleInputBlur('content', e.target.value)} placeholder="Enter text..." className="h-8" />
               </div>
 
               {/* Font Properties */}
@@ -393,10 +282,7 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                 {/* Font Family */}
                 <div>
                   <Label className="text-xs">Font Family</Label>
-                  <Select
-                    value={(selectedElement as TextElement).fontFamily || 'Inter'}
-                    onValueChange={(value) => updateElementProperty('fontFamily', value)}
-                  >
+                  <Select value={(selectedElement as TextElement).fontFamily || 'Inter'} onValueChange={value => updateElementProperty('fontFamily', value)}>
                     <SelectTrigger className="h-8">
                       <SelectValue />
                     </SelectTrigger>
@@ -422,20 +308,11 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label className="text-xs">Font Size</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={localValues.fontSize}
-                      onChange={(e) => handleFontSizeChange(e.target.value)}
-                      className="h-8"
-                    />
+                    <Input type="number" min="1" value={localValues.fontSize} onChange={e => handleFontSizeChange(e.target.value)} className="h-8" />
                   </div>
                   <div>
                     <Label className="text-xs">Font Weight</Label>
-                    <Select
-                      value={(selectedElement as TextElement).fontWeight}
-                      onValueChange={(value) => updateElementProperty('fontWeight', value)}
-                    >
+                    <Select value={(selectedElement as TextElement).fontWeight} onValueChange={value => updateElementProperty('fontWeight', value)}>
                       <SelectTrigger className="h-8">
                         <SelectValue />
                       </SelectTrigger>
@@ -454,43 +331,32 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
               {/* Text Color */}
               <div>
                 <Label className="text-xs">Text Color</Label>
-                <Input
-                  type="color"
-                  value={(selectedElement as TextElement).color}
-                  onChange={(e) => updateElementProperty('color', e.target.value)}
-                  className="h-8"
-                />
+                <Input type="color" value={(selectedElement as TextElement).color} onChange={e => updateElementProperty('color', e.target.value)} className="h-8" />
               </div>
 
               {/* Text Alignment */}
               <div>
                 <Label className="text-xs mb-2 block">Text Alignment</Label>
                 <div className="flex gap-1">
-                  {[
-                    { value: 'left', icon: AlignLeft },
-                    { value: 'center', icon: AlignCenter },
-                    { value: 'right', icon: AlignRight }
-                  ].map((align) => (
-                    <Button
-                      key={align.value}
-                      variant={(selectedElement as TextElement).textAlign === align.value ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => updateElementProperty('textAlign', align.value)}
-                      className="h-8 w-8 p-0"
-                    >
+                  {[{
+                value: 'left',
+                icon: AlignLeft
+              }, {
+                value: 'center',
+                icon: AlignCenter
+              }, {
+                value: 'right',
+                icon: AlignRight
+              }].map(align => <Button key={align.value} variant={(selectedElement as TextElement).textAlign === align.value ? "default" : "outline"} size="sm" onClick={() => updateElementProperty('textAlign', align.value)} className="h-8 w-8 p-0">
                       <align.icon className="w-4 h-4" />
-                    </Button>
-                  ))}
+                    </Button>)}
                 </div>
               </div>
 
               {/* Text Direction (RTL/LTR) */}
               <div>
                 <Label className="text-xs">Text Direction</Label>
-                <Select
-                  value={(selectedElement as TextElement).direction || 'ltr'}
-                  onValueChange={(value) => updateElementProperty('direction', value)}
-                >
+                <Select value={(selectedElement as TextElement).direction || 'ltr'} onValueChange={value => updateElementProperty('direction', value)}>
                   <SelectTrigger className="h-8">
                     <SelectValue />
                   </SelectTrigger>
@@ -504,51 +370,30 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
               {/* Letter Spacing */}
               <div>
                 <Label className="text-xs">Letter Spacing (px)</Label>
-                <Input
-                  type="number"
-                  value={localValues.letterSpacing}
-                  onChange={(e) => handleInputChange('letterSpacing', e.target.value)}
-                  onBlur={(e) => handleInputBlur('letterSpacing', e.target.value)}
-                  className="h-8"
-                  step="0.1"
-                />
+                <Input type="number" value={localValues.letterSpacing} onChange={e => handleInputChange('letterSpacing', e.target.value)} onBlur={e => handleInputBlur('letterSpacing', e.target.value)} className="h-8" step="0.1" />
               </div>
 
               {/* Line Height */}
               <div>
                 <Label className="text-xs">Line Height</Label>
-                <Input
-                  type="number"
-                  value={localValues.lineSpacing}
-                  onChange={(e) => handleInputChange('lineSpacing', e.target.value)}
-                  onBlur={(e) => handleInputBlur('lineHeight', e.target.value)}
-                  className="h-8"
-                  step="0.1"
-                  min="0.5"
-                  max="3"
-                />
+                <Input type="number" value={localValues.lineSpacing} onChange={e => handleInputChange('lineSpacing', e.target.value)} onBlur={e => handleInputBlur('lineHeight', e.target.value)} className="h-8" step="0.1" min="0.5" max="3" />
               </div>
-            </div>
-          )}
+            </div>}
 
-          {selectedElement.type === 'shape' && (
-            <div className="space-y-4">
+          {selectedElement.type === 'shape' && <div className="space-y-4">
               <Separator />
               <h4 className="text-sm font-medium">Shape Properties</h4>
               
               {/* Fill Source */}
               <div>
                 <Label className="text-xs">Fill Source</Label>
-                <Select
-                  value={(selectedElement as ShapeElement).fillType || 'solid'}
-                  onValueChange={(value) => {
-                    updateElementProperty('fillType', value);
-                    if (value === 'solid') {
-                      updateElementProperty('fillSource', undefined);
-                      updateElementProperty('fillImageUrl', undefined);
-                    }
-                  }}
-                >
+                <Select value={(selectedElement as ShapeElement).fillType || 'solid'} onValueChange={value => {
+              updateElementProperty('fillType', value);
+              if (value === 'solid') {
+                updateElementProperty('fillSource', undefined);
+                updateElementProperty('fillImageUrl', undefined);
+              }
+            }}>
                   <SelectTrigger className="h-8">
                     <SelectValue />
                   </SelectTrigger>
@@ -560,33 +405,22 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
               </div>
 
               {/* Fill Color (only for solid fill) */}
-              {((selectedElement as ShapeElement).fillType === 'solid' || !(selectedElement as ShapeElement).fillType) && (
-                <div>
+              {((selectedElement as ShapeElement).fillType === 'solid' || !(selectedElement as ShapeElement).fillType) && <div>
                   <Label className="text-xs">Fill Color</Label>
-                  <Input
-                    type="color"
-                    value={(selectedElement as ShapeElement).fillColor}
-                    onChange={(e) => updateElementProperty('fillColor', e.target.value)}
-                    className="h-8"
-                  />
-                </div>
-              )}
+                  <Input type="color" value={(selectedElement as ShapeElement).fillColor} onChange={e => updateElementProperty('fillColor', e.target.value)} className="h-8" />
+                </div>}
 
               {/* Media Source (only for image fill) */}
-              {(selectedElement as ShapeElement).fillType === 'image' && (
-                <div className="space-y-2">
+              {(selectedElement as ShapeElement).fillType === 'image' && <div className="space-y-2">
                   <div>
                     <Label className="text-xs">Media Source</Label>
-                    <Select
-                      value={(selectedElement as ShapeElement).fillSource || ''}
-                      onValueChange={(value) => {
-                        updateElementProperty('fillSource', value);
-                        const imageUrl = getMediaUrl(value);
-                        if (imageUrl) {
-                          updateElementProperty('fillImageUrl', imageUrl);
-                        }
-                      }}
-                    >
+                    <Select value={(selectedElement as ShapeElement).fillSource || ''} onValueChange={value => {
+                updateElementProperty('fillSource', value);
+                const imageUrl = getMediaUrl(value);
+                if (imageUrl) {
+                  updateElementProperty('fillImageUrl', imageUrl);
+                }
+              }}>
                       <SelectTrigger className="h-8">
                         <SelectValue placeholder="Select media source" />
                       </SelectTrigger>
@@ -595,11 +429,9 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                         <SelectItem value="additional_image_link">Additional Image</SelectItem>
                         <SelectItem value="additional_image_link_2">Detail Image</SelectItem>
                         <SelectItem value="brand_logo">Brand Logo</SelectItem>
-                        {uploadedAssets.map((asset) => (
-                          <SelectItem key={asset.id} value={asset.id}>
+                        {uploadedAssets.map(asset => <SelectItem key={asset.id} value={asset.id}>
                             {asset.name}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -607,10 +439,7 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                   {/* Fill Mode */}
                   <div>
                     <Label className="text-xs">Fill Mode</Label>
-                    <Select
-                      value={(selectedElement as ShapeElement).fillMode || 'cover'}
-                      onValueChange={(value) => updateElementProperty('fillMode', value)}
-                    >
+                    <Select value={(selectedElement as ShapeElement).fillMode || 'cover'} onValueChange={value => updateElementProperty('fillMode', value)}>
                       <SelectTrigger className="h-8">
                         <SelectValue />
                       </SelectTrigger>
@@ -625,78 +454,47 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                   </div>
 
                   {/* Preview */}
-                  {(selectedElement as ShapeElement).fillImageUrl && (
-                    <div className="mt-2">
+                  {(selectedElement as ShapeElement).fillImageUrl && <div className="mt-2">
                       <Label className="text-xs">Preview</Label>
                       <div className="w-full h-20 border rounded overflow-hidden bg-muted flex items-center justify-center">
-                        <img 
-                          src={(selectedElement as ShapeElement).fillImageUrl}
-                          alt="Fill preview"
-                          className="max-w-full max-h-full object-contain"
-                        />
+                        <img src={(selectedElement as ShapeElement).fillImageUrl} alt="Fill preview" className="max-w-full max-h-full object-contain" />
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    </div>}
+                </div>}
 
               {/* Stroke */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label className="text-xs">Stroke Color</Label>
-                  <Input
-                    type="color"
-                    value={(selectedElement as ShapeElement).strokeColor || '#000000'}
-                    onChange={(e) => updateElementProperty('strokeColor', e.target.value)}
-                    className="h-8"
-                  />
+                  <Input type="color" value={(selectedElement as ShapeElement).strokeColor || '#000000'} onChange={e => updateElementProperty('strokeColor', e.target.value)} className="h-8" />
                 </div>
                 <div>
                   <Label className="text-xs">Stroke Width</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    value={(selectedElement as ShapeElement).strokeWidth}
-                    onChange={(e) => updateElementProperty('strokeWidth', parseFloat(e.target.value) || 0)}
-                    className="h-8"
-                  />
+                  <Input type="number" min="0" value={(selectedElement as ShapeElement).strokeWidth} onChange={e => updateElementProperty('strokeWidth', parseFloat(e.target.value) || 0)} className="h-8" />
                 </div>
               </div>
 
               {/* Corner Radius for rectangles */}
-              {(selectedElement as ShapeElement).shapeType === 'rectangle' && (
-                <div>
+              {(selectedElement as ShapeElement).shapeType === 'rectangle' && <div>
                   <Label className="text-xs">Corner Radius</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    value={(selectedElement as ShapeElement).cornerRadius || 0}
-                    onChange={(e) => updateElementProperty('cornerRadius', parseFloat(e.target.value) || 0)}
-                    className="h-8"
-                  />
-                </div>
-              )}
-            </div>
-          )}
+                  <Input type="number" min="0" value={(selectedElement as ShapeElement).cornerRadius || 0} onChange={e => updateElementProperty('cornerRadius', parseFloat(e.target.value) || 0)} className="h-8" />
+                </div>}
+            </div>}
 
-          {selectedElement.type === 'image' && (
-            <div className="space-y-4">
+          {selectedElement.type === 'image' && <div className="space-y-4">
               <Separator />
               <h4 className="text-sm font-medium">Image Properties</h4>
               
               {/* Image Source */}
               <div>
                 <Label className="text-xs">Image Source</Label>
-                <Select
-                  value={(selectedElement as ImageElement).fillType || 'original'}
-                  onValueChange={(value) => {
-                    updateElementProperty('fillType', value);
-                    if (value === 'original') {
-                      updateElementProperty('fillSource', undefined);
-                      updateElementProperty('fillImageUrl', undefined);
-                    }
-                  }}
-                >
+                <Select value={(selectedElement as ImageElement).fillType || 'original'} onValueChange={value => {
+              updateElementProperty('fillType', value);
+              if (value === 'original') {
+                updateElementProperty('fillSource', undefined);
+                updateElementProperty('fillImageUrl', undefined);
+              }
+            }}>
                   <SelectTrigger className="h-8">
                     <SelectValue />
                   </SelectTrigger>
@@ -708,21 +506,17 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
               </div>
 
               {/* Dynamic Media Source */}
-              {(selectedElement as ImageElement).fillType === 'dynamic' && (
-                <div className="space-y-2">
+              {(selectedElement as ImageElement).fillType === 'dynamic' && <div className="space-y-2">
                   <div>
                     <Label className="text-xs">Media Source</Label>
-                    <Select
-                      value={(selectedElement as ImageElement).fillSource || ''}
-                      onValueChange={(value) => {
-                        updateElementProperty('fillSource', value);
-                        const imageUrl = getMediaUrl(value);
-                        if (imageUrl) {
-                          updateElementProperty('fillImageUrl', imageUrl);
-                          updateElementProperty('src', imageUrl);
-                        }
-                      }}
-                    >
+                    <Select value={(selectedElement as ImageElement).fillSource || ''} onValueChange={value => {
+                updateElementProperty('fillSource', value);
+                const imageUrl = getMediaUrl(value);
+                if (imageUrl) {
+                  updateElementProperty('fillImageUrl', imageUrl);
+                  updateElementProperty('src', imageUrl);
+                }
+              }}>
                       <SelectTrigger className="h-8">
                         <SelectValue placeholder="Select media source" />
                       </SelectTrigger>
@@ -731,11 +525,9 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                         <SelectItem value="additional_image_link">Additional Image</SelectItem>
                         <SelectItem value="additional_image_link_2">Detail Image</SelectItem>
                         <SelectItem value="brand_logo">Brand Logo</SelectItem>
-                        {uploadedAssets.map((asset) => (
-                          <SelectItem key={asset.id} value={asset.id}>
+                        {uploadedAssets.map(asset => <SelectItem key={asset.id} value={asset.id}>
                             {asset.name}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -743,10 +535,7 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                   {/* Fill Mode */}
                   <div>
                     <Label className="text-xs">Fill Mode</Label>
-                    <Select
-                      value={(selectedElement as ImageElement).fillMode || 'cover'}
-                      onValueChange={(value) => updateElementProperty('fillMode', value)}
-                    >
+                    <Select value={(selectedElement as ImageElement).fillMode || 'cover'} onValueChange={value => updateElementProperty('fillMode', value)}>
                       <SelectTrigger className="h-8">
                         <SelectValue />
                       </SelectTrigger>
@@ -761,29 +550,18 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                   </div>
 
                   {/* Preview */}
-                  {(selectedElement as ImageElement).fillImageUrl && (
-                    <div className="mt-2">
+                  {(selectedElement as ImageElement).fillImageUrl && <div className="mt-2">
                       <Label className="text-xs">Preview</Label>
                       <div className="w-full h-20 border rounded overflow-hidden bg-muted flex items-center justify-center">
-                        <img 
-                          src={(selectedElement as ImageElement).fillImageUrl}
-                          alt="Fill preview"
-                          className="max-w-full max-h-full object-contain"
-                        />
+                        <img src={(selectedElement as ImageElement).fillImageUrl} alt="Fill preview" className="max-w-full max-h-full object-contain" />
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    </div>}
+                </div>}
               
               {/* Object Fit (only for original images) */}
-              {((selectedElement as ImageElement).fillType === 'original' || !(selectedElement as ImageElement).fillType) && (
-                <div>
+              {((selectedElement as ImageElement).fillType === 'original' || !(selectedElement as ImageElement).fillType) && <div>
                   <Label className="text-xs">Object Fit</Label>
-                  <Select
-                    value={(selectedElement as ImageElement).objectFit}
-                    onValueChange={(value) => updateElementProperty('objectFit', value)}
-                  >
+                  <Select value={(selectedElement as ImageElement).objectFit} onValueChange={value => updateElementProperty('objectFit', value)}>
                     <SelectTrigger className="h-8">
                       <SelectValue />
                     </SelectTrigger>
@@ -793,22 +571,14 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                       <SelectItem value="fill">Fill</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-              )}
+                </div>}
 
               {/* Corner Radius */}
               <div>
                 <Label className="text-xs">Corner Radius</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={(selectedElement as ImageElement).cornerRadius || 0}
-                  onChange={(e) => updateElementProperty('cornerRadius', parseFloat(e.target.value) || 0)}
-                  className="h-8"
-                />
+                <Input type="number" min="0" value={(selectedElement as ImageElement).cornerRadius || 0} onChange={e => updateElementProperty('cornerRadius', parseFloat(e.target.value) || 0)} className="h-8" />
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Z-Index */}
           <div className="space-y-4">
@@ -816,20 +586,10 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
             <div>
               <Label className="text-xs">Layer Order</Label>
               <div className="flex gap-2 mt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => updateElementProperty('zIndex', selectedElement.zIndex + 1)}
-                  className="flex-1"
-                >
+                <Button variant="outline" size="sm" onClick={() => updateElementProperty('zIndex', selectedElement.zIndex + 1)} className="flex-1">
                   Bring Forward
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => updateElementProperty('zIndex', Math.max(0, selectedElement.zIndex - 1))}
-                  className="flex-1"
-                >
+                <Button variant="outline" size="sm" onClick={() => updateElementProperty('zIndex', Math.max(0, selectedElement.zIndex - 1))} className="flex-1">
                   Send Backward
                 </Button>
               </div>
@@ -840,37 +600,24 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
           <div className="space-y-4">
             <Separator />
             <div className="space-y-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // Duplicate element
-                  const newElement = { 
-                    ...selectedElement, 
-                    id: Math.random().toString(36).substr(2, 9),
-                    position: { 
-                      x: selectedElement.position.x + 20, 
-                      y: selectedElement.position.y + 20 
-                    }
-                  };
-                  canvasStore.updateElement(newElement.id, newElement);
-                }}
-                className="w-full"
-              >
+              <Button variant="outline" size="sm" onClick={() => {
+              // Duplicate element
+              const newElement = {
+                ...selectedElement,
+                id: Math.random().toString(36).substr(2, 9),
+                position: {
+                  x: selectedElement.position.x + 20,
+                  y: selectedElement.position.y + 20
+                }
+              };
+              canvasStore.updateElement(newElement.id, newElement);
+            }} className="w-full">
                 Duplicate Element
               </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => canvasStore.deleteElement(selectedElement.id)}
-                className="w-full"
-              >
-                Delete Element
-              </Button>
+              
             </div>
           </div>
         </div>
       </ScrollArea>
-    </div>
-  );
+    </div>;
 }
