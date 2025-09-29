@@ -242,17 +242,17 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       tempCanvas.style.width = `${currentSize.width}px`;
       tempCanvas.style.height = `${currentSize.height}px`;
       
-      // Force solid background color
-      const bgColor = canvasStore.canvasState.backgroundColor;
-      tempCanvas.style.backgroundColor = bgColor;
+      // Force pure white background or use canvas background
+      const bgColor = canvasStore.canvasState.backgroundColor || '#ffffff';
+      tempCanvas.style.backgroundColor = '#ffffff';
       tempCanvas.style.opacity = '1';
 
       // Clone only the content without selection handles
       const canvasContent = canvasRef.current;
       const elementsOnly = canvasContent.cloneNode(true) as HTMLElement;
 
-      // Force pure background on cloned element
-      elementsOnly.style.backgroundColor = bgColor;
+      // Force pure white background on cloned element
+      elementsOnly.style.backgroundColor = '#ffffff';
       elementsOnly.style.opacity = '1';
       elementsOnly.style.backgroundImage = 'none'; // Remove any background image for pure color
       
@@ -274,7 +274,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       const canvas = await html2canvas(tempCanvas, {
         width: currentSize.width,
         height: currentSize.height,
-        backgroundColor: bgColor,
+        backgroundColor: '#ffffff',
         scale: 1,
         useCORS: true,
         allowTaint: true,
