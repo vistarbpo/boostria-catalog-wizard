@@ -33,8 +33,11 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
     x: 0,
     y: 0
   });
+  const [editingElementId, setEditingElementId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
   const canvasRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const editInputRef = useRef<HTMLTextAreaElement>(null);
   const canvasSizes = {
     // Instagram
     "instagram-post": {
@@ -358,10 +361,86 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
           opacity: 1
         }}>
             {/* Canvas Elements */}
-            {canvasStore.canvasState.elements.map(element => <CanvasElement key={element.id} element={element} isSelected={canvasStore.canvasState.selectedElementIds.includes(element.id)} scale={scale} onSelect={canvasStore.selectElement} onMove={canvasStore.moveElement} onResize={canvasStore.resizeElement} onRotate={canvasStore.rotateElement} onDoubleClick={elementId => {
-            // Handle double click for editing
-            console.log('Double clicked element:', elementId);
-          }} />)}
+            {canvasStore.canvasState.elements.map(element => {
+              const isEditing = editingElementId === element.id;
+              
+              return (
+                <div key={element.id} className="relative">
+                  {!isEditing && (
+                    <CanvasElement 
+                      element={element} 
+                      isSelected={canvasStore.canvasState.selectedElementIds.includes(element.id)} 
+                      scale={scale} 
+                      onSelect={canvasStore.selectElement} 
+                      onMove={canvasStore.moveElement} 
+                      onResize={canvasStore.resizeElement} 
+                      onRotate={canvasStore.rotateElement} 
+                      onDoubleClick={elementId => {
+                        if (element.type === 'text') {
+                          const textElement = element as any;
+                          setEditingElementId(elementId);
+                          setEditingText(textElement.content || '');
+                          // Focus the input after a brief delay to ensure it's rendered
+                          setTimeout(() => {
+                            editInputRef.current?.focus();
+                            editInputRef.current?.select();
+                          }, 0);
+                        }
+                      }} 
+                    />
+                  )}
+                  
+                  {isEditing && element.type === 'text' && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: element.position.x,
+                        top: element.position.y,
+                        width: element.size.width,
+                        height: element.size.height,
+                        transform: `rotate(${element.rotation}deg)`,
+                        transformOrigin: 'top left',
+                        zIndex: 1000,
+                      }}
+                    >
+                      <textarea
+                        ref={editInputRef}
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        onBlur={() => {
+                          canvasStore.updateElement(element.id, { content: editingText });
+                          setEditingElementId(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') {
+                            setEditingElementId(null);
+                          } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                            canvasStore.updateElement(element.id, { content: editingText });
+                            setEditingElementId(null);
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          border: '2px solid #3b82f6',
+                          outline: 'none',
+                          resize: 'none',
+                          background: 'rgba(255, 255, 255, 0.95)',
+                          color: (element as any).color,
+                          fontSize: `${(element as any).fontSize}px`,
+                          fontFamily: (element as any).fontFamily,
+                          fontWeight: (element as any).fontWeight,
+                          textAlign: (element as any).textAlign,
+                          direction: (element as any).direction || 'ltr',
+                          padding: '4px',
+                          overflow: 'auto',
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

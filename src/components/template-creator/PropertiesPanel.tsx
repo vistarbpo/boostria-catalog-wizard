@@ -83,12 +83,23 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
       
       // Convert string values to appropriate types
       if (property === 'fontSize' || property === 'letterSpacing') {
-        processedValue = parseFloat(value) || 0;
+        const numValue = parseFloat(value);
+        processedValue = isNaN(numValue) ? 0 : Math.max(1, numValue); // Ensure minimum of 1 for fontSize
       } else if (property === 'lineHeight') {
-        processedValue = parseFloat(value) || 1.2;
+        const numValue = parseFloat(value);
+        processedValue = isNaN(numValue) ? 1.2 : Math.max(0.5, numValue);
       }
       
       canvasStore.updateElement(selectedElement.id, { [property]: processedValue });
+    }
+  };
+  
+  // Real-time font size updates
+  const handleFontSizeChange = (value: string) => {
+    handleInputChange('fontSize', value);
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue > 0 && selectedElement) {
+      canvasStore.updateElement(selectedElement.id, { fontSize: numValue });
     }
   };
 
@@ -375,9 +386,9 @@ export function PropertiesPanel({ canvasStore }: PropertiesPanelProps) {
                     <Label className="text-xs">Font Size</Label>
                     <Input
                       type="number"
+                      min="1"
                       value={localValues.fontSize}
-                      onChange={(e) => handleInputChange('fontSize', e.target.value)}
-                      onBlur={(e) => handleInputBlur('fontSize', e.target.value)}
+                      onChange={(e) => handleFontSizeChange(e.target.value)}
                       className="h-8"
                     />
                   </div>
