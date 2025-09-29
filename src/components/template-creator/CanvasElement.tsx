@@ -34,6 +34,8 @@ const CanvasElementComponent = function CanvasElement({
   const isRotatingRef = useRef(false);
   const dragDataRef = useRef<any>({});
   const animationFrameRef = useRef<number>();
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<NodeJS.Timeout>();
 
   // Optimized DOM manipulation for 60fps performance
   const updateElementStyle = useCallback((pos: Position, size: { width: number; height: number }, rotation: number) => {
@@ -50,6 +52,26 @@ const CanvasElementComponent = function CanvasElement({
     
     e.preventDefault();
     e.stopPropagation();
+    
+    // Handle double-click detection for text elements
+    if (element.type === 'text' && !(e.target instanceof HTMLElement && (e.target.classList.contains('resize-handle') || e.target.classList.contains('rotation-handle')))) {
+      clickCountRef.current++;
+      
+      if (clickCountRef.current === 1) {
+        // First click - start timer
+        clickTimerRef.current = setTimeout(() => {
+          clickCountRef.current = 0;
+        }, 300);
+      } else if (clickCountRef.current === 2) {
+        // Double click detected
+        clickCountRef.current = 0;
+        if (clickTimerRef.current) {
+          clearTimeout(clickTimerRef.current);
+        }
+        onDoubleClick?.(element.id);
+        return; // Don't start dragging
+      }
+    }
     
     const isMultiSelect = e.ctrlKey || e.metaKey;
     onSelect(element.id, isMultiSelect);
@@ -92,7 +114,7 @@ const CanvasElementComponent = function CanvasElement({
         centerY: elementCenter.y
       };
     } else {
-      // Move mode
+      // Move mode - only for non-text or when not double-clicking
       setIsDragging(true);
       isDraggingRef.current = true;
       
@@ -103,7 +125,7 @@ const CanvasElementComponent = function CanvasElement({
         startTop: element.position.y
       };
     }
-  }, [element, onSelect]);
+  }, [element, onSelect, onDoubleClick]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDraggingRef.current && !isResizingRef.current && !isRotatingRef.current) return;
@@ -283,11 +305,14 @@ const CanvasElementComponent = function CanvasElement({
     }
   }, [isDragging, isResizing, isRotating, handleMouseMove, handleMouseUp]);
 
-  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
-    if (element.locked) return;
-    e.stopPropagation();
-    onDoubleClick?.(element.id);
-  }, [element.id, element.locked, onDoubleClick]);
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+      }
+    };
+  }, []);
 
   const renderElement = () => {
     const baseStyle: React.CSSProperties = {
@@ -319,9 +344,9 @@ const CanvasElementComponent = function CanvasElement({
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start'
+              justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              cursor: element.locked ? 'not-allowed' : 'text',
             }}
-            onDoubleClick={handleDoubleClick}
           >
             {textElement.isDynamic ? textElement.dynamicContent || textElement.content : textElement.content}
           </div>
