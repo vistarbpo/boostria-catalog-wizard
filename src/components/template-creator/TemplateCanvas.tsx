@@ -234,36 +234,35 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       // Wait for re-render without selection
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Create a temporary wrapper with pure white base
-      const tempWrapper = document.createElement('div');
-      tempWrapper.style.position = 'absolute';
-      tempWrapper.style.left = '-9999px';
-      tempWrapper.style.top = '-9999px';
-      tempWrapper.style.width = `${currentSize.width}px`;
-      tempWrapper.style.height = `${currentSize.height}px`;
-      tempWrapper.style.backgroundColor = '#ffffff';
+      // Get background color from canvas settings (default to white if not set)
+      const bgColor = canvasStore.canvasState.backgroundColor || '#ffffff';
       
-      // Create the canvas container
+      console.log('Export Debug:', {
+        backgroundColor: bgColor,
+        backgroundType: canvasStore.canvasState.backgroundType,
+        backgroundImageUrl: canvasStore.canvasState.backgroundImageUrl,
+        backgroundMode: canvasStore.canvasState.backgroundMode
+      });
+      
+      // Create the canvas container with correct background
       const tempCanvas = document.createElement('div');
-      tempCanvas.style.position = 'relative';
+      tempCanvas.style.position = 'absolute';
+      tempCanvas.style.left = '-9999px';
+      tempCanvas.style.top = '-9999px';
       tempCanvas.style.width = `${currentSize.width}px`;
       tempCanvas.style.height = `${currentSize.height}px`;
-      tempCanvas.style.backgroundColor = '#ffffff';
+      // Always apply the background color from canvas settings
+      tempCanvas.style.backgroundColor = bgColor;
 
       // Clone the canvas content
       const canvasContent = canvasRef.current;
       const elementsOnly = canvasContent.cloneNode(true) as HTMLElement;
 
-      // Remove the canvas background and make it transparent so wrapper shows through
+      // Make cloned content transparent so tempCanvas background shows through
       elementsOnly.style.backgroundColor = 'transparent';
       elementsOnly.style.backgroundImage = 'none';
       
-      // Apply canvas background from settings on top of white base
-      if (canvasStore.canvasState.backgroundType === 'solid') {
-        tempCanvas.style.backgroundColor = canvasStore.canvasState.backgroundColor;
-      }
-      
-      // Apply background image only if specified
+      // Apply background image if specified (will layer over the background color)
       if (canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl) {
         tempCanvas.style.backgroundImage = `url(${canvasStore.canvasState.backgroundImageUrl})`;
         tempCanvas.style.backgroundSize = canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' : canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' : canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' : canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto';
@@ -276,13 +275,12 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       controlsToRemove.forEach(control => control.remove());
       
       tempCanvas.appendChild(elementsOnly);
-      tempWrapper.appendChild(tempCanvas);
-      document.body.appendChild(tempWrapper);
+      document.body.appendChild(tempCanvas);
       
       const canvas = await html2canvas(tempCanvas, {
         width: currentSize.width,
         height: currentSize.height,
-        backgroundColor: canvasStore.canvasState.backgroundColor,
+        backgroundColor: bgColor, // Match the tempCanvas backgroundColor
         scale: 1,
         useCORS: true,
         allowTaint: true,
@@ -292,7 +290,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       });
 
       // Clean up temp element
-      document.body.removeChild(tempWrapper);
+      document.body.removeChild(tempCanvas);
 
       // Restore original selection
       originalSelection.forEach(id => canvasStore.selectElement(id, true));
