@@ -38,14 +38,12 @@ import {
   ArrowDown,
   Lock,
   Unlock,
-  Copy,
-  Package,
-  StarIcon
+  Copy
 } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { useProduct } from "../../contexts/ProductContext";
 
-type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | "widgets" | null;
+type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | null;
 
 interface ToolbarSidebarProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
@@ -100,7 +98,6 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
     { id: "images" as const, icon: Image, label: "Images" },
     { id: "shapes" as const, icon: Shapes, label: "Shapes" },
     { id: "text" as const, icon: Type, label: "Text" },
-    { id: "widgets" as const, icon: Package, label: "Widgets" },
     { id: "layers" as const, icon: Layers, label: "Layers" },
   ];
 
@@ -346,146 +343,6 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
         canvasStore.updateElement(selectedElement.id, updates);
       }
     }, 100);
-  };
-
-  const handleAddBNPLWidget = () => {
-    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 150;
-    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 50;
-    const maxZIndex = Math.max(...canvasStore.canvasState.elements.map(el => el.zIndex), 0);
-    
-    // Add "or 4 interest-free payments" text
-    canvasStore.addTextElement({ x: centerX, y: centerY }, 'or 4 interest-free payments with');
-    setTimeout(() => {
-      const textElement = canvasStore.getSelectedElement();
-      if (textElement) {
-        canvasStore.updateElement(textElement.id, {
-          fontSize: 14,
-          fontWeight: 'Regular',
-          color: '#666666',
-          zIndex: maxZIndex + 1
-        });
-      }
-    }, 50);
-
-    // Add Tabby logo placeholder (rectangle with text)
-    setTimeout(() => {
-      canvasStore.addShapeElement('rectangle', { x: centerX + 220, y: centerY - 5 });
-      setTimeout(() => {
-        const tabbyLogo = canvasStore.getSelectedElement();
-        if (tabbyLogo && tabbyLogo.type === 'shape') {
-          canvasStore.updateElement(tabbyLogo.id, {
-            size: { width: 60, height: 24 },
-            fillColor: '#3DEBB1',
-            cornerRadius: 4,
-            zIndex: maxZIndex + 2
-          });
-        }
-      }, 50);
-    }, 100);
-
-    // Add Tabby text
-    setTimeout(() => {
-      canvasStore.addTextElement({ x: centerX + 232, y: centerY - 1 }, 'tabby');
-      setTimeout(() => {
-        const tabbyText = canvasStore.getSelectedElement();
-        if (tabbyText) {
-          canvasStore.updateElement(tabbyText.id, {
-            fontSize: 16,
-            fontWeight: 'Bold',
-            color: '#FFFFFF',
-            zIndex: maxZIndex + 3
-          });
-        }
-      }, 50);
-    }, 200);
-
-    // Add Tamara logo placeholder (rectangle with text)
-    setTimeout(() => {
-      canvasStore.addShapeElement('rectangle', { x: centerX + 290, y: centerY - 5 });
-      setTimeout(() => {
-        const tamaraLogo = canvasStore.getSelectedElement();
-        if (tamaraLogo && tamaraLogo.type === 'shape') {
-          canvasStore.updateElement(tamaraLogo.id, {
-            size: { width: 60, height: 24 },
-            fillColor: '#000000',
-            cornerRadius: 4,
-            zIndex: maxZIndex + 4
-          });
-        }
-      }, 50);
-    }, 300);
-
-    // Add Tamara text
-    setTimeout(() => {
-      canvasStore.addTextElement({ x: centerX + 298, y: centerY - 1 }, 'tamara');
-      setTimeout(() => {
-        const tamaraText = canvasStore.getSelectedElement();
-        if (tamaraText) {
-          canvasStore.updateElement(tamaraText.id, {
-            fontSize: 14,
-            fontWeight: 'Bold',
-            color: '#FFFFFF',
-            zIndex: maxZIndex + 5
-          });
-        }
-      }, 50);
-    }, 400);
-  };
-
-  const handleAddReviewWidget = () => {
-    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
-    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 30;
-    const maxZIndex = Math.max(...canvasStore.canvasState.elements.map(el => el.zIndex), 0);
-    
-    // Add 5 star shapes
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
-        canvasStore.addShapeElement('star', { x: centerX + (i * 30), y: centerY });
-        setTimeout(() => {
-          const star = canvasStore.getSelectedElement();
-          if (star && star.type === 'shape') {
-            canvasStore.updateElement(star.id, {
-              size: { width: 24, height: 24 },
-              fillColor: '#FFB800',
-              strokeWidth: 0,
-              zIndex: maxZIndex + i + 1
-            });
-          }
-        }, 50);
-      }, i * 100);
-    }
-
-    // Add rating text
-    setTimeout(() => {
-      canvasStore.addTextElement({ x: centerX + 160, y: centerY + 2 }, '4.8');
-      setTimeout(() => {
-        const ratingText = canvasStore.getSelectedElement();
-        if (ratingText) {
-          canvasStore.updateElement(ratingText.id, {
-            fontSize: 18,
-            fontWeight: 'Bold',
-            color: '#333333',
-            zIndex: maxZIndex + 6
-          });
-        }
-      }, 50);
-    }, 500);
-
-    // Add review count text
-    setTimeout(() => {
-      canvasStore.addTextElement({ x: centerX + 200, y: centerY + 5 }, '(1,234 reviews)');
-      setTimeout(() => {
-        const reviewText = canvasStore.getSelectedElement();
-        if (reviewText) {
-          canvasStore.updateElement(reviewText.id, {
-            fontSize: 12,
-            fontWeight: 'Regular',
-            color: '#666666',
-            zIndex: maxZIndex + 7
-          });
-        }
-      }, 50);
-    }, 600);
   };
 
   return (
@@ -984,55 +841,6 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       Custom Text
                     </Button>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {activeSection === "widgets" && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Widgets</h3>
-                <p className="text-sm text-muted-foreground">
-                  Add pre-grouped dynamic layer sets
-                </p>
-                
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Payment Options</h4>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddBNPLWidget}
-                    className="w-full justify-start h-auto p-3"
-                  >
-                    <div className="flex flex-col items-start gap-1">
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        <span className="font-medium">BNPL Widget</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        Buy Now Pay Later with Tabby & Tamara
-                      </span>
-                    </div>
-                  </Button>
-                </div>
-
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Social Proof</h4>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddReviewWidget}
-                    className="w-full justify-start h-auto p-3"
-                  >
-                    <div className="flex flex-col items-start gap-1">
-                      <div className="flex items-center gap-2">
-                        <StarIcon className="w-4 h-4" />
-                        <span className="font-medium">Review & Rating</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        Star rating with review count
-                      </span>
-                    </div>
-                  </Button>
                 </div>
               </div>
             )}
