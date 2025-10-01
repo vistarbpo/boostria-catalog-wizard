@@ -321,6 +321,94 @@ export function useCanvasStore() {
     return canvasState.elements.filter(el => canvasState.selectedElementIds.includes(el.id));
   }, [canvasState.elements, canvasState.selectedElementIds]);
 
+  const groupSelectedElements = useCallback(() => {
+    const selectedElements = canvasState.elements.filter(el => 
+      canvasState.selectedElementIds.includes(el.id)
+    );
+
+    if (selectedElements.length < 2) return;
+
+    // Calculate bounding box for the group
+    const bounds = selectedElements.reduce((acc, el) => {
+      return {
+        minX: Math.min(acc.minX, el.position.x),
+        minY: Math.min(acc.minY, el.position.y),
+        maxX: Math.max(acc.maxX, el.position.x + el.size.width),
+        maxY: Math.max(acc.maxY, el.position.y + el.size.height)
+      };
+    }, {
+      minX: Infinity,
+      minY: Infinity,
+      maxX: -Infinity,
+      maxY: -Infinity
+    });
+
+    const groupPosition = { x: bounds.minX, y: bounds.minY };
+    const groupSize = {
+      width: bounds.maxX - bounds.minX,
+      height: bounds.maxY - bounds.minY
+    };
+
+    // Adjust children positions relative to group
+    const children = selectedElements.map(el => ({
+      ...el,
+      position: {
+        x: el.position.x - groupPosition.x,
+        y: el.position.y - groupPosition.y
+      }
+    }));
+
+    const groupElement: any = {
+      id: generateId(),
+      type: 'group',
+      position: groupPosition,
+      size: groupSize,
+      rotation: 0,
+      opacity: 100,
+      visible: true,
+      locked: false,
+      zIndex: Math.max(...selectedElements.map(el => el.zIndex)),
+      name: 'Group',
+      children
+    };
+
+    setCanvasState(prev => ({
+      ...prev,
+      elements: [
+        ...prev.elements.filter(el => !prev.selectedElementIds.includes(el.id)),
+        groupElement
+      ],
+      selectedElementIds: [groupElement.id]
+    }));
+  }, [canvasState.elements, canvasState.selectedElementIds]);
+
+  const ungroupSelectedElement = useCallback(() => {
+    const selectedElement = canvasState.elements.find(el => 
+      el.id === canvasState.selectedElementIds[0]
+    );
+
+    if (!selectedElement || selectedElement.type !== 'group') return;
+
+    const groupEl = selectedElement as any;
+    const ungroupedChildren = groupEl.children.map((child: any) => ({
+      ...child,
+      position: {
+        x: child.position.x + groupEl.position.x,
+        y: child.position.y + groupEl.position.y
+      },
+      zIndex: groupEl.zIndex + 1
+    }));
+
+    setCanvasState(prev => ({
+      ...prev,
+      elements: [
+        ...prev.elements.filter(el => el.id !== groupEl.id),
+        ...ungroupedChildren
+      ],
+      selectedElementIds: ungroupedChildren.map((c: any) => c.id)
+    }));
+  }, [canvasState.elements, canvasState.selectedElementIds]);
+
   return {
     canvasState,
     addTextElement,
@@ -342,6 +430,8 @@ export function useCanvasStore() {
     updateCanvasBackground,
     uploadCustomSVG,
     getSelectedElement,
-    getSelectedElements
+    getSelectedElements,
+    groupSelectedElements,
+    ungroupSelectedElement
   };
 }

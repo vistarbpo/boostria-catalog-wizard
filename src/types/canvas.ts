@@ -88,6 +88,12 @@ export interface SVGElement extends BaseElement {
   fillMode?: 'cover' | 'contain' | 'stretch' | 'center' | 'tile';
 }
 
+export interface GroupElement extends BaseElement {
+  type: 'group';
+  name?: string;
+  children: CanvasElement[];
+}
+
 export interface MediaSource {
   id: string;
   name: string;
@@ -96,7 +102,7 @@ export interface MediaSource {
   isFromFeed: boolean;
 }
 
-export type CanvasElement = TextElement | ShapeElement | ImageElement | SVGElement;
+export type CanvasElement = TextElement | ShapeElement | ImageElement | SVGElement | GroupElement;
 
 export interface CanvasState {
   elements: CanvasElement[];

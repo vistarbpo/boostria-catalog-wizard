@@ -139,9 +139,11 @@ export function PropertiesPanel({
       {/* Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold capitalize">{selectedElement.type} Properties</h3>
+          <h3 className="text-lg font-semibold capitalize">
+            {selectedElement.type === 'group' ? 'Group' : selectedElement.type} Properties
+          </h3>
           <Badge variant="secondary" className="text-xs">
-            {selectedElement.id.slice(0, 8)}
+            {selectedElement.type === 'group' ? `${(selectedElement as any).children?.length || 0} items` : selectedElement.id.slice(0, 8)}
           </Badge>
         </div>
       </div>

@@ -19,7 +19,7 @@ const TemplateCreateContent = () => {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <TemplateHeader onExport={handleExport} />
+      <TemplateHeader onExport={handleExport} canvasStore={canvasStore} />
       
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">

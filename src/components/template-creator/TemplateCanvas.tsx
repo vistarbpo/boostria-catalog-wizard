@@ -327,6 +327,26 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       // Check if we're editing text
       if (editingElementId) return;
       
+      // Group: Ctrl+G
+      if ((e.ctrlKey || e.metaKey) && e.key === 'g' && !e.shiftKey) {
+        e.preventDefault();
+        const selectedElements = canvasStore.getSelectedElements();
+        if (selectedElements.length >= 2) {
+          canvasStore.groupSelectedElements();
+          toast.success("Elements grouped");
+        }
+      }
+      
+      // Ungroup: Ctrl+Shift+G
+      if ((e.ctrlKey || e.metaKey) && e.key === 'G' && e.shiftKey) {
+        e.preventDefault();
+        const selectedElements = canvasStore.getSelectedElements();
+        if (selectedElements.length === 1 && selectedElements[0]?.type === 'group') {
+          canvasStore.ungroupSelectedElement();
+          toast.success("Elements ungrouped");
+        }
+      }
+      
       // Check if Delete or Backspace was pressed
       if (e.key === 'Delete' || e.key === 'Backspace') {
         // Check if there's a selected element

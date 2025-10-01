@@ -647,8 +647,118 @@ const CanvasElementComponent = function CanvasElement({
         );
       }
 
+      case 'group': {
+        const groupElement = element as any;
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              position: 'relative',
+              border: isSelected ? '1px dashed rgba(59, 130, 246, 0.5)' : 'none',
+              pointerEvents: element.locked ? 'none' : 'auto',
+            }}
+          >
+            {groupElement.children?.map((child: CanvasElementType) => (
+              <div
+                key={child.id}
+                style={{
+                  position: 'absolute',
+                  left: child.position.x,
+                  top: child.position.y,
+                  width: child.size.width,
+                  height: child.size.height,
+                  transform: `rotate(${child.rotation}deg)`,
+                  transformOrigin: 'top left',
+                  opacity: child.opacity / 100,
+                  visibility: child.visible ? 'visible' : 'hidden',
+                  pointerEvents: 'none',
+                }}
+              >
+                {renderChildElement(child)}
+              </div>
+            ))}
+          </div>
+        );
+      }
+
       default:
         return <div style={baseStyle}>Unknown element</div>;
+    }
+  };
+
+  // Helper function to render individual child elements within a group
+  const renderChildElement = (childElement: CanvasElementType) => {
+    const childBaseStyle: React.CSSProperties = {
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    };
+
+    switch (childElement.type) {
+      case 'text':
+        const textEl = childElement as TextElement;
+        return (
+          <div
+            style={{
+              ...childBaseStyle,
+              color: textEl.color,
+              fontSize: `${textEl.fontSize}px`,
+              fontWeight: textEl.fontWeight,
+              fontFamily: textEl.fontFamily,
+              textAlign: textEl.textAlign,
+              direction: textEl.direction || 'ltr',
+              letterSpacing: `${textEl.letterSpacing}px`,
+              lineHeight: textEl.lineHeight,
+              whiteSpace: textEl.textWrapping ? 'pre-wrap' : 'nowrap',
+              wordBreak: textEl.textWrapping ? 'break-word' : 'normal',
+              overflow: 'hidden',
+              padding: `${textEl.padding.top}px ${textEl.padding.right}px ${textEl.padding.bottom}px ${textEl.padding.left}px`,
+              justifyContent: textEl.textAlign === 'left' ? 'flex-start' : textEl.textAlign === 'right' ? 'flex-end' : 'center',
+              alignItems: 'flex-start',
+            }}
+          >
+            {textEl.content}
+          </div>
+        );
+      case 'shape':
+        const shapeEl = childElement as ShapeElement;
+        return (
+          <div
+            style={{
+              ...childBaseStyle,
+              backgroundColor: shapeEl.fillType === 'solid' ? shapeEl.fillColor : undefined,
+              backgroundImage: shapeEl.fillType === 'image' && shapeEl.fillImageUrl ? `url(${shapeEl.fillImageUrl})` : undefined,
+              backgroundSize: shapeEl.fillMode === 'cover' ? 'cover' : shapeEl.fillMode === 'contain' ? 'contain' : 'auto',
+              borderRadius: shapeEl.shapeType === 'circle' ? '50%' : shapeEl.cornerRadius ? `${shapeEl.cornerRadius}px` : undefined,
+              border: shapeEl.strokeColor ? `${shapeEl.strokeWidth}px solid ${shapeEl.strokeColor}` : undefined,
+            }}
+          />
+        );
+      case 'image':
+        const imgEl = childElement as ImageElement;
+        return (
+          <img
+            src={imgEl.fillType === 'dynamic' && imgEl.fillImageUrl ? imgEl.fillImageUrl : imgEl.src}
+            alt={imgEl.alt || 'Canvas image'}
+            style={{
+              ...childBaseStyle,
+              objectFit: imgEl.objectFit,
+              borderRadius: imgEl.cornerRadius ? `${imgEl.cornerRadius}px` : undefined,
+            }}
+          />
+        );
+      case 'svg':
+        const svgEl = childElement as SVGElement;
+        return (
+          <div
+            style={childBaseStyle}
+            dangerouslySetInnerHTML={{ __html: svgEl.svgContent }}
+          />
+        );
+      default:
+        return <div style={childBaseStyle}>Unknown element</div>;
     }
   };
 

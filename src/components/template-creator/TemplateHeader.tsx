@@ -9,16 +9,23 @@ import {
   Redo,
   Settings,
   User,
-  ArrowLeft
+  ArrowLeft,
+  Group,
+  Ungroup
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useCanvasStore } from "../../hooks/useCanvasStore";
 
 interface TemplateHeaderProps {
   onExport?: () => Promise<void>;
+  canvasStore: ReturnType<typeof useCanvasStore>;
 }
 
-export function TemplateHeader({ onExport }: TemplateHeaderProps) {
+export function TemplateHeader({ onExport, canvasStore }: TemplateHeaderProps) {
   const navigate = useNavigate();
+  const selectedElements = canvasStore.getSelectedElements();
+  const canGroup = selectedElements.length >= 2;
+  const canUngroup = selectedElements.length === 1 && selectedElements[0]?.type === 'group';
 
   return (
     <div className="h-14 bg-card border-b border-border flex items-center justify-between px-4">
@@ -40,6 +47,30 @@ export function TemplateHeader({ onExport }: TemplateHeaderProps) {
           </Button>
           <Button variant="ghost" size="sm">
             <Redo className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Group/Ungroup Buttons */}
+        <div className="flex items-center gap-1 border-l pl-2 ml-2">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={canvasStore.groupSelectedElements}
+            disabled={!canGroup}
+            title="Group elements (Ctrl+G)"
+          >
+            <Group className="w-4 h-4 mr-2" />
+            Group
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={canvasStore.ungroupSelectedElement}
+            disabled={!canUngroup}
+            title="Ungroup elements (Ctrl+Shift+G)"
+          >
+            <Ungroup className="w-4 h-4 mr-2" />
+            Ungroup
           </Button>
         </div>
       </div>
