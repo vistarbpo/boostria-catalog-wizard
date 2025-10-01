@@ -129,7 +129,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
     const canvasHeight = canvasStore.canvasState.canvasSize.height;
     
     // Calculate 80% width for title and description
-    const textWidth = canvasWidth * 0.8;
+    const textWidth = Math.round(canvasWidth * 0.8);
     const centerX = (canvasWidth - textWidth) / 2;
     const centerY = canvasHeight / 2 - 25;
     
@@ -179,38 +179,32 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
     // Clear selection first to keep existing elements
     canvasStore.clearSelection();
     
-    // Create text element with dynamic content from the start
-    canvasStore.addTextElement({ x: centerX, y: centerY }, dynamicValue);
+    // Prepare initial properties based on field type
+    const textOverrides: any = {
+      isDynamic: true,
+      dynamicField: fieldType,
+      dynamicContent: dynamicValue,
+      color: '#000000'
+    };
     
-    // Immediately update it with dynamic properties
-    requestAnimationFrame(() => {
-      const selectedElement = canvasStore.getSelectedElement();
-      if (selectedElement && selectedElement.type === 'text') {
-        const updates: any = { 
-          isDynamic: true,
-          dynamicField: fieldType,
-          dynamicContent: dynamicValue,
-          color: '#000000', // Black color for all dynamic fields
-          autoSize: fieldType === 'description' // Auto-size for description only
-        };
-        
-        // Set specific properties for title
-        if (fieldType === 'title') {
-          updates.fontSize = 44;
-          updates.fontWeight = '700';
-          updates.size = { width: textWidth, height: 100 };
-          updates.textWrapping = true;
-        }
-        
-        // Set specific properties for description
-        if (fieldType === 'description') {
-          updates.size = { width: textWidth, height: 200 };
-          updates.textWrapping = true;
-        }
-        
-        canvasStore.updateElement(selectedElement.id, updates);
-      }
-    });
+    // Set specific properties for title
+    if (fieldType === 'title') {
+      textOverrides.fontSize = 44;
+      textOverrides.fontWeight = '700';
+      textOverrides.size = { width: textWidth, height: 100 };
+      textOverrides.textWrapping = true;
+      textOverrides.autoSize = false;
+    }
+    
+    // Set specific properties for description
+    if (fieldType === 'description') {
+      textOverrides.size = { width: textWidth, height: 200 };
+      textOverrides.textWrapping = true;
+      textOverrides.autoSize = true;
+    }
+    
+    // Create text element with all properties from the start
+    canvasStore.addTextElement({ x: centerX, y: centerY }, dynamicValue, textOverrides);
   };
 
   const handleAddDynamicImage = (mediaKey: string) => {

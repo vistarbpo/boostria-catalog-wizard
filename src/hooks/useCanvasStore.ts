@@ -14,7 +14,7 @@ export function useCanvasStore() {
     backgroundType: 'solid'
   });
 
-  const addTextElement = useCallback((position: Position, initialContent?: string) => {
+  const addTextElement = useCallback((position: Position, initialContent?: string, overrides?: Partial<TextElement>) => {
     setCanvasState(prev => {
       const newElement: TextElement = {
         id: generateId(),
@@ -39,7 +39,8 @@ export function useCanvasStore() {
         textWrapping: true,
         strokeColor: undefined,
         strokeWidth: 0,
-        padding: { top: 8, right: 8, bottom: 8, left: 8 }
+        padding: { top: 8, right: 8, bottom: 8, left: 8 },
+        ...overrides
       };
 
       return {
