@@ -73,6 +73,7 @@ const CanvasElementComponent = function CanvasElement({
       }
     }
     
+    // Multi-select with Ctrl/Cmd
     const isMultiSelect = e.ctrlKey || e.metaKey;
     onSelect(element.id, isMultiSelect);
 

@@ -46,6 +46,9 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isBoxSelecting, setIsBoxSelecting] = useState(false);
+  const [boxSelectStart, setBoxSelectStart] = useState({ x: 0, y: 0 });
+  const [boxSelectEnd, setBoxSelectEnd] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const editInputRef = useRef<HTMLTextAreaElement>(null);
@@ -190,18 +193,46 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
     }
   }, [getActualZoom]);
 
-  // Handle mouse drag panning
+  const actualZoom = getActualZoom();
+  const scale = actualZoom / 100;
+
+  // Handle mouse drag panning or box selection
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button === 0) {
-      canvasStore.clearSelection();
-      setIsDragging(true);
-      setDragStart({
-        x: e.clientX,
-        y: e.clientY
-      });
-      setLastPanOffset(panOffset);
+      // Check if clicking on canvas background (not on an element)
+      const target = e.target as HTMLElement;
+      const isCanvasBackground = target === canvasRef.current || target.closest('[data-canvas-background]');
+      
+      if (isCanvasBackground) {
+        // Clear selection if not holding Ctrl/Cmd
+        if (!e.ctrlKey && !e.metaKey) {
+          canvasStore.clearSelection();
+        }
+        
+        // Start box selection
+        if (!e.shiftKey) {
+          const rect = canvasRef.current?.getBoundingClientRect();
+          if (rect) {
+            const x = (e.clientX - rect.left - panOffset.x) / scale;
+            const y = (e.clientY - rect.top - panOffset.y) / scale;
+            setIsBoxSelecting(true);
+            setBoxSelectStart({ x, y });
+            setBoxSelectEnd({ x, y });
+          }
+        }
+      } else {
+        // Pan if shift key is held
+        if (e.shiftKey) {
+          setIsDragging(true);
+          setDragStart({
+            x: e.clientX,
+            y: e.clientY
+          });
+          setLastPanOffset(panOffset);
+        }
+      }
     }
-  }, [panOffset, canvasStore]);
+  }, [panOffset, canvasStore, scale]);
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isDragging) {
       const deltaX = e.clientX - dragStart.x;
@@ -210,13 +241,40 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
         x: lastPanOffset.x + deltaX,
         y: lastPanOffset.y + deltaY
       });
+    } else if (isBoxSelecting) {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = (e.clientX - rect.left - panOffset.x) / scale;
+        const y = (e.clientY - rect.top - panOffset.y) / scale;
+        setBoxSelectEnd({ x, y });
+      }
     }
-  }, [isDragging, dragStart, lastPanOffset]);
+  }, [isDragging, dragStart, lastPanOffset, isBoxSelecting, panOffset, scale]);
   const handleMouseUp = useCallback(() => {
+    if (isBoxSelecting) {
+      // Calculate selection box bounds
+      const minX = Math.min(boxSelectStart.x, boxSelectEnd.x);
+      const maxX = Math.max(boxSelectStart.x, boxSelectEnd.x);
+      const minY = Math.min(boxSelectStart.y, boxSelectEnd.y);
+      const maxY = Math.max(boxSelectStart.y, boxSelectEnd.y);
+      
+      // Find elements within the box
+      const selectedIds = canvasStore.canvasState.elements
+        .filter(el => {
+          const centerX = el.position.x + el.size.width / 2;
+          const centerY = el.position.y + el.size.height / 2;
+          return centerX >= minX && centerX <= maxX && centerY >= minY && centerY <= maxY;
+        })
+        .map(el => el.id);
+      
+      if (selectedIds.length > 0) {
+        canvasStore.selectElements(selectedIds);
+      }
+      
+      setIsBoxSelecting(false);
+    }
     setIsDragging(false);
-  }, []);
-  const actualZoom = getActualZoom();
-  const scale = actualZoom / 100;
+  }, [isBoxSelecting, boxSelectStart, boxSelectEnd, canvasStore]);
 
   // Export functionality
   const exportAsJPG = useCallback(async () => {
@@ -412,18 +470,40 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
         transform: `translate(-50%, -50%) translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
         transformOrigin: 'center center'
       }}>
-          <div ref={canvasRef} className="relative shadow-lg overflow-hidden" style={{
-          width: currentSize.width,
-          height: currentSize.height,
-          minWidth: currentSize.width,
-          minHeight: currentSize.height,
-          backgroundColor: canvasStore.canvasState.backgroundColor,
-          backgroundImage: canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl ? `url(${canvasStore.canvasState.backgroundImageUrl})` : undefined,
-          backgroundSize: canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' : canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' : canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' : canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto',
-          backgroundRepeat: canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat',
-          backgroundPosition: 'center',
-          opacity: 1
-        }}>
+          <div 
+            ref={canvasRef} 
+            data-canvas-background="true"
+            className="relative shadow-lg overflow-hidden" 
+            style={{
+              width: currentSize.width,
+              height: currentSize.height,
+              minWidth: currentSize.width,
+              minHeight: currentSize.height,
+              backgroundColor: canvasStore.canvasState.backgroundColor,
+              backgroundImage: canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl ? `url(${canvasStore.canvasState.backgroundImageUrl})` : undefined,
+              backgroundSize: canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' : canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' : canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' : canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto',
+              backgroundRepeat: canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat',
+              backgroundPosition: 'center',
+              opacity: 1
+            }}
+          >
+            {/* Box Selection Rectangle */}
+            {isBoxSelecting && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: Math.min(boxSelectStart.x, boxSelectEnd.x),
+                  top: Math.min(boxSelectStart.y, boxSelectEnd.y),
+                  width: Math.abs(boxSelectEnd.x - boxSelectStart.x),
+                  height: Math.abs(boxSelectEnd.y - boxSelectStart.y),
+                  border: '2px dashed hsl(var(--primary))',
+                  backgroundColor: 'hsl(var(--primary) / 0.1)',
+                  pointerEvents: 'none',
+                  zIndex: 9999
+                }}
+              />
+            )}
+            
             {/* Canvas Elements */}
             {canvasStore.canvasState.elements.map(element => {
               const isEditing = editingElementId === element.id;
