@@ -125,8 +125,13 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   };
 
   const handleAddDynamicField = (fieldType: string) => {
-    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
-    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 25;
+    const canvasWidth = canvasStore.canvasState.canvasSize.width;
+    const canvasHeight = canvasStore.canvasState.canvasSize.height;
+    
+    // Calculate 80% width for title and description
+    const textWidth = canvasWidth * 0.8;
+    const centerX = (canvasWidth - textWidth) / 2;
+    const centerY = canvasHeight / 2 - 25;
     
     // Get the actual value from current product first
     let dynamicValue = '';
@@ -171,6 +176,9 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
         dynamicValue = `{${fieldType}}`;
     }
     
+    // Clear selection first to keep existing elements
+    canvasStore.clearSelection();
+    
     // Create text element with dynamic content from the start
     canvasStore.addTextElement({ x: centerX, y: centerY }, dynamicValue);
     
@@ -178,13 +186,29 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
     requestAnimationFrame(() => {
       const selectedElement = canvasStore.getSelectedElement();
       if (selectedElement && selectedElement.type === 'text') {
-        canvasStore.updateElement(selectedElement.id, { 
+        const updates: any = { 
           isDynamic: true,
           dynamicField: fieldType,
           dynamicContent: dynamicValue,
-          color: '#3b82f6', // Blue color to indicate dynamic field
-          autoSize: true // Auto-size text for dynamic content
-        });
+          color: '#000000', // Black color for all dynamic fields
+          autoSize: fieldType === 'description' // Auto-size for description only
+        };
+        
+        // Set specific properties for title
+        if (fieldType === 'title') {
+          updates.fontSize = 50;
+          updates.fontWeight = 'Bold';
+          updates.size = { width: textWidth, height: 100 };
+          updates.textWrapping = true;
+        }
+        
+        // Set specific properties for description
+        if (fieldType === 'description') {
+          updates.size = { width: textWidth, height: 200 };
+          updates.textWrapping = true;
+        }
+        
+        canvasStore.updateElement(selectedElement.id, updates);
       }
     });
   };
