@@ -196,8 +196,8 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
         
         // Set specific properties for title
         if (fieldType === 'title') {
-          updates.fontSize = 50;
-          updates.fontWeight = 'Bold';
+          updates.fontSize = 44;
+          updates.fontWeight = 'bold';
           updates.size = { width: textWidth, height: 100 };
           updates.textWrapping = true;
         }
