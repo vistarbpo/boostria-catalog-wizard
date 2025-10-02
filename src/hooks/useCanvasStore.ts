@@ -4,7 +4,7 @@ import { CanvasElement, CanvasState, TextElement, ShapeElement, ImageElement, SV
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
 export function useCanvasStore() {
-  const [canvasState, setCanvasState] = useState<CanvasState>({
+  const initialState: CanvasState = {
     elements: [],
     selectedElementIds: [],
     canvasSize: { width: 1000, height: 1500 },
@@ -12,42 +12,43 @@ export function useCanvasStore() {
     panOffset: { x: 0, y: 0 },
     backgroundColor: '#ffffff',
     backgroundType: 'solid'
-  });
+  };
 
-  const [history, setHistory] = useState<CanvasState[]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-
-  // Initialize history with initial state
-  useEffect(() => {
-    if (history.length === 0) {
-      setHistory([canvasState]);
-      setHistoryIndex(0);
-    }
-  }, []);
-
-  // Helper to save state to history
-  const saveToHistory = useCallback((newState: CanvasState) => {
-    setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      newHistory.push(newState);
-      // Limit history to 50 states
-      if (newHistory.length > 50) {
-        newHistory.shift();
-        return newHistory;
-      }
-      return newHistory;
-    });
-    setHistoryIndex(prev => prev + 1);
-  }, [historyIndex]);
+  const [canvasState, setCanvasState] = useState<CanvasState>(initialState);
+  const [history, setHistory] = useState<CanvasState[]>([initialState]);
+  const [historyIndex, setHistoryIndex] = useState(0);
 
   // Wrapper for setState that saves to history
   const setCanvasStateWithHistory = useCallback((updater: (prev: CanvasState) => CanvasState) => {
     setCanvasState(prev => {
       const newState = updater(prev);
-      saveToHistory(newState);
+      
+      // Save to history
+      setHistory(currentHistory => {
+        const newHistory = currentHistory.slice(0, historyIndex + 1);
+        newHistory.push(newState);
+        
+        // Limit history to 50 states
+        if (newHistory.length > 50) {
+          newHistory.shift();
+          return newHistory;
+        }
+        
+        return newHistory;
+      });
+      
+      setHistoryIndex(currentIndex => {
+        const newHistory = history.slice(0, currentIndex + 1);
+        // Account for the shift if we're at max history
+        if (newHistory.length >= 50) {
+          return currentIndex; // Don't increment if we shifted
+        }
+        return currentIndex + 1;
+      });
+      
       return newState;
     });
-  }, [saveToHistory]);
+  }, [historyIndex, history]);
 
   const addTextElement = useCallback((position: Position, initialContent?: string, overrides?: Partial<TextElement>) => {
     setCanvasStateWithHistory(prev => {
