@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { CanvasElement, CanvasState, TextElement, ShapeElement, ImageElement, SVGElement, Position } from '../types/canvas';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -15,40 +15,34 @@ export function useCanvasStore() {
   };
 
   const [canvasState, setCanvasState] = useState<CanvasState>(initialState);
-  const [history, setHistory] = useState<CanvasState[]>([initialState]);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  
+  // Use refs for history management to avoid closure issues
+  const historyRef = useRef<CanvasState[]>([initialState]);
+  const historyIndexRef = useRef(0);
+  const [, forceUpdate] = useState({});
 
   // Wrapper for setState that saves to history
   const setCanvasStateWithHistory = useCallback((updater: (prev: CanvasState) => CanvasState) => {
     setCanvasState(prev => {
       const newState = updater(prev);
       
-      // Save to history
-      setHistory(currentHistory => {
-        const newHistory = currentHistory.slice(0, historyIndex + 1);
-        newHistory.push(newState);
-        
-        // Limit history to 50 states
-        if (newHistory.length > 50) {
-          newHistory.shift();
-          return newHistory;
-        }
-        
-        return newHistory;
-      });
+      // Trim history after current index (discard redo history)
+      historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
       
-      setHistoryIndex(currentIndex => {
-        const newHistory = history.slice(0, currentIndex + 1);
-        // Account for the shift if we're at max history
-        if (newHistory.length >= 50) {
-          return currentIndex; // Don't increment if we shifted
-        }
-        return currentIndex + 1;
-      });
+      // Add new state
+      historyRef.current.push(newState);
       
+      // Limit history to 50 states
+      if (historyRef.current.length > 50) {
+        historyRef.current.shift();
+      } else {
+        historyIndexRef.current++;
+      }
+      
+      forceUpdate({});
       return newState;
     });
-  }, [historyIndex, history]);
+  }, []);
 
   const addTextElement = useCallback((position: Position, initialContent?: string, overrides?: Partial<TextElement>) => {
     setCanvasStateWithHistory(prev => {
@@ -446,23 +440,23 @@ export function useCanvasStore() {
   }, [canvasState.elements, canvasState.selectedElementIds]);
 
   const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      const newIndex = historyIndex - 1;
-      setHistoryIndex(newIndex);
-      setCanvasState(history[newIndex]);
+    if (historyIndexRef.current > 0) {
+      historyIndexRef.current--;
+      setCanvasState(historyRef.current[historyIndexRef.current]);
+      forceUpdate({});
     }
-  }, [history, historyIndex]);
+  }, []);
 
   const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1;
-      setHistoryIndex(newIndex);
-      setCanvasState(history[newIndex]);
+    if (historyIndexRef.current < historyRef.current.length - 1) {
+      historyIndexRef.current++;
+      setCanvasState(historyRef.current[historyIndexRef.current]);
+      forceUpdate({});
     }
-  }, [history, historyIndex]);
+  }, []);
 
-  const canUndo = historyIndex > 0;
-  const canRedo = historyIndex < history.length - 1;
+  const canUndo = historyIndexRef.current > 0;
+  const canRedo = historyIndexRef.current < historyRef.current.length - 1;
 
   return {
     canvasState,
