@@ -385,6 +385,25 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       // Check if we're editing text
       if (editingElementId) return;
       
+      // Undo: Ctrl+Z
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        canvasStore.undo();
+        if (canvasStore.canUndo) {
+          toast.success("Undone");
+        }
+      }
+      
+      // Redo: Ctrl+Shift+Z or Ctrl+Y
+      if (((e.ctrlKey || e.metaKey) && e.key === 'Z' && e.shiftKey) || 
+          ((e.ctrlKey || e.metaKey) && e.key === 'y')) {
+        e.preventDefault();
+        canvasStore.redo();
+        if (canvasStore.canRedo) {
+          toast.success("Redone");
+        }
+      }
+      
       // Group: Ctrl+G
       if ((e.ctrlKey || e.metaKey) && e.key === 'g' && !e.shiftKey) {
         e.preventDefault();

@@ -42,10 +42,22 @@ export function TemplateHeader({ onExport, canvasStore }: TemplateHeaderProps) {
         </Button>
         
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={canvasStore.undo}
+            disabled={!canvasStore.canUndo}
+            title="Undo (Ctrl+Z)"
+          >
             <Undo className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={canvasStore.redo}
+            disabled={!canvasStore.canRedo}
+            title="Redo (Ctrl+Shift+Z)"
+          >
             <Redo className="w-4 h-4" />
           </Button>
         </div>

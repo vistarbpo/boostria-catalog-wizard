@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { CanvasElement, CanvasState, TextElement, ShapeElement, ImageElement, SVGElement, Position } from '../types/canvas';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -14,8 +14,43 @@ export function useCanvasStore() {
     backgroundType: 'solid'
   });
 
-  const addTextElement = useCallback((position: Position, initialContent?: string, overrides?: Partial<TextElement>) => {
+  const [history, setHistory] = useState<CanvasState[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+
+  // Initialize history with initial state
+  useEffect(() => {
+    if (history.length === 0) {
+      setHistory([canvasState]);
+      setHistoryIndex(0);
+    }
+  }, []);
+
+  // Helper to save state to history
+  const saveToHistory = useCallback((newState: CanvasState) => {
+    setHistory(prev => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      newHistory.push(newState);
+      // Limit history to 50 states
+      if (newHistory.length > 50) {
+        newHistory.shift();
+        return newHistory;
+      }
+      return newHistory;
+    });
+    setHistoryIndex(prev => prev + 1);
+  }, [historyIndex]);
+
+  // Wrapper for setState that saves to history
+  const setCanvasStateWithHistory = useCallback((updater: (prev: CanvasState) => CanvasState) => {
     setCanvasState(prev => {
+      const newState = updater(prev);
+      saveToHistory(newState);
+      return newState;
+    });
+  }, [saveToHistory]);
+
+  const addTextElement = useCallback((position: Position, initialContent?: string, overrides?: Partial<TextElement>) => {
+    setCanvasStateWithHistory(prev => {
       const newElement: TextElement = {
         id: generateId(),
         type: 'text',
@@ -49,10 +84,10 @@ export function useCanvasStore() {
         selectedElementIds: [newElement.id]
       };
     });
-  }, []);
+  }, [setCanvasStateWithHistory]);
 
   const addShapeElement = useCallback((shapeType: ShapeElement['shapeType'], position: Position) => {
-    setCanvasState(prev => {
+    setCanvasStateWithHistory(prev => {
       const size = shapeType === 'circle' ? { width: 100, height: 100 } : { width: 120, height: 80 };
       
       const newElement: ShapeElement = {
@@ -108,7 +143,7 @@ export function useCanvasStore() {
         }
       }
       
-      setCanvasState(prev => {
+      setCanvasStateWithHistory(prev => {
         // Calculate center position if not provided
         const finalPosition = position || {
           x: (prev.canvasSize.width - Math.round(width)) / 2,
@@ -141,7 +176,7 @@ export function useCanvasStore() {
     
     img.onerror = () => {
       // Fallback to default size if image fails to load
-      setCanvasState(prev => {
+      setCanvasStateWithHistory(prev => {
         // Calculate center position if not provided
         const finalPosition = position || {
           x: (prev.canvasSize.width - 200) / 2,
@@ -173,10 +208,10 @@ export function useCanvasStore() {
     };
     
     img.src = src;
-  }, []);
+  }, [setCanvasStateWithHistory]);
 
   const addSVGElement = useCallback((svgContent: string, position: Position) => {
-    setCanvasState(prev => {
+    setCanvasStateWithHistory(prev => {
       const newElement: SVGElement = {
         id: generateId(),
         type: 'svg',
@@ -202,16 +237,16 @@ export function useCanvasStore() {
         selectedElementIds: [newElement.id]
       };
     });
-  }, []);
+  }, [setCanvasStateWithHistory]);
 
   const updateElement = useCallback((elementId: string, updates: Partial<CanvasElement>) => {
-    setCanvasState(prev => ({
+    setCanvasStateWithHistory(prev => ({
       ...prev,
       elements: prev.elements.map(el => 
         el.id === elementId ? { ...el, ...updates } as CanvasElement : el
       )
     }));
-  }, []);
+  }, [setCanvasStateWithHistory]);
 
   const rotateElement = useCallback((elementId: string, rotation: number) => {
     updateElement(elementId, { rotation });
@@ -243,20 +278,20 @@ export function useCanvasStore() {
   }, []);
 
   const deleteElement = useCallback((elementId: string) => {
-    setCanvasState(prev => ({
+    setCanvasStateWithHistory(prev => ({
       ...prev,
       elements: prev.elements.filter(el => el.id !== elementId),
       selectedElementIds: prev.selectedElementIds.filter(id => id !== elementId)
     }));
-  }, []);
+  }, [setCanvasStateWithHistory]);
 
   const deleteSelected = useCallback(() => {
-    setCanvasState(prev => ({
+    setCanvasStateWithHistory(prev => ({
       ...prev,
       elements: prev.elements.filter(el => !prev.selectedElementIds.includes(el.id)),
       selectedElementIds: []
     }));
-  }, []);
+  }, [setCanvasStateWithHistory]);
 
   const moveElement = useCallback((elementId: string, newPosition: Position) => {
     updateElement(elementId, { position: newPosition });
@@ -267,11 +302,11 @@ export function useCanvasStore() {
   }, [updateElement]);
 
   const updateCanvasSize = useCallback((newSize: { width: number; height: number }) => {
-    setCanvasState(prev => ({
+    setCanvasStateWithHistory(prev => ({
       ...prev,
       canvasSize: newSize
     }));
-  }, []);
+  }, [setCanvasStateWithHistory]);
 
   const updateZoom = useCallback((zoom: number) => {
     setCanvasState(prev => ({
@@ -288,14 +323,14 @@ export function useCanvasStore() {
   }, []);
 
   const updateCanvasBackground = useCallback((backgroundColor: string, backgroundType: 'solid' | 'image' = 'solid', backgroundImageUrl?: string, backgroundMode?: 'cover' | 'contain' | 'stretch' | 'center' | 'tile') => {
-    setCanvasState(prev => ({
+    setCanvasStateWithHistory(prev => ({
       ...prev,
       backgroundColor,
       backgroundType,
       backgroundImageUrl,
       backgroundMode
     }));
-  }, []);
+  }, [setCanvasStateWithHistory]);
 
   const uploadCustomSVG = useCallback((file: File, position?: Position) => {
     const reader = new FileReader();
@@ -372,7 +407,7 @@ export function useCanvasStore() {
       children
     };
 
-    setCanvasState(prev => ({
+    setCanvasStateWithHistory(prev => ({
       ...prev,
       elements: [
         ...prev.elements.filter(el => !prev.selectedElementIds.includes(el.id)),
@@ -399,7 +434,7 @@ export function useCanvasStore() {
       zIndex: groupEl.zIndex + 1
     }));
 
-    setCanvasState(prev => ({
+    setCanvasStateWithHistory(prev => ({
       ...prev,
       elements: [
         ...prev.elements.filter(el => el.id !== groupEl.id),
@@ -408,6 +443,25 @@ export function useCanvasStore() {
       selectedElementIds: ungroupedChildren.map((c: any) => c.id)
     }));
   }, [canvasState.elements, canvasState.selectedElementIds]);
+
+  const undo = useCallback(() => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setCanvasState(history[newIndex]);
+    }
+  }, [history, historyIndex]);
+
+  const redo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setCanvasState(history[newIndex]);
+    }
+  }, [history, historyIndex]);
+
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
 
   return {
     canvasState,
@@ -432,6 +486,10 @@ export function useCanvasStore() {
     getSelectedElement,
     getSelectedElements,
     groupSelectedElements,
-    ungroupSelectedElement
+    ungroupSelectedElement,
+    undo,
+    redo,
+    canUndo,
+    canRedo
   };
 }
