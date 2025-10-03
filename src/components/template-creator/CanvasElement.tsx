@@ -725,18 +725,120 @@ const CanvasElementComponent = function CanvasElement({
         );
       case 'shape':
         const shapeEl = childElement as ShapeElement;
-        return (
-          <div
-            style={{
-              ...childBaseStyle,
-              backgroundColor: shapeEl.fillType === 'solid' ? shapeEl.fillColor : undefined,
-              backgroundImage: shapeEl.fillType === 'image' && shapeEl.fillImageUrl ? `url(${shapeEl.fillImageUrl})` : undefined,
-              backgroundSize: shapeEl.fillMode === 'cover' ? 'cover' : shapeEl.fillMode === 'contain' ? 'contain' : 'auto',
-              borderRadius: shapeEl.shapeType === 'circle' ? '50%' : shapeEl.cornerRadius ? `${shapeEl.cornerRadius}px` : undefined,
-              border: shapeEl.strokeColor ? `${shapeEl.strokeWidth}px solid ${shapeEl.strokeColor}` : undefined,
-            }}
-          />
-        );
+        const shapeStyle: React.CSSProperties = {
+          ...childBaseStyle,
+          border: shapeEl.strokeWidth > 0 ? `${shapeEl.strokeWidth}px solid ${shapeEl.strokeColor}` : undefined,
+        };
+
+        if (shapeEl.fillType === 'image' && shapeEl.fillImageUrl) {
+          shapeStyle.backgroundImage = `url(${shapeEl.fillImageUrl})`;
+          shapeStyle.backgroundSize = 
+            shapeEl.fillMode === 'cover' ? 'cover' :
+            shapeEl.fillMode === 'contain' ? 'contain' :
+            shapeEl.fillMode === 'stretch' ? '100% 100%' :
+            shapeEl.fillMode === 'tile' ? 'auto' : 'cover';
+          shapeStyle.backgroundRepeat = shapeEl.fillMode === 'tile' ? 'repeat' : 'no-repeat';
+          shapeStyle.backgroundPosition = 'center';
+        } else {
+          shapeStyle.backgroundColor = shapeEl.fillColor;
+        }
+
+        // Render based on shape type
+        if (shapeEl.shapeType === 'rectangle') {
+          return (
+            <div
+              style={{
+                ...shapeStyle,
+                borderRadius: shapeEl.cornerRadius || 0,
+              }}
+            />
+          );
+        } else if (shapeEl.shapeType === 'circle') {
+          return (
+            <div
+              style={{
+                ...shapeStyle,
+                borderRadius: '50%',
+              }}
+            />
+          );
+        } else if (shapeEl.shapeType === 'triangle') {
+          return (
+            <svg width="100%" height="100%" viewBox="0 0 100 100" style={childBaseStyle}>
+              <polygon 
+                points="50,10 90,90 10,90" 
+                fill={shapeEl.fillType === 'image' ? `url(#pattern-${shapeEl.id})` : shapeEl.fillColor}
+                stroke={shapeEl.strokeColor}
+                strokeWidth={shapeEl.strokeWidth}
+              />
+            </svg>
+          );
+        } else if (shapeEl.shapeType === 'star') {
+          return (
+            <svg width="100%" height="100%" viewBox="0 0 100 100" style={childBaseStyle}>
+              <polygon 
+                points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" 
+                fill={shapeEl.fillType === 'image' ? `url(#pattern-${shapeEl.id})` : shapeEl.fillColor}
+                stroke={shapeEl.strokeColor}
+                strokeWidth={shapeEl.strokeWidth}
+              />
+            </svg>
+          );
+        } else if (shapeEl.shapeType === 'heart') {
+          return (
+            <svg width="100%" height="100%" viewBox="0 0 100 100" style={childBaseStyle}>
+              <path 
+                d="M50,90 C50,90 10,65 10,40 C10,25 20,15 30,15 C40,15 50,25 50,25 C50,25 60,15 70,15 C80,15 90,25 90,40 C90,65 50,90 50,90 Z"
+                fill={shapeEl.fillType === 'image' ? `url(#pattern-${shapeEl.id})` : shapeEl.fillColor}
+                stroke={shapeEl.strokeColor}
+                strokeWidth={shapeEl.strokeWidth}
+              />
+            </svg>
+          );
+        } else if (shapeEl.shapeType === 'diamond') {
+          return (
+            <svg width="100%" height="100%" viewBox="0 0 100 100" style={childBaseStyle}>
+              <polygon 
+                points="50,10 90,50 50,90 10,50" 
+                fill={shapeEl.fillType === 'image' ? `url(#pattern-${shapeEl.id})` : shapeEl.fillColor}
+                stroke={shapeEl.strokeColor}
+                strokeWidth={shapeEl.strokeWidth}
+              />
+            </svg>
+          );
+        } else if (shapeEl.shapeType === 'plus') {
+          return (
+            <svg width="100%" height="100%" viewBox="0 0 100 100" style={childBaseStyle}>
+              <path 
+                d="M40,0 L60,0 L60,40 L100,40 L100,60 L60,60 L60,100 L40,100 L40,60 L0,60 L0,40 L40,40 Z"
+                fill={shapeEl.fillType === 'image' ? `url(#pattern-${shapeEl.id})` : shapeEl.fillColor}
+                stroke={shapeEl.strokeColor}
+                strokeWidth={shapeEl.strokeWidth}
+              />
+            </svg>
+          );
+        } else if (shapeEl.shapeType === 'arrow') {
+          return (
+            <svg width="100%" height="100%" viewBox="0 0 100 100" style={childBaseStyle}>
+              <path 
+                d="M10,40 L60,40 L60,20 L90,50 L60,80 L60,60 L10,60 Z"
+                fill={shapeEl.fillType === 'image' ? `url(#pattern-${shapeEl.id})` : shapeEl.fillColor}
+                stroke={shapeEl.strokeColor}
+                strokeWidth={shapeEl.strokeWidth}
+              />
+            </svg>
+          );
+        } else {
+          // Fallback to rectangle
+          return (
+            <div
+              style={{
+                ...shapeStyle,
+                borderRadius: shapeEl.cornerRadius || 0,
+              }}
+            />
+          );
+        }
       case 'image':
         const imgEl = childElement as ImageElement;
         return (
