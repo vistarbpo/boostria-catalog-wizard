@@ -38,12 +38,17 @@ import {
   ArrowDown,
   Lock,
   Unlock,
-  Copy
+  Copy,
+  Package,
+  QrCode,
+  Barcode,
+  BadgePercent,
+  Tag
 } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { useProduct } from "../../contexts/ProductContext";
 
-type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | null;
+type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | "widgets" | null;
 
 interface ToolbarSidebarProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
@@ -99,6 +104,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
     { id: "shapes" as const, icon: Shapes, label: "Shapes" },
     { id: "text" as const, icon: Type, label: "Text" },
     { id: "layers" as const, icon: Layers, label: "Layers" },
+    { id: "widgets" as const, icon: Package, label: "Widgets" },
   ];
 
   const shapes = [
@@ -1028,6 +1034,188 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeSection === "widgets" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Widgets</h3>
+                <p className="text-sm text-muted-foreground">
+                  Add pre-built widgets to your template
+                </p>
+
+                {/* QR Code */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">QR Code</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const centerX = canvasStore.canvasState.canvasSize.width / 2 - 75;
+                      const centerY = canvasStore.canvasState.canvasSize.height / 2 - 75;
+                      canvasStore.addShapeElement('rectangle', { x: centerX, y: centerY });
+                      setTimeout(() => {
+                        const selectedElement = canvasStore.getSelectedElement();
+                        if (selectedElement) {
+                          canvasStore.updateElement(selectedElement.id, {
+                            size: { width: 150, height: 150 },
+                            fillColor: '#ffffff',
+                            strokeColor: '#000000',
+                            strokeWidth: 2
+                          });
+                        }
+                      }, 100);
+                    }}
+                    className="w-full justify-start"
+                  >
+                    <QrCode className="w-4 h-4 mr-2" />
+                    QR Code Placeholder
+                  </Button>
+                </div>
+
+                {/* Barcode */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Barcode</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+                      const centerY = canvasStore.canvasState.canvasSize.height / 2 - 40;
+                      canvasStore.addShapeElement('rectangle', { x: centerX, y: centerY });
+                      setTimeout(() => {
+                        const selectedElement = canvasStore.getSelectedElement();
+                        if (selectedElement) {
+                          canvasStore.updateElement(selectedElement.id, {
+                            size: { width: 200, height: 80 },
+                            fillColor: '#ffffff',
+                            strokeColor: '#000000',
+                            strokeWidth: 2
+                          });
+                        }
+                      }, 100);
+                    }}
+                    className="w-full justify-start"
+                  >
+                    <Barcode className="w-4 h-4 mr-2" />
+                    Barcode Placeholder
+                  </Button>
+                </div>
+
+                {/* Badge/Tag */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Badges & Tags</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const centerX = canvasStore.canvasState.canvasSize.width / 2 - 60;
+                        const centerY = 30;
+                        canvasStore.addTextElement({ x: centerX, y: centerY }, 'SALE', {
+                          fontSize: 24,
+                          fontWeight: '700',
+                          color: '#ffffff'
+                        });
+                        setTimeout(() => {
+                          const selectedElement = canvasStore.getSelectedElement();
+                          if (selectedElement) {
+                            canvasStore.addShapeElement('rectangle', { x: centerX - 10, y: centerY - 5 });
+                            setTimeout(() => {
+                              const shape = canvasStore.getSelectedElement();
+                              if (shape) {
+                                canvasStore.updateElement(shape.id, {
+                                  size: { width: 120, height: 40 },
+                                  fillColor: '#ef4444',
+                                  strokeWidth: 0,
+                                  zIndex: selectedElement.zIndex - 1
+                                });
+                              }
+                            }, 50);
+                          }
+                        }, 100);
+                      }}
+                      className="justify-start"
+                    >
+                      <BadgePercent className="w-4 h-4 mr-1" />
+                      Sale
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const centerX = canvasStore.canvasState.canvasSize.width / 2 - 60;
+                        const centerY = 30;
+                        canvasStore.addTextElement({ x: centerX, y: centerY }, 'NEW', {
+                          fontSize: 20,
+                          fontWeight: '700',
+                          color: '#ffffff'
+                        });
+                        setTimeout(() => {
+                          const selectedElement = canvasStore.getSelectedElement();
+                          if (selectedElement) {
+                            canvasStore.addShapeElement('rectangle', { x: centerX - 10, y: centerY - 5 });
+                            setTimeout(() => {
+                              const shape = canvasStore.getSelectedElement();
+                              if (shape) {
+                                canvasStore.updateElement(shape.id, {
+                                  size: { width: 100, height: 35 },
+                                  fillColor: '#10b981',
+                                  strokeWidth: 0,
+                                  zIndex: selectedElement.zIndex - 1
+                                });
+                              }
+                            }, 50);
+                          }
+                        }, 100);
+                      }}
+                      className="justify-start"
+                    >
+                      <Tag className="w-4 h-4 mr-1" />
+                      New
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Price Tag */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Price Display</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const centerX = canvasStore.canvasState.canvasSize.width / 2 - 80;
+                      const centerY = canvasStore.canvasState.canvasSize.height - 100;
+                      
+                      // Add price background
+                      canvasStore.addShapeElement('rectangle', { x: centerX - 10, y: centerY - 10 });
+                      setTimeout(() => {
+                        const bgShape = canvasStore.getSelectedElement();
+                        if (bgShape) {
+                          canvasStore.updateElement(bgShape.id, {
+                            size: { width: 180, height: 60 },
+                            fillColor: '#000000',
+                            strokeWidth: 0,
+                            opacity: 0.9
+                          });
+                          
+                          // Add price text
+                          setTimeout(() => {
+                            canvasStore.addTextElement({ x: centerX, y: centerY }, '$99.99', {
+                              fontSize: 32,
+                              fontWeight: '700',
+                              color: '#ffffff'
+                            });
+                          }, 100);
+                        }
+                      }, 100);
+                    }}
+                    className="w-full justify-start"
+                  >
+                    <BadgePercent className="w-4 h-4 mr-2" />
+                    Price Tag
+                  </Button>
+                </div>
               </div>
             )}
           </div>
