@@ -47,6 +47,8 @@ import {
 } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { useProduct } from "../../contexts/ProductContext";
+import { useWidgets } from "../../hooks/useWidgets";
+import { toast } from "sonner";
 
 type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | "widgets" | null;
 
@@ -80,6 +82,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   }
   
   const { currentProduct, uploadedAssets, addUploadedAsset } = productContext;
+  const { widgets, addWidget, deleteWidget } = useWidgets();
   const [activeSection, setActiveSection] = useState<MenuSection>("source");
   const imageUploadRef = useRef<HTMLInputElement>(null);
   const svgUploadRef = useRef<HTMLInputElement>(null);
@@ -1011,7 +1014,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                 
                 {/* Quick Actions */}
                 {canvasStore.canvasState.selectedElementIds.length > 0 && (
-                  <div className="border-t pt-3">
+                  <div className="border-t pt-3 space-y-2">
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
@@ -1020,7 +1023,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                         className="flex-1"
                       >
                         <X className="w-4 h-4 mr-1" />
-                        Delete Selected
+                        Delete
                       </Button>
                       <Button
                         variant="outline"
@@ -1032,6 +1035,63 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                         Duplicate
                       </Button>
                     </div>
+                    
+                    {/* Group Actions */}
+                    {canvasStore.canvasState.selectedElementIds.length > 1 && (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            canvasStore.groupSelectedElements();
+                            toast.success('Layers grouped successfully');
+                          }}
+                          className="flex-1"
+                        >
+                          <Package className="w-4 h-4 mr-1" />
+                          Group
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const selectedElements = canvasStore.getSelectedElements();
+                            const widgetName = prompt('Enter widget name:', 'My Widget');
+                            if (widgetName && selectedElements.length > 0) {
+                              canvasStore.groupSelectedElements();
+                              setTimeout(() => {
+                                const group = canvasStore.getSelectedElement();
+                                if (group && group.type === 'group') {
+                                  addWidget(widgetName, [(group as any)]);
+                                  toast.success(`Widget "${widgetName}" saved!`);
+                                }
+                              }, 100);
+                            }
+                          }}
+                          className="flex-1"
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Save Widget
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {/* Ungroup */}
+                    {canvasStore.canvasState.selectedElementIds.length === 1 && 
+                     canvasStore.getSelectedElement()?.type === 'group' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          canvasStore.ungroupSelectedElement();
+                          toast.success('Group ungrouped');
+                        }}
+                        className="w-full"
+                      >
+                        <Package className="w-4 h-4 mr-1" />
+                        Ungroup
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -1039,10 +1099,124 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
 
             {activeSection === "widgets" && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Widgets</h3>
-                <p className="text-sm text-muted-foreground">
-                  Add pre-built widgets to your template
-                </p>
+                <div>
+                  <h3 className="text-lg font-semibold">Widgets</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Add pre-built widgets or use your saved widgets
+                  </p>
+                </div>
+
+                {/* Saved Widgets */}
+                {widgets.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      My Widgets ({widgets.length})
+                    </h4>
+                    <div className="space-y-2">
+                      {widgets.map((widget) => (
+                        <Card key={widget.id} className="p-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                // Add widget to canvas
+                                const widgetElements = widget.elements.map(el => ({
+                                  ...el,
+                                  id: Math.random().toString(36).substr(2, 9),
+                                  position: {
+                                    x: el.position.x + 50,
+                                    y: el.position.y + 50
+                                  }
+                                }));
+                                
+                                widgetElements.forEach(element => {
+                                  if (element.type === 'group') {
+                                    const groupEl = element as any;
+                                    canvasStore.canvasState.elements.forEach(() => {});
+                                    // Add group's children
+                                    groupEl.children?.forEach((child: any) => {
+                                      const childWithOffset = {
+                                        ...child,
+                                        id: Math.random().toString(36).substr(2, 9),
+                                        position: {
+                                          x: element.position.x + child.position.x,
+                                          y: element.position.y + child.position.y
+                                        }
+                                      };
+                                      
+                                      if (child.type === 'text') {
+                                        canvasStore.addTextElement(
+                                          childWithOffset.position,
+                                          child.content,
+                                          childWithOffset
+                                        );
+                                      } else if (child.type === 'shape') {
+                                        canvasStore.addShapeElement(
+                                          child.shapeType,
+                                          childWithOffset.position
+                                        );
+                                        setTimeout(() => {
+                                          const addedEl = canvasStore.getSelectedElement();
+                                          if (addedEl) {
+                                            canvasStore.updateElement(addedEl.id, childWithOffset);
+                                          }
+                                        }, 50);
+                                      } else if (child.type === 'image') {
+                                        canvasStore.addImageElement(
+                                          child.src,
+                                          childWithOffset.position
+                                        );
+                                        setTimeout(() => {
+                                          const addedEl = canvasStore.getSelectedElement();
+                                          if (addedEl) {
+                                            canvasStore.updateElement(addedEl.id, childWithOffset);
+                                          }
+                                        }, 50);
+                                      }
+                                    });
+                                  }
+                                });
+                                
+                                toast.success(`Added "${widget.name}" to canvas`);
+                              }}
+                              className="flex-1 justify-start"
+                            >
+                              <Package className="w-4 h-4 mr-2" />
+                              <span className="text-xs truncate">{widget.name}</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                              onClick={() => {
+                                if (confirm(`Delete widget "${widget.name}"?`)) {
+                                  deleteWidget(widget.id);
+                                  toast.success('Widget deleted');
+                                }
+                              }}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {widgets.length === 0 && (
+                  <Card className="p-4 border-dashed">
+                    <div className="text-center text-muted-foreground space-y-2">
+                      <Package className="w-8 h-8 mx-auto opacity-50" />
+                      <p className="text-sm">No saved widgets yet</p>
+                      <p className="text-xs">Select multiple layers and click "Save Widget" to create reusable widgets</p>
+                    </div>
+                  </Card>
+                )}
+
+                <div className="border-t pt-4 space-y-4">
 
                 {/* QR Code */}
                 <div className="space-y-2">
@@ -1212,9 +1386,10 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                     }}
                     className="w-full justify-start"
                   >
-                    <BadgePercent className="w-4 h-4 mr-2" />
+                 <BadgePercent className="w-4 h-4 mr-2" />
                     Price Tag
                   </Button>
+                </div>
                 </div>
               </div>
             )}
