@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCredits } from "@/hooks/useCredits";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useLocation } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -23,6 +24,11 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user } = useAuth();
   const { profile } = useCredits();
+  const location = useLocation();
+  
+  // Collapse sidebar by default on template create page
+  const isTemplateCreatePage = location.pathname.startsWith('/templates/create') || 
+                               location.pathname.startsWith('/templates/edit');
 
   const handleSignOut = async () => {
     try {
@@ -44,7 +50,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={!isTemplateCreatePage}>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         
