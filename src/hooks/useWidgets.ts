@@ -18,8 +18,11 @@ export function useWidgets() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(WIDGETS_STORAGE_KEY);
+      console.log('useWidgets - Loading from localStorage:', stored);
       if (stored) {
-        setWidgets(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        console.log('useWidgets - Parsed widgets:', parsed);
+        setWidgets(parsed);
       }
     } catch (error) {
       console.error('Failed to load widgets:', error);
@@ -29,7 +32,10 @@ export function useWidgets() {
   // Save widgets to localStorage whenever they change
   const saveToStorage = useCallback((newWidgets: SavedWidget[]) => {
     try {
-      localStorage.setItem(WIDGETS_STORAGE_KEY, JSON.stringify(newWidgets));
+      const stringified = JSON.stringify(newWidgets);
+      console.log('useWidgets - Saving to localStorage:', stringified);
+      localStorage.setItem(WIDGETS_STORAGE_KEY, stringified);
+      console.log('useWidgets - Saved successfully');
     } catch (error) {
       console.error('Failed to save widgets:', error);
     }
@@ -43,8 +49,11 @@ export function useWidgets() {
       createdAt: Date.now()
     };
 
+    console.log('useWidgets - Adding new widget:', newWidget);
+
     setWidgets(prev => {
       const updated = [...prev, newWidget];
+      console.log('useWidgets - Updated widgets array:', updated);
       saveToStorage(updated);
       return updated;
     });

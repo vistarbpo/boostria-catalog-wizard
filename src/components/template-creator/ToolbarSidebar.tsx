@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
@@ -83,6 +83,13 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   
   const { currentProduct, uploadedAssets, addUploadedAsset } = productContext;
   const { widgets, addWidget, deleteWidget } = useWidgets();
+  
+  // Debug log
+  useEffect(() => {
+    console.log('ToolbarSidebar - Current widgets:', widgets);
+    console.log('ToolbarSidebar - Widgets from localStorage:', localStorage.getItem('canvas_widgets'));
+  }, [widgets]);
+  
   const [activeSection, setActiveSection] = useState<MenuSection>("source");
   const imageUploadRef = useRef<HTMLInputElement>(null);
   const svgUploadRef = useRef<HTMLInputElement>(null);
@@ -1051,19 +1058,26 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                           <Package className="w-4 h-4 mr-1" />
                           Group
                         </Button>
-                        <Button
+                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => {
                             const selectedElements = canvasStore.getSelectedElements();
+                            console.log('Selected elements for widget:', selectedElements);
                             const widgetName = prompt('Enter widget name:', 'My Widget');
                             if (widgetName && selectedElements.length > 0) {
                               canvasStore.groupSelectedElements();
                               setTimeout(() => {
                                 const group = canvasStore.getSelectedElement();
+                                console.log('Group created:', group);
                                 if (group && group.type === 'group') {
-                                  addWidget(widgetName, [(group as any)]);
+                                  const widget = addWidget(widgetName, [(group as any)]);
+                                  console.log('Widget saved:', widget);
+                                  console.log('Total widgets:', widgets.length + 1);
                                   toast.success(`Widget "${widgetName}" saved!`);
+                                } else {
+                                  console.error('Failed to create group');
+                                  toast.error('Failed to save widget');
                                 }
                               }, 100);
                             }
@@ -1103,6 +1117,9 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                   <h3 className="text-lg font-semibold">Widgets</h3>
                   <p className="text-sm text-muted-foreground">
                     Add pre-built widgets or use your saved widgets
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Debug: {widgets.length} widgets loaded
                   </p>
                 </div>
 
