@@ -364,29 +364,31 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   };
 
   return (
-    <div className="w-80 bg-card border-r border-border h-full flex flex-col">
-      {/* Menu Tabs */}
-      <div className="flex border-b border-border">
+    <div className="h-full flex">
+      {/* Vertical Menu */}
+      <div className="w-16 bg-muted/30 border-r border-border flex flex-col py-2">
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveSection(item.id)}
-            className={`flex-1 p-3 text-xs font-medium transition-colors ${
+            className={`flex flex-col items-center justify-center gap-1 py-3 px-2 transition-colors ${
               activeSection === item.id 
-                ? 'bg-primary text-primary-foreground border-b-2 border-primary' 
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-primary text-primary-foreground' 
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
             }`}
+            title={item.label}
           >
-            <item.icon className="w-4 h-4 mx-auto mb-1" />
-            {item.label}
+            <item.icon className="w-5 h-5" />
+            <span className="text-[10px] font-medium">{item.id}</span>
           </button>
         ))}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      {/* Content Area */}
+      <div className="w-64 bg-card border-r border-border h-full flex flex-col">
+
         <ScrollArea className="h-full">
-          <div className="p-4">
+          <div className="p-3">
             {activeSection === "source" && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Source Feed</h3>
