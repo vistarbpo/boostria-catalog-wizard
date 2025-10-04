@@ -58,7 +58,13 @@ export interface ShapeElement extends BaseElement {
   fillMode?: 'cover' | 'contain' | 'stretch' | 'center' | 'tile'; // How the image fills the shape
   strokeColor?: string;
   strokeWidth: number;
-  cornerRadius?: number;
+  cornerRadius?: number; // Legacy single radius (will be used as fallback)
+  cornerRadii?: {
+    topLeft: number;
+    topRight: number;
+    bottomLeft: number;
+    bottomRight: number;
+  };
 }
 
 export interface ImageElement extends BaseElement {

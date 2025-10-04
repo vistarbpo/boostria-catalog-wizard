@@ -2,6 +2,17 @@ import React, { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { CanvasElement as CanvasElementType, TextElement, ShapeElement, ImageElement, SVGElement, Position } from '../../types/canvas';
 import { RotateCw } from 'lucide-react';
 
+// Helper function to get border radius CSS value
+const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
+  const shapeEl = element as ShapeElement;
+  if (shapeEl.cornerRadii) {
+    const { topLeft, topRight, bottomRight, bottomLeft } = shapeEl.cornerRadii;
+    return `${topLeft}px ${topRight}px ${bottomRight}px ${bottomLeft}px`;
+  }
+  return shapeEl.cornerRadius || 0;
+};
+
+
 interface CanvasElementProps {
   element: CanvasElementType;
   isSelected: boolean;
@@ -383,7 +394,7 @@ const CanvasElementComponent = function CanvasElement({
               <div
                 style={{
                   ...shapeStyle,
-                  borderRadius: shapeElement.cornerRadius || 0,
+                  borderRadius: getBorderRadiusStyle(shapeElement),
                 }}
               />
             );
@@ -601,7 +612,7 @@ const CanvasElementComponent = function CanvasElement({
         
         const imageStyle: React.CSSProperties = {
           ...baseStyle,
-          borderRadius: imageElement.cornerRadius || 0,
+          borderRadius: getBorderRadiusStyle(imageElement as any),
         };
 
         // Handle dynamic fill modes for images
@@ -749,7 +760,7 @@ const CanvasElementComponent = function CanvasElement({
             <div
               style={{
                 ...shapeStyle,
-                borderRadius: shapeEl.cornerRadius || 0,
+                borderRadius: getBorderRadiusStyle(shapeEl),
               }}
             />
           );
@@ -834,7 +845,7 @@ const CanvasElementComponent = function CanvasElement({
             <div
               style={{
                 ...shapeStyle,
-                borderRadius: shapeEl.cornerRadius || 0,
+                borderRadius: getBorderRadiusStyle(shapeEl),
               }}
             />
           );
@@ -848,7 +859,7 @@ const CanvasElementComponent = function CanvasElement({
             style={{
               ...childBaseStyle,
               objectFit: imgEl.objectFit,
-              borderRadius: imgEl.cornerRadius ? `${imgEl.cornerRadius}px` : undefined,
+              borderRadius: getBorderRadiusStyle(imgEl as any),
             }}
           />
         );
