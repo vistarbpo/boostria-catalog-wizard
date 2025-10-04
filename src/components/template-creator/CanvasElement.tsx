@@ -12,6 +12,64 @@ const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
   return shapeEl.cornerRadius || 0;
 };
 
+// Helper function to format dynamic text with modifiers and formatting
+const formatDynamicText = (element: TextElement): string => {
+  let content = element.isDynamic ? (element.dynamicContent || element.content) : element.content;
+  
+  // If not dynamic or no modifiers/formatting, return as is
+  if (!element.isDynamic || (!element.modifiers?.length && !element.formatting)) {
+    return content;
+  }
+
+  // Try to parse as number for modifiers
+  let value = parseFloat(content.replace(/[^0-9.-]/g, ''));
+  if (isNaN(value)) return content;
+
+  // Apply modifiers
+  if (element.modifiers) {
+    element.modifiers.forEach(mod => {
+      switch (mod.type) {
+        case 'add':
+          value += mod.value;
+          break;
+        case 'subtract':
+          value -= mod.value;
+          break;
+        case 'multiply':
+          value *= mod.value;
+          break;
+        case 'divide':
+          value = mod.value !== 0 ? value / mod.value : value;
+          break;
+        case 'decimals':
+          value = parseFloat(value.toFixed(mod.value));
+          break;
+      }
+    });
+  }
+
+  // Apply formatting
+  if (element.formatting) {
+    const fmt = element.formatting;
+    let formatted = value.toFixed(fmt.decimals ?? 2);
+    
+    if (fmt.thousandsSeparator) {
+      formatted = parseFloat(formatted).toLocaleString('en-US', {
+        minimumFractionDigits: fmt.decimals ?? 2,
+        maximumFractionDigits: fmt.decimals ?? 2,
+      });
+    }
+    
+    if (fmt.currencySymbol) formatted = fmt.currencySymbol + formatted;
+    if (fmt.prefix) formatted = fmt.prefix + formatted;
+    if (fmt.suffix) formatted = formatted + fmt.suffix;
+    
+    return formatted;
+  }
+
+  return value.toString();
+};
+
 
 interface CanvasElementProps {
   element: CanvasElementType;
@@ -360,7 +418,7 @@ const CanvasElementComponent = function CanvasElement({
               cursor: element.locked ? 'not-allowed' : 'text',
             }}
           >
-            {textElement.isDynamic ? textElement.dynamicContent || textElement.content : textElement.content}
+            {formatDynamicText(textElement)}
           </div>
         );
       }
@@ -731,7 +789,7 @@ const CanvasElementComponent = function CanvasElement({
               alignItems: 'flex-start',
             }}
           >
-            {textEl.content}
+            {formatDynamicText(textEl)}
           </div>
         );
       case 'shape':

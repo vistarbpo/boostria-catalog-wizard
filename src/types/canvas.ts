@@ -46,6 +46,19 @@ export interface TextElement extends BaseElement {
   isDynamic?: boolean;
   dynamicField?: string; // Field name from product data like 'title', 'price', etc.
   dynamicContent?: string; // Resolved content when isDynamic is true
+  // Formatting and modifiers
+  formatting?: {
+    prefix?: string;
+    suffix?: string;
+    decimals?: number;
+    thousandsSeparator?: boolean;
+    currencySymbol?: string;
+  };
+  modifiers?: Array<{
+    id: string;
+    type: 'add' | 'subtract' | 'multiply' | 'divide' | 'decimals';
+    value: number;
+  }>;
 }
 
 export interface ShapeElement extends BaseElement {

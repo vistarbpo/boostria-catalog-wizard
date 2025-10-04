@@ -11,11 +11,12 @@ import { Badge } from "../ui/badge";
 import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
-import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2 } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement } from "../../types/canvas";
 import { useProduct } from "../../contexts/ProductContext";
 import { CanvasSettings } from "./CanvasSettings";
+import { DynamicFieldSettings } from "./DynamicFieldSettings";
 interface PropertiesPanelProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
 }
@@ -41,6 +42,9 @@ export function PropertiesPanel({
 
   // State for corner radius linking
   const [cornerRadiusLinked, setCornerRadiusLinked] = useState(true);
+  
+  // State for dynamic field settings dialog
+  const [dynamicSettingsOpen, setDynamicSettingsOpen] = useState(false);
 
   // Update local values when selection changes
   useEffect(() => {
@@ -279,8 +283,44 @@ export function PropertiesPanel({
               {/* Text Content */}
               <div>
                 <Label className="text-xs">Content</Label>
-                <Input value={localValues.content} onChange={e => handleInputChange('content', e.target.value)} onBlur={e => handleInputBlur('content', e.target.value)} placeholder="Enter text..." className="h-8" />
+                <div className="flex gap-2">
+                  <Input 
+                    value={localValues.content} 
+                    onChange={e => handleInputChange('content', e.target.value)} 
+                    onBlur={e => handleInputBlur('content', e.target.value)} 
+                    placeholder="Enter text..." 
+                    className="h-8 flex-1" 
+                  />
+                  {(selectedElement as TextElement).isDynamic && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDynamicSettingsOpen(true)}
+                      className="h-8 px-2"
+                      title="Dynamic Field Settings"
+                    >
+                      <Settings className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                {(selectedElement as TextElement).isDynamic && (
+                  <Badge variant="secondary" className="mt-2 text-xs">
+                    Dynamic: {(selectedElement as TextElement).dynamicField}
+                  </Badge>
+                )}
               </div>
+
+              {/* Dynamic Field Settings Dialog */}
+              {(selectedElement as TextElement).isDynamic && (
+                <DynamicFieldSettings
+                  element={selectedElement as TextElement}
+                  open={dynamicSettingsOpen}
+                  onClose={() => setDynamicSettingsOpen(false)}
+                  onUpdate={(updates) => {
+                    canvasStore.updateElement(selectedElement.id, updates);
+                  }}
+                />
+              )}
 
               {/* Font Properties */}
               <div className="space-y-3">
