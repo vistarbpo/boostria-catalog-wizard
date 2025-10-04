@@ -21,36 +21,36 @@ const formatDynamicText = (element: TextElement): string => {
     return content;
   }
 
-  // Try to parse as number for modifiers
-  let value = parseFloat(content.replace(/[^0-9.-]/g, ''));
-  if (isNaN(value)) return content;
+  let text = content;
 
   // Apply modifiers
   if (element.modifiers) {
     element.modifiers.forEach(mod => {
       switch (mod.type) {
+        case 'uppercase':
+          text = text.toUpperCase();
+          break;
+        case 'lowercase':
+          text = text.toLowerCase();
+          break;
+        case 'titlecase':
+          text = text.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+          break;
+        case 'numerical':
+          text = text.replace(/[^0-9.]/g, '');
+          break;
         case 'add':
-          value += mod.value;
-          break;
-        case 'subtract':
-          value -= mod.value;
-          break;
-        case 'multiply':
-          value *= mod.value;
-          break;
-        case 'divide':
-          value = mod.value !== 0 ? value / mod.value : value;
-          break;
-        case 'decimals':
-          value = parseFloat(value.toFixed(mod.value));
+          const num = parseFloat(text) || 0;
+          text = (num + mod.value).toString();
           break;
       }
     });
   }
 
-  // Apply formatting
-  if (element.formatting) {
+  // Apply formatting if text is numeric
+  if (!isNaN(parseFloat(text)) && element.formatting) {
     const fmt = element.formatting;
+    let value = parseFloat(text);
     let formatted = value.toFixed(fmt.decimals ?? 2);
     
     if (fmt.thousandsSeparator) {
@@ -67,7 +67,7 @@ const formatDynamicText = (element: TextElement): string => {
     return formatted;
   }
 
-  return value.toString();
+  return text;
 };
 
 
