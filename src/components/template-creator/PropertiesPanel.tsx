@@ -653,9 +653,86 @@ export function PropertiesPanel({
                 </div>}
 
               {/* Corner Radius */}
-              <div>
+              <div className="space-y-2">
                 <Label className="text-xs">Corner Radius</Label>
-                <Input type="number" min="0" value={(selectedElement as ImageElement).cornerRadius || 0} onChange={e => updateElementProperty('cornerRadius', parseFloat(e.target.value) || 0)} className="h-8" />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      value={(selectedElement as ImageElement).cornerRadii?.topLeft ?? (selectedElement as ImageElement).cornerRadius ?? 0} 
+                      onChange={e => {
+                        const value = parseFloat(e.target.value) || 0;
+                        const currentRadii = (selectedElement as ImageElement).cornerRadii || {
+                          topLeft: (selectedElement as ImageElement).cornerRadius || 0,
+                          topRight: (selectedElement as ImageElement).cornerRadius || 0,
+                          bottomLeft: (selectedElement as ImageElement).cornerRadius || 0,
+                          bottomRight: (selectedElement as ImageElement).cornerRadius || 0,
+                        };
+                        updateElementProperty('cornerRadii', { ...currentRadii, topLeft: value });
+                      }} 
+                      className="h-8 text-center" 
+                      placeholder="TL"
+                    />
+                  </div>
+                  <div>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      value={(selectedElement as ImageElement).cornerRadii?.topRight ?? (selectedElement as ImageElement).cornerRadius ?? 0} 
+                      onChange={e => {
+                        const value = parseFloat(e.target.value) || 0;
+                        const currentRadii = (selectedElement as ImageElement).cornerRadii || {
+                          topLeft: (selectedElement as ImageElement).cornerRadius || 0,
+                          topRight: (selectedElement as ImageElement).cornerRadius || 0,
+                          bottomLeft: (selectedElement as ImageElement).cornerRadius || 0,
+                          bottomRight: (selectedElement as ImageElement).cornerRadius || 0,
+                        };
+                        updateElementProperty('cornerRadii', { ...currentRadii, topRight: value });
+                      }} 
+                      className="h-8 text-center" 
+                      placeholder="TR"
+                    />
+                  </div>
+                  <div>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      value={(selectedElement as ImageElement).cornerRadii?.bottomLeft ?? (selectedElement as ImageElement).cornerRadius ?? 0} 
+                      onChange={e => {
+                        const value = parseFloat(e.target.value) || 0;
+                        const currentRadii = (selectedElement as ImageElement).cornerRadii || {
+                          topLeft: (selectedElement as ImageElement).cornerRadius || 0,
+                          topRight: (selectedElement as ImageElement).cornerRadius || 0,
+                          bottomLeft: (selectedElement as ImageElement).cornerRadius || 0,
+                          bottomRight: (selectedElement as ImageElement).cornerRadius || 0,
+                        };
+                        updateElementProperty('cornerRadii', { ...currentRadii, bottomLeft: value });
+                      }} 
+                      className="h-8 text-center" 
+                      placeholder="BL"
+                    />
+                  </div>
+                  <div>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      value={(selectedElement as ImageElement).cornerRadii?.bottomRight ?? (selectedElement as ImageElement).cornerRadius ?? 0} 
+                      onChange={e => {
+                        const value = parseFloat(e.target.value) || 0;
+                        const currentRadii = (selectedElement as ImageElement).cornerRadii || {
+                          topLeft: (selectedElement as ImageElement).cornerRadius || 0,
+                          topRight: (selectedElement as ImageElement).cornerRadius || 0,
+                          bottomLeft: (selectedElement as ImageElement).cornerRadius || 0,
+                          bottomRight: (selectedElement as ImageElement).cornerRadius || 0,
+                        };
+                        updateElementProperty('cornerRadii', { ...currentRadii, bottomRight: value });
+                      }} 
+                      className="h-8 text-center" 
+                      placeholder="BR"
+                    />
+                  </div>
+                </div>
               </div>
             </div>}
 

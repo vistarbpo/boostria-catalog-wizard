@@ -73,6 +73,12 @@ export interface ImageElement extends BaseElement {
   alt?: string;
   objectFit: 'contain' | 'cover' | 'fill';
   cornerRadius?: number;
+  cornerRadii?: {
+    topLeft: number;
+    topRight: number;
+    bottomLeft: number;
+    bottomRight: number;
+  };
   // Dynamic fill properties
   fillType?: 'original' | 'dynamic';
   fillSource?: string; // For dynamic fills like 'image_link', 'additional_image_link', etc.
