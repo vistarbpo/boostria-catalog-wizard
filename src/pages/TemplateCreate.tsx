@@ -24,29 +24,37 @@ const TemplateCreateContent = () => {
 
       // Check if user is typing in an input field
       const isTyping = (e.target as HTMLElement)?.tagName === 'INPUT' || 
-                       (e.target as HTMLElement)?.tagName === 'TEXTAREA';
+                       (e.target as HTMLElement)?.tagName === 'TEXTAREA' ||
+                       (e.target as HTMLElement)?.contentEditable === 'true';
       
       if (isTyping) return;
 
+      // Check if there are selected elements
+      if (canvasStore.canvasState.selectedElementIds.length === 0) return;
+
       // Cmd/Ctrl + ] - Bring Forward
-      if (cmdOrCtrl && e.key === ']' && !e.shiftKey) {
+      if (cmdOrCtrl && e.code === 'BracketRight' && !e.shiftKey) {
         e.preventDefault();
         canvasStore.bringForward();
+        console.log('Bring Forward triggered');
       }
       // Cmd/Ctrl + [ - Send Backward
-      else if (cmdOrCtrl && e.key === '[' && !e.shiftKey) {
+      else if (cmdOrCtrl && e.code === 'BracketLeft' && !e.shiftKey) {
         e.preventDefault();
         canvasStore.sendBackward();
+        console.log('Send Backward triggered');
       }
       // Cmd/Ctrl + Shift + ] - Bring to Front
-      else if (cmdOrCtrl && e.shiftKey && e.key === '}') { // } is Shift + ]
+      else if (cmdOrCtrl && e.shiftKey && e.code === 'BracketRight') {
         e.preventDefault();
         canvasStore.bringToFront();
+        console.log('Bring to Front triggered');
       }
       // Cmd/Ctrl + Shift + [ - Send to Back
-      else if (cmdOrCtrl && e.shiftKey && e.key === '{') { // { is Shift + [
+      else if (cmdOrCtrl && e.shiftKey && e.code === 'BracketLeft') {
         e.preventDefault();
         canvasStore.sendToBack();
+        console.log('Send to Back triggered');
       }
     };
 

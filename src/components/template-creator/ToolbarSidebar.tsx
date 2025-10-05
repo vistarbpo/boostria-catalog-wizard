@@ -57,6 +57,9 @@ interface ToolbarSidebarProps {
 }
 
 export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
+  const [draggedElement, setDraggedElement] = useState<string | null>(null);
+  const [dragOverElement, setDragOverElement] = useState<string | null>(null);
+
   // Add error handling for useProduct
   let productContext;
   try {
@@ -246,23 +249,48 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   };
 
   const handleMoveLayerUp = (elementId: string) => {
-    const element = canvasStore.canvasState.elements.find(el => el.id === elementId);
-    if (element) {
-      const maxZIndex = Math.max(...canvasStore.canvasState.elements.map(el => el.zIndex));
-      if (element.zIndex < maxZIndex) {
-        canvasStore.updateElement(elementId, { zIndex: element.zIndex + 1 });
-      }
-    }
+    canvasStore.bringForward();
   };
 
   const handleMoveLayerDown = (elementId: string) => {
-    const element = canvasStore.canvasState.elements.find(el => el.id === elementId);
-    if (element) {
-      const minZIndex = Math.min(...canvasStore.canvasState.elements.map(el => el.zIndex));
-      if (element.zIndex > minZIndex) {
-        canvasStore.updateElement(elementId, { zIndex: element.zIndex - 1 });
+    canvasStore.sendBackward();
+  };
+
+  const handleDragStart = (e: React.DragEvent, elementId: string) => {
+    setDraggedElement(elementId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, elementId: string) => {
+    e.preventDefault();
+    if (draggedElement && draggedElement !== elementId) {
+      setDragOverElement(elementId);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (draggedElement && dragOverElement && draggedElement !== dragOverElement) {
+      const draggedEl = canvasStore.canvasState.elements.find(el => el.id === draggedElement);
+      const targetEl = canvasStore.canvasState.elements.find(el => el.id === dragOverElement);
+      
+      if (draggedEl && targetEl) {
+        // Swap z-indices
+        const draggedZIndex = draggedEl.zIndex;
+        const targetZIndex = targetEl.zIndex;
+        
+        canvasStore.updateElement(draggedElement, { zIndex: targetZIndex });
+        canvasStore.updateElement(dragOverElement, { zIndex: draggedZIndex });
+        
+        toast.success('Layer order updated');
       }
     }
+    
+    setDraggedElement(null);
+    setDragOverElement(null);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverElement(null);
   };
 
   const handleDuplicateSelected = () => {
@@ -898,11 +926,20 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       
                       return (
                         <div 
-                          key={element.id} 
+                          key={element.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, element.id)}
+                          onDragOver={(e) => handleDragOver(e, element.id)}
+                          onDragEnd={handleDragEnd}
+                          onDragLeave={handleDragLeave}
                           className={`group flex items-center gap-1.5 p-2 rounded border transition-colors min-w-0 ${
                             isSelected 
                               ? 'bg-primary/10 border-primary' 
                               : 'bg-muted/50 border-border hover:bg-muted'
+                          } ${
+                            dragOverElement === element.id ? 'ring-2 ring-primary' : ''
+                          } ${
+                            draggedElement === element.id ? 'opacity-50' : ''
                           }`}
                         >
                           {/* Drag Handle */}
