@@ -91,8 +91,10 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
           text = value.toString();
           break;
         case 'divide':
-          value = mod.value !== 0 ? value / mod.value : value;
-          text = value.toString();
+          if (mod.value && mod.value !== 0) {
+            value = value / mod.value;
+            text = value.toString();
+          }
           break;
         case 'decimals':
           value = parseFloat(value.toFixed(mod.value || 2));
