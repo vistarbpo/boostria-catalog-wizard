@@ -324,10 +324,10 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
                     {(['add', 'subtract', 'multiply', 'divide', 'decimals'].includes(modifier.type)) && (
                       <Input
                         type="number"
-                        value={modifier.value}
-                        onChange={e => updateModifier(modifier.id, { value: parseFloat(e.target.value) || 0 })}
+                        value={modifier.value === 0 ? '' : modifier.value}
+                        onChange={e => updateModifier(modifier.id, { value: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                         className="h-9 w-24"
-                        step={modifier.type === 'decimals' ? '1' : '0.01'}
+                        step={modifier.type === 'decimals' ? '1' : 'any'}
                         placeholder={modifier.type === 'decimals' ? 'Places' : 'Value'}
                       />
                     )}
