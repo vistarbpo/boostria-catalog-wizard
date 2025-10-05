@@ -57,7 +57,7 @@ export interface TextElement extends BaseElement {
   modifiers?: Array<{
     id: string;
     type: 'uppercase' | 'lowercase' | 'titlecase' | 'numerical' | 'add' | 'subtract' | 'multiply' | 'divide' | 'decimals';
-    value: number;
+    value?: number;
   }>;
 }
 
