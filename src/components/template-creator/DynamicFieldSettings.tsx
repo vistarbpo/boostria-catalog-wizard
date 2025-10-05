@@ -91,7 +91,7 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
           text = value.toString();
           break;
         case 'divide':
-          if (mod.value && mod.value !== 0) {
+          if (mod.value) {
             value = value / mod.value;
             text = value.toString();
           }
