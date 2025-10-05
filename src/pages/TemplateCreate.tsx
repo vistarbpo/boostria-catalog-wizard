@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { TemplateHeader } from "@/components/template-creator/TemplateHeader";
 import { ToolbarSidebar } from "@/components/template-creator/ToolbarSidebar";
 import { TemplateCanvas, TemplateCanvasRef } from "@/components/template-creator/TemplateCanvas";
@@ -15,6 +15,44 @@ const TemplateCreateContent = () => {
   const handleExport = async () => {
     await canvasRef.current?.exportAsJPG();
   };
+
+  // Keyboard shortcuts for layer ordering (Adobe-like)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+
+      // Check if user is typing in an input field
+      const isTyping = (e.target as HTMLElement)?.tagName === 'INPUT' || 
+                       (e.target as HTMLElement)?.tagName === 'TEXTAREA';
+      
+      if (isTyping) return;
+
+      // Cmd/Ctrl + ] - Bring Forward
+      if (cmdOrCtrl && e.key === ']' && !e.shiftKey) {
+        e.preventDefault();
+        canvasStore.bringForward();
+      }
+      // Cmd/Ctrl + [ - Send Backward
+      else if (cmdOrCtrl && e.key === '[' && !e.shiftKey) {
+        e.preventDefault();
+        canvasStore.sendBackward();
+      }
+      // Cmd/Ctrl + Shift + ] - Bring to Front
+      else if (cmdOrCtrl && e.shiftKey && e.key === '}') { // } is Shift + ]
+        e.preventDefault();
+        canvasStore.bringToFront();
+      }
+      // Cmd/Ctrl + Shift + [ - Send to Back
+      else if (cmdOrCtrl && e.shiftKey && e.key === '{') { // { is Shift + [
+        e.preventDefault();
+        canvasStore.sendToBack();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canvasStore]);
   
   return (
     <div className="h-screen flex flex-col bg-background">

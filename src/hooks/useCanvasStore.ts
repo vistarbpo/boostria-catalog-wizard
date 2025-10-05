@@ -455,6 +455,68 @@ export function useCanvasStore() {
     }
   }, []);
 
+  const bringForward = useCallback(() => {
+    const selectedIds = canvasState.selectedElementIds;
+    if (selectedIds.length === 0) return;
+
+    setCanvasStateWithHistory(prev => ({
+      ...prev,
+      elements: prev.elements.map(el => {
+        if (selectedIds.includes(el.id)) {
+          const maxZIndex = Math.max(...prev.elements.map(e => e.zIndex));
+          return el.zIndex < maxZIndex ? { ...el, zIndex: el.zIndex + 1 } : el;
+        }
+        return el;
+      })
+    }));
+  }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
+
+  const sendBackward = useCallback(() => {
+    const selectedIds = canvasState.selectedElementIds;
+    if (selectedIds.length === 0) return;
+
+    setCanvasStateWithHistory(prev => ({
+      ...prev,
+      elements: prev.elements.map(el => {
+        if (selectedIds.includes(el.id)) {
+          const minZIndex = Math.min(...prev.elements.map(e => e.zIndex));
+          return el.zIndex > minZIndex ? { ...el, zIndex: el.zIndex - 1 } : el;
+        }
+        return el;
+      })
+    }));
+  }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
+
+  const bringToFront = useCallback(() => {
+    const selectedIds = canvasState.selectedElementIds;
+    if (selectedIds.length === 0) return;
+
+    setCanvasStateWithHistory(prev => {
+      const maxZIndex = Math.max(...prev.elements.map(el => el.zIndex));
+      return {
+        ...prev,
+        elements: prev.elements.map(el => 
+          selectedIds.includes(el.id) ? { ...el, zIndex: maxZIndex + 1 } : el
+        )
+      };
+    });
+  }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
+
+  const sendToBack = useCallback(() => {
+    const selectedIds = canvasState.selectedElementIds;
+    if (selectedIds.length === 0) return;
+
+    setCanvasStateWithHistory(prev => {
+      const minZIndex = Math.min(...prev.elements.map(el => el.zIndex));
+      return {
+        ...prev,
+        elements: prev.elements.map(el => 
+          selectedIds.includes(el.id) ? { ...el, zIndex: minZIndex - 1 } : el
+        )
+      };
+    });
+  }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
+
   const canUndo = historyIndexRef.current > 0;
   const canRedo = historyIndexRef.current < historyRef.current.length - 1;
 
@@ -482,6 +544,10 @@ export function useCanvasStore() {
     getSelectedElements,
     groupSelectedElements,
     ungroupSelectedElement,
+    bringForward,
+    sendBackward,
+    bringToFront,
+    sendToBack,
     undo,
     redo,
     canUndo,

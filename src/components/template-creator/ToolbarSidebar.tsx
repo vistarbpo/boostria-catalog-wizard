@@ -899,20 +899,20 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       return (
                         <div 
                           key={element.id} 
-                          className={`group flex items-center gap-2 p-2 rounded border transition-colors ${
+                          className={`group flex items-center gap-1.5 p-2 rounded border transition-colors min-w-0 ${
                             isSelected 
                               ? 'bg-primary/10 border-primary' 
                               : 'bg-muted/50 border-border hover:bg-muted'
                           }`}
                         >
                           {/* Drag Handle */}
-                          <div className="cursor-move opacity-50 hover:opacity-100">
+                          <div className="cursor-move opacity-50 hover:opacity-100 flex-shrink-0">
                             <GripVertical className="w-3 h-3" />
                           </div>
                           
                           {/* Layer Info */}
                           <div 
-                            className="flex-1 flex items-center gap-2 cursor-pointer"
+                            className="flex-1 flex items-center gap-2 cursor-pointer min-w-0 overflow-hidden"
                             onClick={() => canvasStore.selectElement(element.id)}
                           >
                             {/* Layer Icon */}
@@ -924,22 +924,19 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                             </div>
                             
                             {/* Layer Name & Details */}
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium truncate">
-                                {element.type === 'text' && (element as any).content?.substring(0, 20)}
-                                {element.type === 'shape' && `${(element as any).shapeType} shape`}
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <div className="text-xs font-medium truncate">
+                                {element.type === 'text' && (element as any).content?.substring(0, 15)}
+                                {element.type === 'shape' && `${(element as any).shapeType}`}
                                 {element.type === 'image' && 'Image'}
                                 {element.type === 'svg' && 'SVG'}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {Math.round(element.size.width)} × {Math.round(element.size.height)}
                               </div>
                             </div>
                           </div>
                           
-                          {/* Layer Controls */}
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {/* Move Up */}
+                          {/* Layer Controls - Always visible */}
+                          <div className="flex items-center gap-0.5 flex-shrink-0">
+                            {/* Move Forward */}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -949,11 +946,12 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                                 handleMoveLayerUp(element.id);
                               }}
                               disabled={index === 0}
+                              title="Bring Forward (Cmd/Ctrl + ])"
                             >
                               <ArrowUp className="w-3 h-3" />
                             </Button>
                             
-                            {/* Move Down */}
+                            {/* Move Backward */}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -963,6 +961,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                                 handleMoveLayerDown(element.id);
                               }}
                               disabled={index === canvasStore.canvasState.elements.length - 1}
+                              title="Send Backward (Cmd/Ctrl + [)"
                             >
                               <ArrowDown className="w-3 h-3" />
                             </Button>
@@ -976,6 +975,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                                 e.stopPropagation();
                                 canvasStore.updateElement(element.id, { visible: !element.visible });
                               }}
+                              title="Toggle Visibility"
                             >
                               {element.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                             </Button>
@@ -989,6 +989,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                                 e.stopPropagation();
                                 canvasStore.updateElement(element.id, { locked: !element.locked });
                               }}
+                              title="Lock/Unlock"
                             >
                               {element.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
                             </Button>
@@ -1002,6 +1003,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                                 e.stopPropagation();
                                 canvasStore.deleteElement(element.id);
                               }}
+                              title="Delete"
                             >
                               <X className="w-3 h-3" />
                             </Button>
