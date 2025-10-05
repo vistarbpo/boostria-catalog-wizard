@@ -25,6 +25,7 @@ const formatDynamicText = (element: TextElement): string => {
 
   // Apply modifiers
   if (element.modifiers) {
+    let value = parseFloat(text) || 0;
     element.modifiers.forEach(mod => {
       switch (mod.type) {
         case 'uppercase':
@@ -38,10 +39,27 @@ const formatDynamicText = (element: TextElement): string => {
           break;
         case 'numerical':
           text = text.replace(/[^0-9.]/g, '');
+          value = parseFloat(text) || 0;
           break;
         case 'add':
-          const num = parseFloat(text) || 0;
-          text = (num + mod.value).toString();
+          value = value + (mod.value || 0);
+          text = value.toString();
+          break;
+        case 'subtract':
+          value = value - (mod.value || 0);
+          text = value.toString();
+          break;
+        case 'multiply':
+          value = value * (mod.value || 1);
+          text = value.toString();
+          break;
+        case 'divide':
+          value = mod.value !== 0 ? value / mod.value : value;
+          text = value.toString();
+          break;
+        case 'decimals':
+          value = parseFloat(value.toFixed(mod.value || 2));
+          text = value.toString();
           break;
       }
     });

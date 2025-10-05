@@ -14,7 +14,7 @@ interface DynamicFieldSettingsProps {
   onUpdate: (updates: Partial<TextElement>) => void;
 }
 
-type ModifierType = 'uppercase' | 'lowercase' | 'titlecase' | 'numerical' | 'add';
+type ModifierType = 'uppercase' | 'lowercase' | 'titlecase' | 'numerical' | 'add' | 'subtract' | 'multiply' | 'divide' | 'decimals';
 
 const modifierDescriptions: Record<ModifierType, string> = {
   uppercase: 'Capitalizes all linked text when rendered',
@@ -22,6 +22,10 @@ const modifierDescriptions: Record<ModifierType, string> = {
   titlecase: 'Capitalizes the first letter of every word in the linked text',
   numerical: 'Strips all characters other than numbers and decimal places',
   add: 'Outputs the addition of column data by an additional number or feed column',
+  subtract: 'Outputs the subtraction of column data by an additional number or feed column',
+  multiply: 'Outputs the multiplication of column data by an additional number or feed column',
+  divide: 'Outputs the dividend of column data by an additional number or feed column',
+  decimals: 'Formats numbers to a specific number of decimal places with rounding options',
 };
 
 export function DynamicFieldSettings({ element, open, onClose, onUpdate }: DynamicFieldSettingsProps) {
@@ -31,7 +35,7 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
   const addModifier = () => {
     const newModifier = {
       id: Math.random().toString(36).substr(2, 9),
-      type: 'uppercase' as ModifierType,
+      type: 'add' as ModifierType,
       value: 0,
     };
     setModifiers([...modifiers, newModifier]);
@@ -55,7 +59,8 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
 
   // Calculate preview value
   const getPreview = () => {
-    let text = 'Sample Product Title'; // Sample text value
+    let text = '87.99'; // Sample numeric value for price
+    let value = parseFloat(text);
     
     // Apply modifiers
     modifiers.forEach(mod => {
@@ -71,18 +76,34 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
           break;
         case 'numerical':
           text = text.replace(/[^0-9.]/g, '');
+          value = parseFloat(text) || 0;
           break;
         case 'add':
-          // For add modifier, try to parse as number and add
-          const num = parseFloat(text) || 0;
-          text = (num + mod.value).toString();
+          value = value + (mod.value || 0);
+          text = value.toString();
+          break;
+        case 'subtract':
+          value = value - (mod.value || 0);
+          text = value.toString();
+          break;
+        case 'multiply':
+          value = value * (mod.value || 1);
+          text = value.toString();
+          break;
+        case 'divide':
+          value = mod.value !== 0 ? value / mod.value : value;
+          text = value.toString();
+          break;
+        case 'decimals':
+          value = parseFloat(value.toFixed(mod.value || 2));
+          text = value.toString();
           break;
       }
     });
 
     // Apply formatting if text is numeric
     if (!isNaN(parseFloat(text))) {
-      let value = parseFloat(text);
+      value = parseFloat(text);
       let formatted = value.toFixed(formatting.decimals ?? 2);
       if (formatting.thousandsSeparator) {
         formatted = parseFloat(formatted).toLocaleString('en-US', {
@@ -221,6 +242,46 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-popover">
+                        <SelectItem value="add">
+                          <div>
+                            <div className="font-medium">Add</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {modifierDescriptions.add}
+                            </div>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="subtract">
+                          <div>
+                            <div className="font-medium">Subtract</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {modifierDescriptions.subtract}
+                            </div>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="multiply">
+                          <div>
+                            <div className="font-medium">Multiply</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {modifierDescriptions.multiply}
+                            </div>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="divide">
+                          <div>
+                            <div className="font-medium">Divide</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {modifierDescriptions.divide}
+                            </div>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="decimals">
+                          <div>
+                            <div className="font-medium">Decimals</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {modifierDescriptions.decimals}
+                            </div>
+                          </div>
+                        </SelectItem>
                         <SelectItem value="uppercase">
                           <div>
                             <div className="font-medium">Uppercase</div>
@@ -253,14 +314,6 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
                             </div>
                           </div>
                         </SelectItem>
-                        <SelectItem value="add">
-                          <div>
-                            <div className="font-medium">Add</div>
-                            <div className="text-xs text-muted-foreground mt-0.5">
-                              {modifierDescriptions.add}
-                            </div>
-                          </div>
-                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground">
@@ -268,13 +321,14 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    {modifier.type === 'add' && (
+                    {(['add', 'subtract', 'multiply', 'divide', 'decimals'].includes(modifier.type)) && (
                       <Input
                         type="number"
                         value={modifier.value}
                         onChange={e => updateModifier(modifier.id, { value: parseFloat(e.target.value) || 0 })}
                         className="h-9 w-24"
-                        step="0.01"
+                        step={modifier.type === 'decimals' ? '1' : '0.01'}
+                        placeholder={modifier.type === 'decimals' ? 'Places' : 'Value'}
                       />
                     )}
                     <Button
