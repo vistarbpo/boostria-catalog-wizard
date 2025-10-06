@@ -25,7 +25,9 @@ const formatDynamicText = (element: TextElement): string => {
 
   // Apply modifiers
   if (element.modifiers) {
-    let value = parseFloat(text) || 0;
+    // Clean the text of non-numeric characters before parsing
+    let cleanedText = text.replace(/[^0-9.-]/g, '');
+    let value = parseFloat(cleanedText) || 0;
     element.modifiers.forEach(mod => {
       switch (mod.type) {
         case 'uppercase':
