@@ -59,8 +59,9 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
 
   // Calculate preview value
   const getPreview = () => {
-    let text = '87.99'; // Sample numeric value for price
-    let value = parseFloat(text);
+    // Use the actual element's content, removing currency symbols and other non-numeric chars for calculation
+    let text = (element.dynamicContent || element.content || '299.99').replace(/[^0-9.]/g, '');
+    let value = parseFloat(text) || 0;
     
     // Apply modifiers
     modifiers.forEach(mod => {
