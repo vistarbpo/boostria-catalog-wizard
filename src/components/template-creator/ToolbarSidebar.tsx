@@ -231,20 +231,12 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
     const mediaUrl = productContext.getMediaUrl(mediaKey);
     
     if (mediaUrl) {
-      // Let addImageElement calculate the center position based on actual image dimensions
-      canvasStore.addImageElement(mediaUrl);
-      
-      // Update the image to be dynamic
-      setTimeout(() => {
-        const selectedElement = canvasStore.getSelectedElement();
-        if (selectedElement && selectedElement.type === 'image') {
-          canvasStore.updateElement(selectedElement.id, {
-            fillType: 'dynamic',
-            fillSource: mediaKey,
-            fillImageUrl: mediaUrl
-          });
-        }
-      }, 100);
+      // Pass dynamic properties directly to addImageElement
+      canvasStore.addImageElement(mediaUrl, undefined, {
+        fillType: 'dynamic',
+        fillSource: mediaKey,
+        fillImageUrl: mediaUrl
+      });
     }
   };
 

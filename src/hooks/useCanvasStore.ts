@@ -114,7 +114,7 @@ export function useCanvasStore() {
     });
   }, []);
 
-  const addImageElement = useCallback((src: string, position?: Position) => {
+  const addImageElement = useCallback((src: string, position?: Position, dynamicProps?: { fillType?: 'original' | 'dynamic'; fillSource?: string; fillImageUrl?: string }) => {
     // Create a temporary image to get natural dimensions
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -157,8 +157,10 @@ export function useCanvasStore() {
           zIndex: prev.elements.length + 1,
           src,
           objectFit: 'cover',
-          fillType: 'original',
-          fillMode: 'cover'
+          fillType: dynamicProps?.fillType || 'original',
+          fillMode: 'cover',
+          fillSource: dynamicProps?.fillSource,
+          fillImageUrl: dynamicProps?.fillImageUrl
         };
 
         return {
@@ -190,8 +192,10 @@ export function useCanvasStore() {
           zIndex: prev.elements.length + 1,
           src,
           objectFit: 'cover',
-          fillType: 'original',
-          fillMode: 'cover'
+          fillType: dynamicProps?.fillType || 'original',
+          fillMode: 'cover',
+          fillSource: dynamicProps?.fillSource,
+          fillImageUrl: dynamicProps?.fillImageUrl
         };
 
         return {
