@@ -54,7 +54,8 @@ const formatDynamicText = (element: TextElement): string => {
           text = value.toString();
           break;
         case 'divide':
-          if (mod.value) {
+          // Only divide if we have a valid, non-zero divisor
+          if (typeof mod.value === 'number' && mod.value !== 0) {
             value = value / mod.value;
             text = value.toString();
           }
