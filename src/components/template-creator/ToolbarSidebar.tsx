@@ -337,8 +337,8 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   };
 
   const handleAddTextPreset = (preset: string) => {
-    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
-    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 25;
+    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 150;
+    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 50;
     canvasStore.addTextElement({ x: centerX, y: centerY });
     
     // Update the text properties based on preset
@@ -351,34 +351,42 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
           case 'heading1':
             updates = { 
               content: 'Heading 1',
-              fontSize: 48,
+              fontSize: 64,
               fontWeight: 'Bold'
             };
             break;
           case 'heading2':
             updates = { 
               content: 'Heading 2',
-              fontSize: 32,
-              fontWeight: 'Bold'
+              fontSize: 48,
+              fontWeight: '600'
             };
             break;
           case 'heading3':
             updates = { 
               content: 'Heading 3',
+              fontSize: 36,
+              fontWeight: '600'
+            };
+            break;
+          case 'subheading':
+            updates = { 
+              content: 'Subheading Text',
               fontSize: 24,
               fontWeight: 'Medium'
             };
             break;
           case 'body':
             updates = { 
-              content: 'Body text paragraph',
+              content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.',
               fontSize: 16,
-              fontWeight: 'Regular'
+              fontWeight: 'Regular',
+              width: 400
             };
             break;
           case 'caption':
             updates = { 
-              content: 'Caption text',
+              content: 'Caption or small text',
               fontSize: 12,
               fontWeight: 'Regular'
             };
@@ -387,6 +395,13 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
             updates = { 
               content: 'Button Text',
               fontSize: 14,
+              fontWeight: '600'
+            };
+            break;
+          case 'custom':
+            updates = { 
+              content: 'Custom Formatted Text',
+              fontSize: 20,
               fontWeight: 'Medium'
             };
             break;
@@ -864,37 +879,85 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddTextPreset('heading1')}
-                      className="justify-start w-full"
+                      className="justify-start w-full text-left"
                     >
-                      <Type className="w-4 h-4 mr-2" />
-                      Heading 1
+                      <Type className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold">Heading 1</span>
+                        <span className="text-xs text-muted-foreground">64px, Bold</span>
+                      </div>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddTextPreset('heading2')}
-                      className="justify-start w-full"
+                      className="justify-start w-full text-left"
                     >
-                      <Type className="w-4 h-4 mr-2" />
-                      Heading 2
+                      <Type className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <div className="flex flex-col items-start">
+                        <span className="font-semibold">Heading 2</span>
+                        <span className="text-xs text-muted-foreground">48px, Semi-bold</span>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddTextPreset('heading3')}
+                      className="justify-start w-full text-left"
+                    >
+                      <Type className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <div className="flex flex-col items-start">
+                        <span className="font-semibold">Heading 3</span>
+                        <span className="text-xs text-muted-foreground">36px, Semi-bold</span>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddTextPreset('subheading')}
+                      className="justify-start w-full text-left"
+                    >
+                      <Type className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Subheading</span>
+                        <span className="text-xs text-muted-foreground">24px, Medium</span>
+                      </div>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddTextPreset('body')}
-                      className="justify-start w-full"
+                      className="justify-start w-full text-left"
                     >
-                      <Type className="w-4 h-4 mr-2" />
-                      Body Text
+                      <Type className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <div className="flex flex-col items-start">
+                        <span>Body Text</span>
+                        <span className="text-xs text-muted-foreground">16px, Lorem ipsum</span>
+                      </div>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleAddText}
-                      className="justify-start w-full"
+                      onClick={() => handleAddTextPreset('caption')}
+                      className="justify-start w-full text-left"
                     >
-                      <Type className="w-4 h-4 mr-2" />
-                      Custom Text
+                      <Type className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm">Caption</span>
+                        <span className="text-xs text-muted-foreground">12px, Regular</span>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddTextPreset('custom')}
+                      className="justify-start w-full text-left"
+                    >
+                      <Type className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Custom Text</span>
+                        <span className="text-xs text-muted-foreground">20px, Medium</span>
+                      </div>
                     </Button>
                   </div>
                 </div>
