@@ -953,10 +953,10 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                             </div>
                             
                             {/* Layer Name & Details */}
-                            <div className="flex-1 min-w-0 overflow-hidden">
+                            <div className="flex-1 min-w-0 overflow-hidden max-w-[80px]">
                               <div className="text-xs font-medium truncate">
-                                {element.type === 'text' && (element as any).content?.substring(0, 15)}
-                                {element.type === 'shape' && `${(element as any).shapeType}`}
+                                {element.type === 'text' && (element as any).content?.substring(0, 8)}
+                                {element.type === 'shape' && `${(element as any).shapeType}`.substring(0, 8)}
                                 {element.type === 'image' && 'Image'}
                                 {element.type === 'svg' && 'SVG'}
                               </div>
