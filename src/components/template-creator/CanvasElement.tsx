@@ -235,12 +235,12 @@ const CanvasElementComponent = function CanvasElement({
       const currentY = e.clientY;
       
       if (isDraggingRef.current) {
-        // Smooth drag
+        // Smooth drag - allow negative positions for left/up movement
         const deltaX = (currentX - dragDataRef.current.startX) / scale;
         const deltaY = (currentY - dragDataRef.current.startY) / scale;
         
-        const newX = Math.max(0, dragDataRef.current.startLeft + deltaX);
-        const newY = Math.max(0, dragDataRef.current.startTop + deltaY);
+        const newX = dragDataRef.current.startLeft + deltaX;
+        const newY = dragDataRef.current.startTop + deltaY;
         
         updateElementStyle(
           { x: newX, y: newY },
@@ -317,13 +317,13 @@ const CanvasElementComponent = function CanvasElement({
       cancelAnimationFrame(animationFrameRef.current);
     }
     
-    // Apply final state to React state
+    // Apply final state to React state - allow negative positions
     if (isDraggingRef.current) {
       const deltaX = (e.clientX - dragDataRef.current.startX) / scale;
       const deltaY = (e.clientY - dragDataRef.current.startY) / scale;
       
-      const newX = Math.max(0, dragDataRef.current.startLeft + deltaX);
-      const newY = Math.max(0, dragDataRef.current.startTop + deltaY);
+      const newX = dragDataRef.current.startLeft + deltaX;
+      const newY = dragDataRef.current.startTop + deltaY;
       
       onMove(element.id, { x: newX, y: newY });
     } else if (isResizingRef.current) {
