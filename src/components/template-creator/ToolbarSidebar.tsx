@@ -337,81 +337,98 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   };
 
   const handleAddTextPreset = (preset: string) => {
-    const centerX = canvasStore.canvasState.canvasSize.width / 2 - 150;
-    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 50;
-    canvasStore.addTextElement({ x: centerX, y: centerY });
+    // Clear selection first to avoid affecting previous text
+    canvasStore.clearSelection();
     
-    // Update the text properties based on preset
-    setTimeout(() => {
-      const selectedElement = canvasStore.getSelectedElement();
-      if (selectedElement && selectedElement.type === 'text') {
-        let updates: Partial<any> = {};
-        
-        switch (preset) {
-          case 'heading1':
-            updates = { 
-              content: 'Heading 1',
-              fontSize: 64,
-              fontWeight: 'Bold'
-            };
-            break;
-          case 'heading2':
-            updates = { 
-              content: 'Heading 2',
-              fontSize: 48,
-              fontWeight: '600'
-            };
-            break;
-          case 'heading3':
-            updates = { 
-              content: 'Heading 3',
-              fontSize: 36,
-              fontWeight: '600'
-            };
-            break;
-          case 'subheading':
-            updates = { 
-              content: 'Subheading Text',
-              fontSize: 24,
-              fontWeight: 'Medium'
-            };
-            break;
-          case 'body':
-            updates = { 
-              content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.',
-              fontSize: 16,
-              fontWeight: 'Regular',
-              width: 400
-            };
-            break;
-          case 'caption':
-            updates = { 
-              content: 'Caption or small text',
-              fontSize: 12,
-              fontWeight: 'Regular'
-            };
-            break;
-          case 'button':
-            updates = { 
-              content: 'Button Text',
-              fontSize: 14,
-              fontWeight: '600'
-            };
-            break;
-          case 'custom':
-            updates = { 
-              content: 'Custom Formatted Text',
-              fontSize: 20,
-              fontWeight: 'Medium'
-            };
-            break;
-          default:
-            updates = { content: 'Text' };
-        }
-        
-        canvasStore.updateElement(selectedElement.id, updates);
+    const canvasWidth = canvasStore.canvasState.canvasSize.width;
+    const textWidth = canvasWidth * 0.6; // 60% width (20% padding on each side)
+    const centerX = canvasWidth * 0.2; // Start at 20% from left
+    const centerY = canvasStore.canvasState.canvasSize.height / 2 - 50;
+    
+    let presetConfig: Partial<any> = {};
+    
+    switch (preset) {
+      case 'heading1':
+        presetConfig = { 
+          content: 'Heading 1',
+          fontSize: 64,
+          fontWeight: 'Bold',
+          width: textWidth
+        };
+        break;
+      case 'heading2':
+        presetConfig = { 
+          content: 'Heading 2',
+          fontSize: 48,
+          fontWeight: '600',
+          width: textWidth
+        };
+        break;
+      case 'heading3':
+        presetConfig = { 
+          content: 'Heading 3',
+          fontSize: 36,
+          fontWeight: '600',
+          width: textWidth
+        };
+        break;
+      case 'subheading':
+        presetConfig = { 
+          content: 'Subheading Text',
+          fontSize: 24,
+          fontWeight: 'Medium',
+          width: textWidth
+        };
+        break;
+      case 'body':
+        presetConfig = { 
+          content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.',
+          fontSize: 16,
+          fontWeight: 'Regular',
+          width: textWidth
+        };
+        break;
+      case 'caption':
+        presetConfig = { 
+          content: 'Caption or small text',
+          fontSize: 12,
+          fontWeight: 'Regular',
+          width: textWidth
+        };
+        break;
+      case 'button':
+        presetConfig = { 
+          content: 'Button Text',
+          fontSize: 14,
+          fontWeight: '600',
+          width: textWidth * 0.3
+        };
+        break;
+      case 'custom':
+        presetConfig = { 
+          content: 'Custom Formatted Text',
+          fontSize: 20,
+          fontWeight: 'Medium',
+          width: textWidth
+        };
+        break;
+      default:
+        presetConfig = { 
+          content: 'Text',
+          width: textWidth
+        };
+    }
+    
+    // Add text element with preset configuration directly
+    canvasStore.addTextElement(
+      { x: centerX, y: centerY },
+      presetConfig.content,
+      {
+        fontSize: presetConfig.fontSize,
+        fontWeight: presetConfig.fontWeight,
+        size: { width: presetConfig.width, height: 100 }
       }
-    }, 100);
+    );
   };
 
   return (
