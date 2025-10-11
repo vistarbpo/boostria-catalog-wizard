@@ -96,35 +96,42 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           : buttonElement.cornerRadius || 0;
 
         return (
-          <button
+          <div
             key={element.id}
             style={{
               ...baseStyle,
-              color: buttonElement.color,
-              backgroundColor: buttonElement.backgroundColor,
-              fontSize: `${buttonElement.fontSize}px`,
-              fontFamily: buttonElement.fontFamily,
-              fontWeight: buttonElement.fontWeight,
-              textAlign: buttonElement.textAlign,
-              direction: buttonElement.direction || 'ltr',
-              paddingTop: `${buttonElement.padding.top}px`,
-              paddingRight: `${buttonElement.padding.right}px`,
-              paddingBottom: `${buttonElement.padding.bottom}px`,
-              paddingLeft: `${buttonElement.padding.left}px`,
-              borderRadius,
-              border: buttonElement.borderWidth > 0
-                ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
-                : 'none',
-              display: 'inline-block',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-              outline: 'none',
-              cursor: 'default',
             }}
           >
-            {buttonElement.content}
-          </button>
+            <button
+              style={{
+                width: '100%',
+                height: '100%',
+                color: buttonElement.color,
+                backgroundColor: buttonElement.backgroundColor,
+                fontSize: `${buttonElement.fontSize}px`,
+                fontFamily: buttonElement.fontFamily,
+                fontWeight: buttonElement.fontWeight,
+                textAlign: buttonElement.textAlign,
+                direction: buttonElement.direction || 'ltr',
+                paddingTop: `${buttonElement.padding.top}px`,
+                paddingRight: `${buttonElement.padding.right}px`,
+                paddingBottom: `${buttonElement.padding.bottom}px`,
+                paddingLeft: `${buttonElement.padding.left}px`,
+                borderRadius,
+                border: buttonElement.borderWidth > 0
+                  ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
+                  : 'none',
+                display: 'inline-block',
+                whiteSpace: 'nowrap',
+                userSelect: 'none',
+                boxSizing: 'border-box',
+                outline: 'none',
+                cursor: 'default',
+              }}
+            >
+              {buttonElement.content}
+            </button>
+          </div>
         );
       }
 
