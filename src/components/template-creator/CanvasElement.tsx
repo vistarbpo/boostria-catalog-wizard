@@ -458,16 +458,19 @@ const CanvasElementComponent = function CanvasElement({
         useEffect(() => {
           if (textMeasureRef.current && onResize) {
             const textWidth = textMeasureRef.current.offsetWidth;
-            const totalPadding = buttonElement.padding.left + buttonElement.padding.right;
+            const textHeight = textMeasureRef.current.offsetHeight;
+            const horizontalPadding = buttonElement.padding.left + buttonElement.padding.right;
+            const verticalPadding = buttonElement.padding.top + buttonElement.padding.bottom;
             const borderWidth = (buttonElement.borderWidth || 0) * 2;
-            const newWidth = textWidth + totalPadding + borderWidth + 4;
+            const newWidth = textWidth + horizontalPadding + borderWidth + 4;
+            const newHeight = textHeight + verticalPadding + borderWidth + 4;
             
-            // Only update if width changed significantly (avoid infinite loops)
-            if (Math.abs(newWidth - element.size.width) > 2) {
-              onResize(element.id, { width: newWidth, height: element.size.height });
+            // Only update if size changed significantly (avoid infinite loops)
+            if (Math.abs(newWidth - element.size.width) > 2 || Math.abs(newHeight - element.size.height) > 2) {
+              onResize(element.id, { width: newWidth, height: newHeight });
             }
           }
-        }, [buttonElement.content, buttonElement.fontSize, buttonElement.fontFamily, buttonElement.fontWeight, buttonElement.padding]);
+        }, [buttonElement.content, buttonElement.fontSize, buttonElement.fontFamily, buttonElement.fontWeight, buttonElement.padding, buttonElement.borderWidth]);
         
         return (
           <>

@@ -96,7 +96,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           : buttonElement.cornerRadius || 0;
 
         return (
-          <div
+          <button
             key={element.id}
             style={{
               ...baseStyle,
@@ -115,20 +115,16 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               border: buttonElement.borderWidth > 0
                 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
                 : 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: buttonElement.textAlign === 'center'
-                ? 'center'
-                : buttonElement.textAlign === 'right'
-                ? 'flex-end'
-                : 'flex-start',
+              display: 'inline-block',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               boxSizing: 'border-box',
+              outline: 'none',
+              cursor: 'default',
             }}
           >
             {buttonElement.content}
-          </div>
+          </button>
         );
       }
 
