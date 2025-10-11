@@ -452,31 +452,66 @@ const CanvasElementComponent = function CanvasElement({
           ? `${buttonElement.cornerRadii.topLeft}px ${buttonElement.cornerRadii.topRight}px ${buttonElement.cornerRadii.bottomRight}px ${buttonElement.cornerRadii.bottomLeft}px`
           : buttonElement.cornerRadius || 0;
         
+        // Create a hidden span to measure text width for auto-layout
+        const textMeasureRef = useRef<HTMLSpanElement>(null);
+        
+        useEffect(() => {
+          if (textMeasureRef.current && onResize) {
+            const textWidth = textMeasureRef.current.offsetWidth;
+            const totalPadding = buttonElement.padding.left + buttonElement.padding.right;
+            const borderWidth = buttonElement.borderWidth * 2;
+            const newWidth = textWidth + totalPadding + borderWidth;
+            
+            // Only update if width changed significantly (avoid infinite loops)
+            if (Math.abs(newWidth - element.size.width) > 2) {
+              onResize(element.id, { width: newWidth, height: element.size.height });
+            }
+          }
+        }, [buttonElement.content, buttonElement.fontSize, buttonElement.fontFamily, buttonElement.fontWeight, buttonElement.padding]);
+        
         return (
-          <div
-            style={{
-              ...baseStyle,
-              color: buttonElement.color,
-              backgroundColor: buttonElement.backgroundColor,
-              fontSize: `${buttonElement.fontSize}px`,
-              fontFamily: buttonElement.fontFamily,
-              fontWeight: buttonElement.fontWeight,
-              textAlign: buttonElement.textAlign,
-              direction: buttonElement.direction || 'ltr',
-              padding: `${buttonElement.padding.top}px ${buttonElement.padding.right}px ${buttonElement.padding.bottom}px ${buttonElement.padding.left}px`,
-              borderRadius,
-              border: buttonElement.borderWidth > 0 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}` : undefined,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: buttonElement.textAlign === 'center' ? 'center' : buttonElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
-              cursor: element.locked ? 'not-allowed' : 'pointer',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              userSelect: 'none',
-            }}
-          >
-            {buttonElement.content}
-          </div>
+          <>
+            {/* Hidden span for measuring text width */}
+            <span
+              ref={textMeasureRef}
+              style={{
+                position: 'absolute',
+                visibility: 'hidden',
+                whiteSpace: 'nowrap',
+                fontSize: `${buttonElement.fontSize}px`,
+                fontFamily: buttonElement.fontFamily,
+                fontWeight: buttonElement.fontWeight,
+                pointerEvents: 'none',
+              }}
+            >
+              {buttonElement.content}
+            </span>
+            
+            <div
+              style={{
+                ...baseStyle,
+                color: buttonElement.color,
+                backgroundColor: buttonElement.backgroundColor,
+                fontSize: `${buttonElement.fontSize}px`,
+                fontFamily: buttonElement.fontFamily,
+                fontWeight: buttonElement.fontWeight,
+                textAlign: buttonElement.textAlign,
+                direction: buttonElement.direction || 'ltr',
+                padding: `${buttonElement.padding.top}px ${buttonElement.padding.right}px ${buttonElement.padding.bottom}px ${buttonElement.padding.left}px`,
+                borderRadius,
+                border: buttonElement.borderWidth > 0 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}` : undefined,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: buttonElement.textAlign === 'center' ? 'center' : buttonElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+                cursor: element.locked ? 'not-allowed' : 'pointer',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                userSelect: 'none',
+              }}
+            >
+              {buttonElement.content}
+            </div>
+          </>
         );
       }
 

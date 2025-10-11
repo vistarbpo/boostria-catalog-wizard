@@ -1271,6 +1271,9 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => {
+                                // Clear selection before adding widget
+                                canvasStore.clearSelection();
+                                
                                 // Add widget to canvas
                                 const widgetElements = widget.elements.map(el => ({
                                   ...el,
@@ -1423,6 +1426,26 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                   >
                     <Barcode className="w-4 h-4 mr-2" />
                     Barcode Placeholder
+                  </Button>
+                </div>
+
+                {/* Button Widget */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Button Widget</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      canvasStore.clearSelection();
+                      const canvasWidth = canvasStore.canvasState.canvasSize.width;
+                      const centerX = (canvasWidth - 160) / 2;
+                      const centerY = canvasStore.canvasState.canvasSize.height / 2 - 24;
+                      canvasStore.addButtonElement({ x: centerX, y: centerY });
+                    }}
+                    className="w-full justify-start"
+                  >
+                    <RectangleHorizontal className="w-4 h-4 mr-2" />
+                    Add Button
                   </Button>
                 </div>
 
