@@ -460,7 +460,7 @@ const CanvasElementComponent = function CanvasElement({
             const textWidth = textMeasureRef.current.offsetWidth;
             const totalPadding = buttonElement.padding.left + buttonElement.padding.right;
             const borderWidth = (buttonElement.borderWidth || 0) * 2;
-            const newWidth = textWidth + totalPadding + borderWidth + 4; // Add 4px buffer for safety
+            const newWidth = textWidth + totalPadding + borderWidth + 4;
             
             // Only update if width changed significantly (avoid infinite loops)
             if (Math.abs(newWidth - element.size.width) > 2) {
@@ -471,7 +471,7 @@ const CanvasElementComponent = function CanvasElement({
         
         return (
           <>
-            {/* Hidden span for measuring text width */}
+            {/* Hidden span for measuring text width - only show in editor, not during export */}
             <span
               ref={textMeasureRef}
               data-measurement-element="true"
@@ -483,13 +483,14 @@ const CanvasElementComponent = function CanvasElement({
                 fontFamily: buttonElement.fontFamily,
                 fontWeight: buttonElement.fontWeight,
                 pointerEvents: 'none',
-                left: '-9999px', // Move far off screen
+                left: '-9999px',
               }}
             >
               {buttonElement.content}
             </span>
             
-            <div
+            <button
+              data-button-element="true"
               style={{
                 ...baseStyle,
                 color: buttonElement.color,
@@ -499,21 +500,24 @@ const CanvasElementComponent = function CanvasElement({
                 fontWeight: buttonElement.fontWeight,
                 textAlign: buttonElement.textAlign,
                 direction: buttonElement.direction || 'ltr',
-                padding: `${buttonElement.padding.top}px ${buttonElement.padding.right}px ${buttonElement.padding.bottom}px ${buttonElement.padding.left}px`,
+                paddingTop: `${buttonElement.padding.top}px`,
+                paddingRight: `${buttonElement.padding.right}px`,
+                paddingBottom: `${buttonElement.padding.bottom}px`,
+                paddingLeft: `${buttonElement.padding.left}px`,
                 borderRadius,
-                border: buttonElement.borderWidth > 0 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}` : undefined,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: buttonElement.textAlign === 'center' ? 'center' : buttonElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+                border: buttonElement.borderWidth > 0 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}` : 'none',
+                display: 'inline-block',
                 cursor: element.locked ? 'not-allowed' : 'pointer',
                 whiteSpace: 'nowrap',
-                overflow: 'visible',
                 userSelect: 'none',
                 boxSizing: 'border-box',
+                outline: 'none',
+                width: '100%',
+                height: '100%',
               }}
             >
               {buttonElement.content}
-            </div>
+            </button>
           </>
         );
       }
