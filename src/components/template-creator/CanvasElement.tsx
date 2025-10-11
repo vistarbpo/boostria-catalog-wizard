@@ -120,7 +120,6 @@ const CanvasElementComponent = function CanvasElement({
   const [isRotating, setIsRotating] = useState(false);
   
   const elementRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   const isResizingRef = useRef(false);
   const isRotatingRef = useRef(false);
@@ -131,11 +130,11 @@ const CanvasElementComponent = function CanvasElement({
 
   // Optimized DOM manipulation for 60fps performance
   const updateElementStyle = useCallback((pos: Position, size: { width: number; height: number }, rotation: number) => {
-    if (elementRef.current && contentRef.current) {
+    if (elementRef.current) {
       // Use GPU-accelerated transforms
       elementRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) rotate(${rotation}deg)`;
-      contentRef.current.style.width = `${size.width}px`;
-      contentRef.current.style.height = `${size.height}px`;
+      elementRef.current.style.width = `${size.width}px`;
+      elementRef.current.style.height = `${size.height}px`;
     }
   }, []);
 
@@ -1058,21 +1057,15 @@ const CanvasElementComponent = function CanvasElement({
       style={{
         left: 0,
         top: 0,
+        width: element.size.width,
+        height: element.size.height,
         zIndex: element.zIndex,
         transform: `translate3d(${element.position.x}px, ${element.position.y}px, 0) rotate(${element.rotation}deg)`,
         transformOrigin: 'center center',
       }}
       onMouseDown={handleMouseDown}
     >
-      <div 
-        ref={contentRef}
-        style={{ 
-          width: element.size.width, 
-          height: element.size.height 
-        }}
-      >
-        {renderElement()}
-      </div>
+      {renderElement()}
       
       {isSelected && !element.locked && (
         <div className="absolute inset-0" style={{ transform: `rotate(-${element.rotation}deg)` }}>
