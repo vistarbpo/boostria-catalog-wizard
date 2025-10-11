@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { CanvasElement, CanvasState, TextElement, ShapeElement, ImageElement, SVGElement, Position } from '../types/canvas';
+import { CanvasElement, CanvasState, TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement, Position } from '../types/canvas';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -70,6 +70,46 @@ export function useCanvasStore() {
         strokeColor: undefined,
         strokeWidth: 0,
         padding: { top: 8, right: 8, bottom: 8, left: 8 },
+        ...overrides
+      };
+
+      return {
+        ...prev,
+        elements: [...prev.elements, newElement],
+        selectedElementIds: [newElement.id]
+      };
+    });
+  }, [setCanvasStateWithHistory]);
+
+  const addButtonElement = useCallback((position: Position, initialContent?: string, overrides?: Partial<ButtonElement>) => {
+    setCanvasStateWithHistory(prev => {
+      const newElement: ButtonElement = {
+        id: generateId(),
+        type: 'button',
+        position,
+        size: { width: 160, height: 48 },
+        rotation: 0,
+        opacity: 100,
+        visible: true,
+        locked: false,
+        zIndex: prev.elements.length + 1,
+        content: initialContent || 'SHOP NOW!',
+        fontFamily: 'Inter',
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#ffffff',
+        backgroundColor: '#000000',
+        textAlign: 'center',
+        direction: 'ltr',
+        padding: { top: 12, right: 24, bottom: 12, left: 24 },
+        cornerRadii: {
+          topLeft: 8,
+          topRight: 8,
+          bottomLeft: 8,
+          bottomRight: 8
+        },
+        borderColor: undefined,
+        borderWidth: 0,
         ...overrides
       };
 
@@ -527,6 +567,7 @@ export function useCanvasStore() {
   return {
     canvasState,
     addTextElement,
+    addButtonElement,
     addShapeElement,
     addImageElement,
     addSVGElement,

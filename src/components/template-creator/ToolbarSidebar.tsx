@@ -889,6 +889,26 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Text</h3>
                 
+                {/* Button Widget */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Button Widget</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      canvasStore.clearSelection();
+                      const canvasWidth = canvasStore.canvasState.canvasSize.width;
+                      const centerX = (canvasWidth - 160) / 2;
+                      const centerY = canvasStore.canvasState.canvasSize.height / 2 - 24;
+                      canvasStore.addButtonElement({ x: centerX, y: centerY });
+                    }}
+                    className="justify-start w-full text-left"
+                  >
+                    <RectangleHorizontal className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span>Add Button</span>
+                  </Button>
+                </div>
+                
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">Text Presets</h4>
                   <div className="space-y-2">
@@ -1027,6 +1047,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                             {/* Layer Icon */}
                             <div className="flex-shrink-0">
                               {element.type === 'text' && <Type className="w-4 h-4" />}
+                              {element.type === 'button' && <RectangleHorizontal className="w-4 h-4" />}
                               {element.type === 'shape' && <Shapes className="w-4 h-4" />}  
                               {element.type === 'image' && <Image className="w-4 h-4" />}
                               {element.type === 'svg' && <FileImage className="w-4 h-4" />}
@@ -1036,6 +1057,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                             <div className="flex-1 min-w-0 overflow-hidden max-w-[80px]">
                               <div className="text-xs font-medium truncate">
                                 {element.type === 'text' && (element as any).content?.substring(0, 8)}
+                                {element.type === 'button' && (element as any).content?.substring(0, 8)}
                                 {element.type === 'shape' && `${(element as any).shapeType}`.substring(0, 8)}
                                 {element.type === 'image' && 'Image'}
                                 {element.type === 'svg' && 'SVG'}

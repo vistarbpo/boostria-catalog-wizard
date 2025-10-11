@@ -113,6 +113,33 @@ export interface SVGElement extends BaseElement {
   fillMode?: 'cover' | 'contain' | 'stretch' | 'center' | 'tile';
 }
 
+export interface ButtonElement extends BaseElement {
+  type: 'button';
+  content: string;
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: string;
+  color: string;
+  backgroundColor: string;
+  textAlign: 'left' | 'center' | 'right';
+  direction?: 'ltr' | 'rtl';
+  padding: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  cornerRadius?: number;
+  cornerRadii?: {
+    topLeft: number;
+    topRight: number;
+    bottomLeft: number;
+    bottomRight: number;
+  };
+  borderColor?: string;
+  borderWidth: number;
+}
+
 export interface GroupElement extends BaseElement {
   type: 'group';
   name?: string;
@@ -127,7 +154,7 @@ export interface MediaSource {
   isFromFeed: boolean;
 }
 
-export type CanvasElement = TextElement | ShapeElement | ImageElement | SVGElement | GroupElement;
+export type CanvasElement = TextElement | ShapeElement | ImageElement | SVGElement | ButtonElement | GroupElement;
 
 export interface CanvasState {
   elements: CanvasElement[];

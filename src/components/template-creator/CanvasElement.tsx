@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, memo, useEffect } from 'react';
-import { CanvasElement as CanvasElementType, TextElement, ShapeElement, ImageElement, SVGElement, Position } from '../../types/canvas';
+import { CanvasElement as CanvasElementType, TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement, Position } from '../../types/canvas';
 import { RotateCw } from 'lucide-react';
 
 // Helper function to get border radius CSS value
@@ -442,6 +442,40 @@ const CanvasElementComponent = function CanvasElement({
             }}
           >
             {formatDynamicText(textElement)}
+          </div>
+        );
+      }
+
+      case 'button': {
+        const buttonElement = element as ButtonElement;
+        const borderRadius = buttonElement.cornerRadii 
+          ? `${buttonElement.cornerRadii.topLeft}px ${buttonElement.cornerRadii.topRight}px ${buttonElement.cornerRadii.bottomRight}px ${buttonElement.cornerRadii.bottomLeft}px`
+          : buttonElement.cornerRadius || 0;
+        
+        return (
+          <div
+            style={{
+              ...baseStyle,
+              color: buttonElement.color,
+              backgroundColor: buttonElement.backgroundColor,
+              fontSize: `${buttonElement.fontSize}px`,
+              fontFamily: buttonElement.fontFamily,
+              fontWeight: buttonElement.fontWeight,
+              textAlign: buttonElement.textAlign,
+              direction: buttonElement.direction || 'ltr',
+              padding: `${buttonElement.padding.top}px ${buttonElement.padding.right}px ${buttonElement.padding.bottom}px ${buttonElement.padding.left}px`,
+              borderRadius,
+              border: buttonElement.borderWidth > 0 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}` : undefined,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: buttonElement.textAlign === 'center' ? 'center' : buttonElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              cursor: element.locked ? 'not-allowed' : 'pointer',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              userSelect: 'none',
+            }}
+          >
+            {buttonElement.content}
           </div>
         );
       }

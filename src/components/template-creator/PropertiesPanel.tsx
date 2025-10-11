@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
-import { TextElement, ShapeElement, ImageElement, SVGElement } from "../../types/canvas";
+import { TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement } from "../../types/canvas";
 import { useProduct } from "../../contexts/ProductContext";
 import { CanvasSettings } from "./CanvasSettings";
 import { DynamicFieldSettings } from "./DynamicFieldSettings";
@@ -422,6 +422,294 @@ export function PropertiesPanel({
               <div>
                 <Label className="text-xs">Line Height</Label>
                 <Input type="number" value={localValues.lineSpacing} onChange={e => handleInputChange('lineSpacing', e.target.value)} onBlur={e => handleInputBlur('lineHeight', e.target.value)} className="h-8" step="0.1" min="0.5" max="3" />
+              </div>
+            </div>}
+
+          {selectedElement.type === 'button' && <div className="space-y-4">
+              <Separator />
+              <h4 className="text-sm font-medium">Button Properties</h4>
+              
+              {/* Button Content */}
+              <div>
+                <Label className="text-xs">Button Text</Label>
+                <Input 
+                  value={(selectedElement as ButtonElement).content} 
+                  onChange={e => updateElementProperty('content', e.target.value)} 
+                  placeholder="Enter button text..." 
+                  className="h-8" 
+                />
+              </div>
+
+              {/* Font Properties */}
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs">Font Family</Label>
+                  <Select value={(selectedElement as ButtonElement).fontFamily || 'Inter'} onValueChange={value => updateElementProperty('fontFamily', value)}>
+                    <SelectTrigger className="h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="z-50 bg-popover">
+                      <SelectItem value="Inter">Inter (Modern Sans)</SelectItem>
+                      <SelectItem value="Roboto">Roboto</SelectItem>
+                      <SelectItem value="Open Sans">Open Sans</SelectItem>
+                      <SelectItem value="Lato">Lato</SelectItem>
+                      <SelectItem value="Montserrat">Montserrat</SelectItem>
+                      <SelectItem value="Poppins">Poppins</SelectItem>
+                      <SelectItem value="Nunito">Nunito</SelectItem>
+                      <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                      <SelectItem value="Raleway">Raleway</SelectItem>
+                      <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                      <SelectItem value="Oswald">Oswald (Display)</SelectItem>
+                      <SelectItem value="Playfair Display">Playfair Display (Serif)</SelectItem>
+                      <SelectItem value="Merriweather">Merriweather (Serif)</SelectItem>
+                      <SelectItem value="Lora">Lora (Serif)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Font Size</Label>
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      value={(selectedElement as ButtonElement).fontSize} 
+                      onChange={e => updateElementProperty('fontSize', parseFloat(e.target.value) || 16)} 
+                      className="h-8" 
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Font Weight</Label>
+                    <Select value={(selectedElement as ButtonElement).fontWeight} onValueChange={value => updateElementProperty('fontWeight', value)}>
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="z-50 bg-popover">
+                        <SelectItem value="300">Light (300)</SelectItem>
+                        <SelectItem value="400">Regular (400)</SelectItem>
+                        <SelectItem value="500">Medium (500)</SelectItem>
+                        <SelectItem value="600">Semi Bold (600)</SelectItem>
+                        <SelectItem value="700">Bold (700)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Colors */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">Text Color</Label>
+                  <Input type="color" value={(selectedElement as ButtonElement).color} onChange={e => updateElementProperty('color', e.target.value)} className="h-8" />
+                </div>
+                <div>
+                  <Label className="text-xs">Background Color</Label>
+                  <Input type="color" value={(selectedElement as ButtonElement).backgroundColor} onChange={e => updateElementProperty('backgroundColor', e.target.value)} className="h-8" />
+                </div>
+              </div>
+
+              {/* Text Alignment */}
+              <div>
+                <Label className="text-xs mb-2 block">Text Alignment</Label>
+                <div className="flex gap-1">
+                  {[{
+                value: 'left',
+                icon: AlignLeft
+              }, {
+                value: 'center',
+                icon: AlignCenter
+              }, {
+                value: 'right',
+                icon: AlignRight
+              }].map(align => <Button key={align.value} variant={(selectedElement as ButtonElement).textAlign === align.value ? "default" : "outline"} size="sm" onClick={() => updateElementProperty('textAlign', align.value)} className="h-8 w-8 p-0">
+                      <align.icon className="w-4 h-4" />
+                    </Button>)}
+                </div>
+              </div>
+
+              {/* Text Direction (RTL support) */}
+              <div>
+                <Label className="text-xs">Text Direction</Label>
+                <Select value={(selectedElement as ButtonElement).direction || 'ltr'} onValueChange={value => updateElementProperty('direction', value)}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ltr">Left to Right (LTR)</SelectItem>
+                    <SelectItem value="rtl">Right to Left (RTL)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Padding */}
+              <div className="space-y-2">
+                <Label className="text-xs">Padding (px)</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Top</Label>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      value={(selectedElement as ButtonElement).padding.top} 
+                      onChange={e => updateElementProperty('padding', {
+                        ...(selectedElement as ButtonElement).padding,
+                        top: parseFloat(e.target.value) || 0
+                      })} 
+                      className="h-8" 
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Right</Label>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      value={(selectedElement as ButtonElement).padding.right} 
+                      onChange={e => updateElementProperty('padding', {
+                        ...(selectedElement as ButtonElement).padding,
+                        right: parseFloat(e.target.value) || 0
+                      })} 
+                      className="h-8" 
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Bottom</Label>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      value={(selectedElement as ButtonElement).padding.bottom} 
+                      onChange={e => updateElementProperty('padding', {
+                        ...(selectedElement as ButtonElement).padding,
+                        bottom: parseFloat(e.target.value) || 0
+                      })} 
+                      className="h-8" 
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Left</Label>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      value={(selectedElement as ButtonElement).padding.left} 
+                      onChange={e => updateElementProperty('padding', {
+                        ...(selectedElement as ButtonElement).padding,
+                        left: parseFloat(e.target.value) || 0
+                      })} 
+                      className="h-8" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Corner Radius */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs">Corner Radius</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => setCornerRadiusLinked(!cornerRadiusLinked)}
+                    title={cornerRadiusLinked ? "Unlink corners" : "Link corners"}
+                  >
+                    <Link2 className={`w-3 h-3 ${cornerRadiusLinked ? '' : 'opacity-30'}`} />
+                  </Button>
+                </div>
+                {cornerRadiusLinked ? (
+                  <Input 
+                    type="number" 
+                    min="0" 
+                    value={(selectedElement as ButtonElement).cornerRadii?.topLeft ?? (selectedElement as ButtonElement).cornerRadius ?? 0} 
+                    onChange={e => {
+                      const value = parseFloat(e.target.value) || 0;
+                      updateElementProperty('cornerRadii', {
+                        topLeft: value,
+                        topRight: value,
+                        bottomLeft: value,
+                        bottomRight: value,
+                      });
+                    }} 
+                    className="h-8" 
+                  />
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Top Left</Label>
+                      <Input 
+                        type="number" 
+                        min="0" 
+                        value={(selectedElement as ButtonElement).cornerRadii?.topLeft ?? 0} 
+                        onChange={e => {
+                          const current = (selectedElement as ButtonElement).cornerRadii || { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 };
+                          updateElementProperty('cornerRadii', {
+                            ...current,
+                            topLeft: parseFloat(e.target.value) || 0
+                          });
+                        }} 
+                        className="h-8" 
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Top Right</Label>
+                      <Input 
+                        type="number" 
+                        min="0" 
+                        value={(selectedElement as ButtonElement).cornerRadii?.topRight ?? 0} 
+                        onChange={e => {
+                          const current = (selectedElement as ButtonElement).cornerRadii || { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 };
+                          updateElementProperty('cornerRadii', {
+                            ...current,
+                            topRight: parseFloat(e.target.value) || 0
+                          });
+                        }} 
+                        className="h-8" 
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Bottom Left</Label>
+                      <Input 
+                        type="number" 
+                        min="0" 
+                        value={(selectedElement as ButtonElement).cornerRadii?.bottomLeft ?? 0} 
+                        onChange={e => {
+                          const current = (selectedElement as ButtonElement).cornerRadii || { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 };
+                          updateElementProperty('cornerRadii', {
+                            ...current,
+                            bottomLeft: parseFloat(e.target.value) || 0
+                          });
+                        }} 
+                        className="h-8" 
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Bottom Right</Label>
+                      <Input 
+                        type="number" 
+                        min="0" 
+                        value={(selectedElement as ButtonElement).cornerRadii?.bottomRight ?? 0} 
+                        onChange={e => {
+                          const current = (selectedElement as ButtonElement).cornerRadii || { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 };
+                          updateElementProperty('cornerRadii', {
+                            ...current,
+                            bottomRight: parseFloat(e.target.value) || 0
+                          });
+                        }} 
+                        className="h-8" 
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Border */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">Border Color</Label>
+                  <Input type="color" value={(selectedElement as ButtonElement).borderColor || '#000000'} onChange={e => updateElementProperty('borderColor', e.target.value)} className="h-8" />
+                </div>
+                <div>
+                  <Label className="text-xs">Border Width</Label>
+                  <Input type="number" min="0" value={(selectedElement as ButtonElement).borderWidth} onChange={e => updateElementProperty('borderWidth', parseFloat(e.target.value) || 0)} className="h-8" />
+                </div>
               </div>
             </div>}
 
