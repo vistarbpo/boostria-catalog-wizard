@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, forwardRef, useImperativeHandle } from "react";
+import { createRoot } from 'react-dom/client';
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -18,6 +19,7 @@ import { CanvasElement } from "./CanvasElement";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
+import { ExportRenderer } from './ExportRenderer';
 interface TemplateCanvasProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
 }
@@ -278,10 +280,6 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
 
   // Export functionality
   const exportAsJPG = useCallback(async () => {
-    if (!canvasRef.current) {
-      toast.error("Canvas not ready for export");
-      return;
-    }
     try {
       const loadingToast = toast.loading("Preparing export...");
 
@@ -294,74 +292,49 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
 
       // Get background color from canvas settings (default to white if not set)
       const bgColor = canvasStore.canvasState.backgroundColor || '#ffffff';
-      
-      console.log('Export Debug:', {
-        backgroundColor: bgColor,
-        backgroundType: canvasStore.canvasState.backgroundType,
-        backgroundImageUrl: canvasStore.canvasState.backgroundImageUrl,
-        backgroundMode: canvasStore.canvasState.backgroundMode
+
+      // Create a temporary container for the export renderer
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '-9999px';
+      tempContainer.style.width = `${currentSize.width}px`;
+      tempContainer.style.height = `${currentSize.height}px`;
+      document.body.appendChild(tempContainer);
+
+      // Render export view using React
+      const root = createRoot(tempContainer);
+      await new Promise<void>((resolve) => {
+        root.render(
+          <ExportRenderer
+            elements={canvasStore.canvasState.elements}
+            canvasWidth={currentSize.width}
+            canvasHeight={currentSize.height}
+            backgroundColor={bgColor}
+            backgroundType={canvasStore.canvasState.backgroundType}
+            backgroundImageUrl={canvasStore.canvasState.backgroundImageUrl}
+            backgroundMode={canvasStore.canvasState.backgroundMode}
+          />
+        );
+        // Wait for render to complete
+        setTimeout(resolve, 200);
       });
-      
-      // Create the canvas container with correct background
-      const tempCanvas = document.createElement('div');
-      tempCanvas.style.position = 'absolute';
-      tempCanvas.style.left = '-9999px';
-      tempCanvas.style.top = '-9999px';
-      tempCanvas.style.width = `${currentSize.width}px`;
-      tempCanvas.style.height = `${currentSize.height}px`;
-      // Always apply the background color from canvas settings
-      tempCanvas.style.backgroundColor = bgColor;
 
-      // Clone the canvas content
-      const canvasContent = canvasRef.current;
-      const elementsOnly = canvasContent.cloneNode(true) as HTMLElement;
-
-      // Make cloned content transparent so tempCanvas background shows through
-      elementsOnly.style.backgroundColor = 'transparent';
-      elementsOnly.style.backgroundImage = 'none';
-      
-      // Apply background image if specified (will layer over the background color)
-      if (canvasStore.canvasState.backgroundType === 'image' && canvasStore.canvasState.backgroundImageUrl) {
-        tempCanvas.style.backgroundImage = `url(${canvasStore.canvasState.backgroundImageUrl})`;
-        tempCanvas.style.backgroundSize = canvasStore.canvasState.backgroundMode === 'cover' ? 'cover' : canvasStore.canvasState.backgroundMode === 'contain' ? 'contain' : canvasStore.canvasState.backgroundMode === 'stretch' ? '100% 100%' : canvasStore.canvasState.backgroundMode === 'tile' ? 'auto' : 'auto';
-        tempCanvas.style.backgroundRepeat = canvasStore.canvasState.backgroundMode === 'tile' ? 'repeat' : 'no-repeat';
-        tempCanvas.style.backgroundPosition = 'center';
-      }
-
-      // Remove all selection handles and controls from the clone
-      const controlsToRemove = elementsOnly.querySelectorAll('.resize-handle, .rotation-handle, .selection-outline, [class*="handle"], [class*="control"]');
-      controlsToRemove.forEach(control => control.remove());
-      
-      // Remove hidden measurement elements used for auto-layout
-      const measurementElements = elementsOnly.querySelectorAll('[data-measurement-element="true"]');
-      measurementElements.forEach(elem => elem.remove());
-      
-      // Clean up button elements for export - ensure proper rendering
-      const buttonElements = elementsOnly.querySelectorAll('[data-button-element="true"]');
-      buttonElements.forEach(btn => {
-        const button = btn as HTMLElement;
-        // Reset any inline display issues and ensure proper box model
-        button.style.display = 'inline-block';
-        button.style.boxSizing = 'border-box';
-      });
-      
-      tempCanvas.appendChild(elementsOnly);
-      document.body.appendChild(tempCanvas);
-      
-      const canvas = await html2canvas(tempCanvas, {
+      // Capture with html2canvas
+      const canvas = await html2canvas(tempContainer.firstChild as HTMLElement, {
         width: currentSize.width,
         height: currentSize.height,
-        backgroundColor: bgColor, // Match the tempCanvas backgroundColor
-        scale: 1,
+        backgroundColor: bgColor,
+        scale: 2,
         useCORS: true,
         allowTaint: true,
-        removeContainer: false,
         logging: false,
-        imageTimeout: 0
+        imageTimeout: 0,
       });
 
-      // Clean up temp element
-      document.body.removeChild(tempCanvas);
+      // Clean up
+      root.unmount();
+      document.body.removeChild(tempContainer);
 
       // Restore original selection
       originalSelection.forEach(id => canvasStore.selectElement(id, true));
