@@ -51,7 +51,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
   const [boxSelectEnd, setBoxSelectEnd] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const editInputRef = useRef<HTMLTextAreaElement>(null);
+  const editInputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
   const canvasSizes = {
     // Instagram
     "instagram-post": {
@@ -332,6 +332,10 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       const controlsToRemove = elementsOnly.querySelectorAll('.resize-handle, .rotation-handle, .selection-outline, [class*="handle"], [class*="control"]');
       controlsToRemove.forEach(control => control.remove());
       
+      // Remove hidden measurement spans used for auto-layout
+      const hiddenSpans = elementsOnly.querySelectorAll('span[style*="visibility: hidden"]');
+      hiddenSpans.forEach(span => span.remove());
+      
       tempCanvas.appendChild(elementsOnly);
       document.body.appendChild(tempCanvas);
       
@@ -538,7 +542,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
                       onMove={canvasStore.moveElement} 
                       onResize={canvasStore.resizeElement} 
                       onRotate={canvasStore.rotateElement} 
-                      onDoubleClick={elementId => {
+                       onDoubleClick={elementId => {
                         if (element.type === 'text') {
                           const textElement = element as any;
                           setEditingElementId(elementId);
@@ -548,8 +552,17 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
                             editInputRef.current?.focus();
                             editInputRef.current?.select();
                           }, 0);
+                        } else if (element.type === 'button') {
+                          const buttonElement = element as any;
+                          setEditingElementId(elementId);
+                          setEditingText(buttonElement.content || '');
+                          // Focus the input after a brief delay to ensure it's rendered
+                          setTimeout(() => {
+                            editInputRef.current?.focus();
+                            editInputRef.current?.select();
+                          }, 0);
                         }
-                      }} 
+                      }}
                     />
                   )}
                   
@@ -567,7 +580,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
                       }}
                     >
                       <textarea
-                        ref={editInputRef}
+                        ref={editInputRef as any}
                         value={editingText}
                         onChange={(e) => setEditingText(e.target.value)}
                         onBlur={() => {
@@ -597,6 +610,55 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
                           direction: (element as any).direction || 'ltr',
                           padding: '4px',
                           overflow: 'auto',
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  {isEditing && element.type === 'button' && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: element.position.x,
+                        top: element.position.y,
+                        width: element.size.width,
+                        height: element.size.height,
+                        transform: `rotate(${element.rotation}deg)`,
+                        transformOrigin: 'top left',
+                        zIndex: 1000,
+                      }}
+                    >
+                      <input
+                        ref={editInputRef as any}
+                        type="text"
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        onBlur={() => {
+                          canvasStore.updateElement(element.id, { content: editingText });
+                          setEditingElementId(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') {
+                            setEditingElementId(null);
+                          } else if (e.key === 'Enter') {
+                            canvasStore.updateElement(element.id, { content: editingText });
+                            setEditingElementId(null);
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          border: '2px solid #3b82f6',
+                          outline: 'none',
+                          background: (element as any).backgroundColor,
+                          color: (element as any).color,
+                          fontSize: `${(element as any).fontSize}px`,
+                          fontFamily: (element as any).fontFamily,
+                          fontWeight: (element as any).fontWeight,
+                          textAlign: (element as any).textAlign,
+                          direction: (element as any).direction || 'ltr',
+                          padding: `${(element as any).padding?.top || 0}px ${(element as any).padding?.right || 0}px ${(element as any).padding?.bottom || 0}px ${(element as any).padding?.left || 0}px`,
+                          borderRadius: (element as any).cornerRadius ? `${(element as any).cornerRadius}px` : '0',
                         }}
                       />
                     </div>

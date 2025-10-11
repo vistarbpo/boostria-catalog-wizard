@@ -459,8 +459,8 @@ const CanvasElementComponent = function CanvasElement({
           if (textMeasureRef.current && onResize) {
             const textWidth = textMeasureRef.current.offsetWidth;
             const totalPadding = buttonElement.padding.left + buttonElement.padding.right;
-            const borderWidth = buttonElement.borderWidth * 2;
-            const newWidth = textWidth + totalPadding + borderWidth;
+            const borderWidth = (buttonElement.borderWidth || 0) * 2;
+            const newWidth = textWidth + totalPadding + borderWidth + 4; // Add 4px buffer for safety
             
             // Only update if width changed significantly (avoid infinite loops)
             if (Math.abs(newWidth - element.size.width) > 2) {
@@ -482,6 +482,7 @@ const CanvasElementComponent = function CanvasElement({
                 fontFamily: buttonElement.fontFamily,
                 fontWeight: buttonElement.fontWeight,
                 pointerEvents: 'none',
+                left: '-9999px', // Move far off screen
               }}
             >
               {buttonElement.content}
@@ -505,8 +506,9 @@ const CanvasElementComponent = function CanvasElement({
                 justifyContent: buttonElement.textAlign === 'center' ? 'center' : buttonElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
                 cursor: element.locked ? 'not-allowed' : 'pointer',
                 whiteSpace: 'nowrap',
-                overflow: 'hidden',
+                overflow: 'visible',
                 userSelect: 'none',
+                boxSizing: 'border-box',
               }}
             >
               {buttonElement.content}
