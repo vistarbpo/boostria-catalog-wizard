@@ -332,9 +332,13 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       const controlsToRemove = elementsOnly.querySelectorAll('.resize-handle, .rotation-handle, .selection-outline, [class*="handle"], [class*="control"]');
       controlsToRemove.forEach(control => control.remove());
       
-      // Remove hidden measurement spans used for auto-layout
-      const hiddenSpans = elementsOnly.querySelectorAll('span[style*="visibility: hidden"]');
-      hiddenSpans.forEach(span => span.remove());
+      // Remove hidden measurement elements used for auto-layout (more reliable selector)
+      const measurementElements = elementsOnly.querySelectorAll('[data-measurement-element="true"]');
+      console.log('Export: Found measurement elements to remove:', measurementElements.length);
+      measurementElements.forEach(elem => {
+        console.log('Export: Removing measurement element:', elem);
+        elem.remove();
+      });
       
       tempCanvas.appendChild(elementsOnly);
       document.body.appendChild(tempCanvas);

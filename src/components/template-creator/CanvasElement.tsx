@@ -474,6 +474,7 @@ const CanvasElementComponent = function CanvasElement({
             {/* Hidden span for measuring text width */}
             <span
               ref={textMeasureRef}
+              data-measurement-element="true"
               style={{
                 position: 'absolute',
                 visibility: 'hidden',
