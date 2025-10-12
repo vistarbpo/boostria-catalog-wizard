@@ -518,7 +518,9 @@ const CanvasElementComponent = function CanvasElement({
                 height: '100%',
               }}
             >
-              {buttonElement.content}
+              <span style={{ border: '2px solid blue', padding: '2px' }}>
+                {buttonElement.content}
+              </span>
             </button>
           </>
         );
