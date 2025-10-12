@@ -491,39 +491,43 @@ const CanvasElementComponent = function CanvasElement({
               {buttonElement.content}
             </span>
             
-            <button
+            <div
               data-button-element="true"
               style={{
                 ...baseStyle,
-                color: buttonElement.color,
                 backgroundColor: buttonElement.backgroundColor,
-                fontSize: `${buttonElement.fontSize}px`,
-                fontFamily: buttonElement.fontFamily,
-                fontWeight: buttonElement.fontWeight,
-                textAlign: 'center',
-                direction: buttonElement.direction || 'ltr',
-                paddingTop: `${buttonElement.padding.top}px`,
-                paddingRight: `${buttonElement.padding.right}px`,
-                paddingBottom: `${buttonElement.padding.bottom}px`,
-                paddingLeft: `${buttonElement.padding.left}px`,
                 borderRadius,
                 border: buttonElement.borderWidth > 0 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}` : 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 cursor: element.locked ? 'not-allowed' : 'pointer',
-                whiteSpace: 'nowrap',
-                userSelect: 'none',
                 boxSizing: 'border-box',
-                outline: 'none',
                 width: '100%',
                 height: '100%',
-                lineHeight: 'normal',
-                verticalAlign: 'middle',
+                display: 'table',
+                padding: 0,
               }}
             >
-              {buttonElement.content}
-            </button>
+              <div
+                style={{
+                  display: 'table-cell',
+                  verticalAlign: 'middle',
+                  textAlign: 'center',
+                  color: buttonElement.color,
+                  fontSize: `${buttonElement.fontSize}px`,
+                  fontFamily: buttonElement.fontFamily,
+                  fontWeight: buttonElement.fontWeight,
+                  direction: buttonElement.direction || 'ltr',
+                  paddingTop: `${buttonElement.padding.top}px`,
+                  paddingRight: `${buttonElement.padding.right}px`,
+                  paddingBottom: `${buttonElement.padding.bottom}px`,
+                  paddingLeft: `${buttonElement.padding.left}px`,
+                  whiteSpace: 'nowrap',
+                  userSelect: 'none',
+                  lineHeight: '1',
+                }}
+              >
+                {buttonElement.content}
+              </div>
+            </div>
           </>
         );
       }
