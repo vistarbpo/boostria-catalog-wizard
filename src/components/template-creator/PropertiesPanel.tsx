@@ -11,7 +11,7 @@ import { Badge } from "../ui/badge";
 import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
-import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, Strikethrough, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement } from "../../types/canvas";
 import { useProduct } from "../../contexts/ProductContext";
@@ -395,6 +395,92 @@ export function PropertiesPanel({
               }].map(align => <Button key={align.value} variant={(selectedElement as TextElement).textAlign === align.value ? "default" : "outline"} size="sm" onClick={() => updateElementProperty('textAlign', align.value)} className="h-8 w-8 p-0">
                       <align.icon className="w-4 h-4" />
                     </Button>)}
+                </div>
+              </div>
+
+              {/* Text Decoration */}
+              <div>
+                <Label className="text-xs mb-2 block">Decoration</Label>
+                <div className="flex gap-1">
+                  <Button 
+                    variant={(selectedElement as TextElement).textDecoration === 'none' || !(selectedElement as TextElement).textDecoration ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => updateElementProperty('textDecoration', 'none')} 
+                    className="h-8 flex-1"
+                    title="None"
+                  >
+                    —
+                  </Button>
+                  <Button 
+                    variant={(selectedElement as TextElement).textDecoration === 'underline' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => updateElementProperty('textDecoration', 'underline')} 
+                    className="h-8 w-8 p-0"
+                    title="Underline"
+                  >
+                    <Underline className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant={(selectedElement as TextElement).textDecoration === 'line-through' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => updateElementProperty('textDecoration', 'line-through')} 
+                    className="h-8 w-8 p-0"
+                    title="Strikethrough"
+                  >
+                    <Strikethrough className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Text Case Transform */}
+              <div>
+                <Label className="text-xs mb-2 block">Case</Label>
+                <div className="grid grid-cols-5 gap-1">
+                  <Button 
+                    variant={(selectedElement as TextElement).textTransform === 'none' || !(selectedElement as TextElement).textTransform ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => updateElementProperty('textTransform', 'none')} 
+                    className="h-8 text-xs"
+                    title="None"
+                  >
+                    —
+                  </Button>
+                  <Button 
+                    variant={(selectedElement as TextElement).textTransform === 'uppercase' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => updateElementProperty('textTransform', 'uppercase')} 
+                    className="h-8 text-xs font-semibold"
+                    title="Uppercase"
+                  >
+                    AG
+                  </Button>
+                  <Button 
+                    variant={(selectedElement as TextElement).textTransform === 'lowercase' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => updateElementProperty('textTransform', 'lowercase')} 
+                    className="h-8 text-xs"
+                    title="Lowercase"
+                  >
+                    ag
+                  </Button>
+                  <Button 
+                    variant={(selectedElement as TextElement).textTransform === 'capitalize' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => updateElementProperty('textTransform', 'capitalize')} 
+                    className="h-8 text-xs"
+                    title="Capitalize"
+                  >
+                    Ag
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled
+                    className="h-8 text-xs opacity-50"
+                    title="More options"
+                  >
+                    ›
+                  </Button>
                 </div>
               </div>
 

@@ -42,6 +42,9 @@ export interface TextElement extends BaseElement {
     bottom: number;
     left: number;
   };
+  // Text decoration
+  textDecoration?: 'none' | 'underline' | 'line-through';
+  textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
   // Dynamic content properties
   isDynamic?: boolean;
   dynamicField?: string; // Field name from product data like 'title', 'price', etc.

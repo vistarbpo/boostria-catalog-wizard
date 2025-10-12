@@ -429,6 +429,8 @@ const CanvasElementComponent = function CanvasElement({
               direction: textElement.direction || 'ltr',
               letterSpacing: `${textElement.letterSpacing}px`,
               lineHeight: textElement.lineHeight,
+              textDecoration: textElement.textDecoration || 'none',
+              textTransform: textElement.textTransform || 'none',
               backgroundColor: textElement.backgroundColor,
               border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
               padding: `${textElement.padding.top}px ${textElement.padding.right}px ${textElement.padding.bottom}px ${textElement.padding.left}px`,
