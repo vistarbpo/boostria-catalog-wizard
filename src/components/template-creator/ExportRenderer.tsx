@@ -193,44 +193,42 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           
           case 'triangle':
             return (
-              <svg 
+              <div
                 key={element.id}
-                width={element.size.width}
-                height={element.size.height}
-                viewBox="0 0 100 100" 
                 style={{
-                  position: 'absolute',
-                  left: `${element.position.x}px`,
-                  top: `${element.position.y}px`,
-                  transform: `rotate(${element.rotation}deg)`,
-                  opacity: element.opacity / 100,
-                  zIndex: element.zIndex,
-                  pointerEvents: 'none',
+                  ...baseStyle,
+                  boxSizing: 'border-box',
                 }}
               >
-                <defs>
-                  {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
-                    <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
-                      <image 
-                        href={shapeElement.fillImageUrl} 
-                        x="0" y="0" 
-                        width="100" height="100" 
-                        preserveAspectRatio={
-                          shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
-                          shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
-                          'none'
-                        }
-                      />
-                    </pattern>
-                  )}
-                </defs>
-                <polygon 
-                  points="50,10 90,90 10,90" 
-                  fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
-                  stroke={shapeElement.strokeColor}
-                  strokeWidth={shapeElement.strokeWidth}
-                />
-              </svg>
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 100 100"
+                >
+                  <defs>
+                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
+                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
+                        <image 
+                          href={shapeElement.fillImageUrl} 
+                          x="0" y="0" 
+                          width="100" height="100" 
+                          preserveAspectRatio={
+                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
+                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
+                            'none'
+                          }
+                        />
+                      </pattern>
+                    )}
+                  </defs>
+                  <polygon 
+                    points="50,10 90,90 10,90" 
+                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
+                    stroke={shapeElement.strokeColor}
+                    strokeWidth={shapeElement.strokeWidth}
+                  />
+                </svg>
+              </div>
             );
           
           default:
