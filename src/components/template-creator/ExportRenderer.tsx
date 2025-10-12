@@ -57,8 +57,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               letterSpacing: `${textElement.letterSpacing}px`,
               direction: textElement.direction || 'ltr',
               textDecoration: textElement.textDecoration || 'none',
-              textDecorationThickness: '2px',
-              textDecorationSkipInk: 'none',
               textTransform: textElement.textTransform || 'none',
               backgroundColor: textElement.backgroundColor,
               border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
@@ -80,23 +78,62 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         const borderRadius = imageElement.cornerRadii
           ? `${imageElement.cornerRadii.topLeft}px ${imageElement.cornerRadii.topRight}px ${imageElement.cornerRadii.bottomRight}px ${imageElement.cornerRadii.bottomLeft}px`
           : imageElement.cornerRadius || 0;
+        
+        // Use dynamic image URL if fillType is 'dynamic' and fillImageUrl is set
+        const imageSrc = imageElement.fillType === 'dynamic' && imageElement.fillImageUrl 
+          ? imageElement.fillImageUrl 
+          : imageElement.src;
+        
+        const imageStyle: React.CSSProperties = {
+          ...baseStyle,
+          overflow: 'hidden',
+          borderRadius,
+        };
+
+        // Handle dynamic fill modes for images - same logic as CanvasElement
+        let objectFit: React.CSSProperties['objectFit'] = 'cover';
+        if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl) {
+          if (imageElement.fillMode) {
+            objectFit = 
+              imageElement.fillMode === 'cover' ? 'cover' :
+              imageElement.fillMode === 'contain' ? 'contain' :
+              imageElement.fillMode === 'stretch' ? 'fill' :
+              imageElement.fillMode === 'center' ? 'none' :
+              'cover';
+            
+            if (imageElement.fillMode === 'tile') {
+              // Return div with background for tiling
+              return (
+                <div
+                  key={element.id}
+                  style={{
+                    ...imageStyle,
+                    backgroundImage: `url(${imageElement.fillImageUrl})`,
+                    backgroundRepeat: 'repeat',
+                    backgroundSize: 'auto',
+                    backgroundPosition: 'center',
+                  }}
+                />
+              );
+            }
+          }
+        } else {
+          // Use original objectFit for non-dynamic images
+          objectFit = imageElement.objectFit;
+        }
           
         return (
           <div
             key={element.id}
-            style={{
-              ...baseStyle,
-              overflow: 'hidden',
-              borderRadius,
-            }}
+            style={imageStyle}
           >
             <img
-              src={imageElement.fillType === 'dynamic' ? imageElement.fillImageUrl : imageElement.src}
+              src={imageSrc}
               alt={imageElement.alt || ''}
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: imageElement.objectFit || 'cover',
+                objectFit,
                 display: 'block',
               }}
               crossOrigin="anonymous"
