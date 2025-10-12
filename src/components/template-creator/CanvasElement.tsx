@@ -430,7 +430,7 @@ const CanvasElementComponent = function CanvasElement({
               letterSpacing: `${textElement.letterSpacing}px`,
               lineHeight: textElement.lineHeight,
               backgroundColor: textElement.backgroundColor,
-              border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : '2px solid blue',
+              border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
               padding: `${textElement.padding.top}px ${textElement.padding.right}px ${textElement.padding.bottom}px ${textElement.padding.left}px`,
               whiteSpace: textElement.textWrapping ? 'normal' : 'nowrap',
               overflow: 'hidden',
