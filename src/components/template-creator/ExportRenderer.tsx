@@ -43,6 +43,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
     switch (element.type) {
       case 'text': {
         const textElement = element as TextElement;
+        const textContent = textElement.content;
+        const hasDecoration = textElement.textDecoration && textElement.textDecoration !== 'none';
+        
         return (
           <div
             key={element.id}
@@ -56,7 +59,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               lineHeight: textElement.lineHeight,
               letterSpacing: `${textElement.letterSpacing}px`,
               direction: textElement.direction || 'ltr',
-              textDecoration: textElement.textDecoration || 'none',
               textTransform: textElement.textTransform || 'none',
               backgroundColor: textElement.backgroundColor,
               border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
@@ -66,9 +68,36 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              position: 'relative',
             }}
           >
-            {textElement.content}
+            <span style={{
+              position: 'relative',
+              display: 'inline-block',
+            }}>
+              {textContent}
+              {hasDecoration && textElement.textDecoration === 'underline' && (
+                <span style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: '0.1em',
+                  height: '0.1em',
+                  backgroundColor: textElement.color,
+                }} />
+              )}
+              {hasDecoration && textElement.textDecoration === 'line-through' && (
+                <span style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: '50%',
+                  height: '0.1em',
+                  backgroundColor: textElement.color,
+                  transform: 'translateY(-50%)',
+                }} />
+              )}
+            </span>
           </div>
         );
       }
@@ -90,36 +119,34 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           borderRadius,
         };
 
-        // Handle dynamic fill modes for images - same logic as CanvasElement
-        let objectFit: React.CSSProperties['objectFit'] = 'cover';
-        if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl) {
-          if (imageElement.fillMode) {
-            objectFit = 
-              imageElement.fillMode === 'cover' ? 'cover' :
-              imageElement.fillMode === 'contain' ? 'contain' :
-              imageElement.fillMode === 'stretch' ? 'fill' :
-              imageElement.fillMode === 'center' ? 'none' :
-              'cover';
-            
-            if (imageElement.fillMode === 'tile') {
-              // Return div with background for tiling
-              return (
-                <div
-                  key={element.id}
-                  style={{
-                    ...imageStyle,
-                    backgroundImage: `url(${imageElement.fillImageUrl})`,
-                    backgroundRepeat: 'repeat',
-                    backgroundSize: 'auto',
-                    backgroundPosition: 'center',
-                  }}
-                />
-              );
-            }
+        // Determine objectFit - prioritize objectFit property
+        let objectFit: React.CSSProperties['objectFit'] = imageElement.objectFit || 'cover';
+        
+        // Only override if using dynamic fill with explicit fillMode
+        if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl && imageElement.fillMode) {
+          if (imageElement.fillMode === 'tile') {
+            // Return div with background for tiling
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...imageStyle,
+                  backgroundImage: `url(${imageElement.fillImageUrl})`,
+                  backgroundRepeat: 'repeat',
+                  backgroundSize: 'auto',
+                  backgroundPosition: 'center',
+                }}
+              />
+            );
           }
-        } else {
-          // Use original objectFit for non-dynamic images
-          objectFit = imageElement.objectFit;
+          
+          // Map fillMode to objectFit
+          objectFit = 
+            imageElement.fillMode === 'cover' ? 'cover' :
+            imageElement.fillMode === 'contain' ? 'contain' :
+            imageElement.fillMode === 'stretch' ? 'fill' :
+            imageElement.fillMode === 'center' ? 'none' :
+            'cover';
         }
           
         return (

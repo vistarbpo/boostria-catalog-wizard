@@ -417,6 +417,9 @@ const CanvasElementComponent = function CanvasElement({
     switch (element.type) {
       case 'text': {
         const textElement = element as TextElement;
+        const textContent = formatDynamicText(textElement);
+        const hasDecoration = textElement.textDecoration && textElement.textDecoration !== 'none';
+        
         return (
           <div
             style={{
@@ -429,7 +432,6 @@ const CanvasElementComponent = function CanvasElement({
               direction: textElement.direction || 'ltr',
               letterSpacing: `${textElement.letterSpacing}px`,
               lineHeight: textElement.lineHeight,
-              textDecoration: textElement.textDecoration || 'none',
               textTransform: textElement.textTransform || 'none',
               backgroundColor: textElement.backgroundColor,
               border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
@@ -440,9 +442,36 @@ const CanvasElementComponent = function CanvasElement({
               alignItems: 'center',
               justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
               cursor: element.locked ? 'not-allowed' : 'text',
+              position: 'relative',
             }}
           >
-            {formatDynamicText(textElement)}
+            <span style={{
+              position: 'relative',
+              display: 'inline-block',
+            }}>
+              {textContent}
+              {hasDecoration && textElement.textDecoration === 'underline' && (
+                <span style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: '0.1em',
+                  height: '0.1em',
+                  backgroundColor: textElement.color,
+                }} />
+              )}
+              {hasDecoration && textElement.textDecoration === 'line-through' && (
+                <span style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: '50%',
+                  height: '0.1em',
+                  backgroundColor: textElement.color,
+                  transform: 'translateY(-50%)',
+                }} />
+              )}
+            </span>
           </div>
         );
       }
@@ -783,29 +812,30 @@ const CanvasElementComponent = function CanvasElement({
           borderRadius: getBorderRadiusStyle(imageElement as any),
         };
 
-        // Handle dynamic fill modes for images
-        if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl) {
-          if (imageElement.fillMode) {
-            imageStyle.objectFit = 
-              imageElement.fillMode === 'cover' ? 'cover' :
-              imageElement.fillMode === 'contain' ? 'contain' :
-              imageElement.fillMode === 'stretch' ? 'fill' :
-              imageElement.fillMode === 'center' ? 'none' :
-              'cover';
-            
-            if (imageElement.fillMode === 'tile') {
-              imageStyle.backgroundImage = `url(${imageElement.fillImageUrl})`;
-              imageStyle.backgroundRepeat = 'repeat';
-              imageStyle.backgroundSize = 'auto';
-              imageStyle.backgroundPosition = 'center';
-              // Return empty div with background for tiling
-              return <div style={imageStyle} />;
-            }
+        // Determine objectFit - prioritize objectFit property
+        let objectFit: React.CSSProperties['objectFit'] = imageElement.objectFit || 'cover';
+        
+        // Only override if using dynamic fill with explicit fillMode
+        if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl && imageElement.fillMode) {
+          if (imageElement.fillMode === 'tile') {
+            imageStyle.backgroundImage = `url(${imageElement.fillImageUrl})`;
+            imageStyle.backgroundRepeat = 'repeat';
+            imageStyle.backgroundSize = 'auto';
+            imageStyle.backgroundPosition = 'center';
+            // Return empty div with background for tiling
+            return <div style={imageStyle} />;
           }
-        } else {
-          // Use original objectFit for non-dynamic images
-          imageStyle.objectFit = imageElement.objectFit;
+          
+          // Map fillMode to objectFit
+          objectFit = 
+            imageElement.fillMode === 'cover' ? 'cover' :
+            imageElement.fillMode === 'contain' ? 'contain' :
+            imageElement.fillMode === 'stretch' ? 'fill' :
+            imageElement.fillMode === 'center' ? 'none' :
+            'cover';
         }
+        
+        imageStyle.objectFit = objectFit;
         
         return (
           <img
