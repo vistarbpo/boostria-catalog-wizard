@@ -20,6 +20,13 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   backgroundImageUrl,
   backgroundMode,
 }) => {
+  const getBorderRadiusStyle = (shapeElement: ShapeElement) => {
+    if (shapeElement.cornerRadii) {
+      return `${shapeElement.cornerRadii.topLeft}px ${shapeElement.cornerRadii.topRight}px ${shapeElement.cornerRadii.bottomRight}px ${shapeElement.cornerRadii.bottomLeft}px`;
+    }
+    return shapeElement.cornerRadius || 0;
+  };
+
   const renderElement = (element: CanvasElement) => {
     const baseStyle: React.CSSProperties = {
       position: 'absolute',
@@ -28,7 +35,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
       width: `${element.size.width}px`,
       height: `${element.size.height}px`,
       transform: `rotate(${element.rotation}deg)`,
-      opacity: element.opacity,
+      opacity: element.opacity / 100,
       zIndex: element.zIndex,
       pointerEvents: 'none',
     };
@@ -47,11 +54,16 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               fontWeight: textElement.fontWeight,
               textAlign: textElement.textAlign,
               lineHeight: textElement.lineHeight,
-              letterSpacing: textElement.letterSpacing ? `${textElement.letterSpacing}px` : undefined,
+              letterSpacing: `${textElement.letterSpacing}px`,
               direction: textElement.direction || 'ltr',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
+              backgroundColor: textElement.backgroundColor,
+              border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
+              padding: `${textElement.padding.top}px ${textElement.padding.right}px ${textElement.padding.bottom}px ${textElement.padding.left}px`,
+              whiteSpace: textElement.textWrapping ? 'normal' : 'nowrap',
               overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
             }}
           >
             {textElement.content}
@@ -115,14 +127,14 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               border: buttonElement.borderWidth > 0
                 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
                 : 'none',
-              display: 'inline-block',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'default',
               whiteSpace: 'nowrap',
               userSelect: 'none',
               boxSizing: 'border-box',
               outline: 'none',
-              width: `${element.size.width}px`,
-              height: `${element.size.height}px`,
             }}
           >
             {buttonElement.content}
@@ -132,24 +144,107 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
 
       case 'shape': {
         const shapeElement = element as ShapeElement;
-        const borderRadius = shapeElement.cornerRadii
-          ? `${shapeElement.cornerRadii.topLeft}px ${shapeElement.cornerRadii.topRight}px ${shapeElement.cornerRadii.bottomRight}px ${shapeElement.cornerRadii.bottomLeft}px`
-          : shapeElement.cornerRadius || 0;
+        
+        const shapeBaseStyle: React.CSSProperties = {
+          ...baseStyle,
+          border: shapeElement.strokeWidth > 0 
+            ? `${shapeElement.strokeWidth}px solid ${shapeElement.strokeColor}` 
+            : undefined,
+        };
 
-        return (
-          <div
-            key={element.id}
-            style={{
-              ...baseStyle,
-              backgroundColor: shapeElement.fillColor,
-              borderRadius,
-              border: shapeElement.strokeWidth > 0
-                ? `${shapeElement.strokeWidth}px solid ${shapeElement.strokeColor}`
-                : 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-        );
+        // Handle image fill
+        if (shapeElement.fillType === 'image' && shapeElement.fillImageUrl) {
+          shapeBaseStyle.backgroundImage = `url(${shapeElement.fillImageUrl})`;
+          shapeBaseStyle.backgroundSize = 
+            shapeElement.fillMode === 'cover' ? 'cover' :
+            shapeElement.fillMode === 'contain' ? 'contain' :
+            shapeElement.fillMode === 'stretch' ? '100% 100%' :
+            shapeElement.fillMode === 'tile' ? 'auto' : 'cover';
+          shapeBaseStyle.backgroundRepeat = shapeElement.fillMode === 'tile' ? 'repeat' : 'no-repeat';
+          shapeBaseStyle.backgroundPosition = 'center';
+        } else {
+          shapeBaseStyle.backgroundColor = shapeElement.fillColor;
+        }
+
+        switch (shapeElement.shapeType) {
+          case 'rectangle':
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...shapeBaseStyle,
+                  borderRadius: getBorderRadiusStyle(shapeElement),
+                  boxSizing: 'border-box',
+                }}
+              />
+            );
+          
+          case 'circle':
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...shapeBaseStyle,
+                  borderRadius: '50%',
+                  boxSizing: 'border-box',
+                }}
+              />
+            );
+          
+          case 'triangle':
+            return (
+              <svg 
+                key={element.id}
+                width={element.size.width}
+                height={element.size.height}
+                viewBox="0 0 100 100" 
+                style={{
+                  position: 'absolute',
+                  left: `${element.position.x}px`,
+                  top: `${element.position.y}px`,
+                  transform: `rotate(${element.rotation}deg)`,
+                  opacity: element.opacity / 100,
+                  zIndex: element.zIndex,
+                  pointerEvents: 'none',
+                }}
+              >
+                <defs>
+                  {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
+                    <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
+                      <image 
+                        href={shapeElement.fillImageUrl} 
+                        x="0" y="0" 
+                        width="100" height="100" 
+                        preserveAspectRatio={
+                          shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
+                          shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
+                          'none'
+                        }
+                      />
+                    </pattern>
+                  )}
+                </defs>
+                <polygon 
+                  points="50,10 90,90 10,90" 
+                  fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
+                  stroke={shapeElement.strokeColor}
+                  strokeWidth={shapeElement.strokeWidth}
+                />
+              </svg>
+            );
+          
+          default:
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...shapeBaseStyle,
+                  borderRadius: getBorderRadiusStyle(shapeElement),
+                  boxSizing: 'border-box',
+                }}
+              />
+            );
+        }
       }
 
       default:
