@@ -508,7 +508,7 @@ const CanvasElementComponent = function CanvasElement({
                 paddingLeft: `${buttonElement.padding.left}px`,
                 borderRadius,
                 border: buttonElement.borderWidth > 0 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}` : 'none',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: element.locked ? 'not-allowed' : 'pointer',
@@ -518,15 +518,11 @@ const CanvasElementComponent = function CanvasElement({
                 outline: 'none',
                 width: '100%',
                 height: '100%',
+                lineHeight: 'normal',
+                verticalAlign: 'middle',
               }}
             >
-              <span style={{
-                display: 'inline-block',
-                lineHeight: '1',
-                transform: 'translateY(0.05em)'
-              }}>
-                {buttonElement.content}
-              </span>
+              {buttonElement.content}
             </button>
           </>
         );

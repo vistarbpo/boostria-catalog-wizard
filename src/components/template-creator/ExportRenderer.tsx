@@ -119,12 +119,15 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               fontWeight: buttonElement.fontWeight,
               textAlign: 'center',
               direction: buttonElement.direction || 'ltr',
-              padding: `${buttonElement.padding.top}px ${buttonElement.padding.right}px ${buttonElement.padding.bottom}px ${buttonElement.padding.left}px`,
+              paddingTop: `${buttonElement.padding.top}px`,
+              paddingRight: `${buttonElement.padding.right}px`,
+              paddingBottom: `${buttonElement.padding.bottom}px`,
+              paddingLeft: `${buttonElement.padding.left}px`,
               borderRadius,
               border: buttonElement.borderWidth > 0
                 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
                 : 'none',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'default',
@@ -132,15 +135,11 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               userSelect: 'none',
               boxSizing: 'border-box',
               outline: 'none',
+              lineHeight: 'normal',
+              verticalAlign: 'middle',
             }}
           >
-            <span style={{
-              display: 'inline-block',
-              lineHeight: '1',
-              transform: 'translateY(0.05em)'
-            }}>
-              {buttonElement.content}
-            </span>
+            {buttonElement.content}
           </button>
         );
       }
