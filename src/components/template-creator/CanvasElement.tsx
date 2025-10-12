@@ -518,10 +518,15 @@ const CanvasElementComponent = function CanvasElement({
                 outline: 'none',
                 width: '100%',
                 height: '100%',
-                lineHeight: '1',
               }}
             >
-              {buttonElement.content}
+              <span style={{
+                display: 'inline-block',
+                lineHeight: '1',
+                transform: 'translateY(0.05em)'
+              }}>
+                {buttonElement.content}
+              </span>
             </button>
           </>
         );

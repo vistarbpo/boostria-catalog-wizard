@@ -127,7 +127,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              lineHeight: '1',
               cursor: 'default',
               whiteSpace: 'nowrap',
               userSelect: 'none',
@@ -135,7 +134,13 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               outline: 'none',
             }}
           >
-            {buttonElement.content}
+            <span style={{
+              display: 'inline-block',
+              lineHeight: '1',
+              transform: 'translateY(0.05em)'
+            }}>
+              {buttonElement.content}
+            </span>
           </button>
         );
       }
