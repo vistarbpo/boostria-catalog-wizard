@@ -500,7 +500,7 @@ const CanvasElementComponent = function CanvasElement({
                 fontSize: `${buttonElement.fontSize}px`,
                 fontFamily: buttonElement.fontFamily,
                 fontWeight: buttonElement.fontWeight,
-                textAlign: buttonElement.textAlign,
+                textAlign: 'center',
                 direction: buttonElement.direction || 'ltr',
                 paddingTop: `${buttonElement.padding.top}px`,
                 paddingRight: `${buttonElement.padding.right}px`,
@@ -508,7 +508,9 @@ const CanvasElementComponent = function CanvasElement({
                 paddingLeft: `${buttonElement.padding.left}px`,
                 borderRadius,
                 border: buttonElement.borderWidth > 0 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}` : 'none',
-                display: 'inline-block',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 cursor: element.locked ? 'not-allowed' : 'pointer',
                 whiteSpace: 'nowrap',
                 userSelect: 'none',
@@ -516,11 +518,10 @@ const CanvasElementComponent = function CanvasElement({
                 outline: 'none',
                 width: '100%',
                 height: '100%',
+                lineHeight: '1',
               }}
             >
-              <span style={{ border: '2px solid blue', padding: '2px' }}>
-                {buttonElement.content}
-              </span>
+              {buttonElement.content}
             </button>
           </>
         );
