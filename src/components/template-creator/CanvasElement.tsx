@@ -502,31 +502,30 @@ const CanvasElementComponent = function CanvasElement({
                 boxSizing: 'border-box',
                 width: '100%',
                 height: '100%',
-                display: 'table',
-                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingTop: `${buttonElement.padding.top}px`,
+                paddingRight: `${buttonElement.padding.right}px`,
+                paddingBottom: `${buttonElement.padding.bottom}px`,
+                paddingLeft: `${buttonElement.padding.left}px`,
               }}
             >
-              <div
+              <span
                 style={{
-                  display: 'table-cell',
-                  verticalAlign: 'middle',
-                  textAlign: 'center',
                   color: buttonElement.color,
                   fontSize: `${buttonElement.fontSize}px`,
                   fontFamily: buttonElement.fontFamily,
                   fontWeight: buttonElement.fontWeight,
                   direction: buttonElement.direction || 'ltr',
-                  paddingTop: `${buttonElement.padding.top}px`,
-                  paddingRight: `${buttonElement.padding.right}px`,
-                  paddingBottom: `${buttonElement.padding.bottom}px`,
-                  paddingLeft: `${buttonElement.padding.left}px`,
                   whiteSpace: 'nowrap',
                   userSelect: 'none',
                   lineHeight: '1',
+                  display: 'block',
                 }}
               >
                 {buttonElement.content}
-              </div>
+              </span>
             </div>
           </>
         );
