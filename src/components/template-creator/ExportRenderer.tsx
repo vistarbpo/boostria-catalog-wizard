@@ -57,6 +57,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               letterSpacing: `${textElement.letterSpacing}px`,
               direction: textElement.direction || 'ltr',
               textDecoration: textElement.textDecoration || 'none',
+              textDecorationThickness: '2px',
+              textDecorationSkipInk: 'none',
               textTransform: textElement.textTransform || 'none',
               backgroundColor: textElement.backgroundColor,
               border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
