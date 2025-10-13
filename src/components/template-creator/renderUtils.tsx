@@ -30,36 +30,22 @@ export const getTextStyles = (textElement: TextElement, baseStyle: React.CSSProp
 };
 
 export const renderTextDecoration = (textElement: TextElement, content: string) => {
-  const hasDecoration = textElement.textDecoration && textElement.textDecoration !== 'none';
+  const decorationStyle: React.CSSProperties = {};
+  
+  if (textElement.textDecoration === 'underline') {
+    decorationStyle.textDecoration = 'underline';
+    decorationStyle.textDecorationColor = textElement.color;
+    decorationStyle.textDecorationThickness = '1.5px';
+    decorationStyle.textUnderlineOffset = '2px';
+  } else if (textElement.textDecoration === 'line-through') {
+    decorationStyle.textDecoration = 'line-through';
+    decorationStyle.textDecorationColor = textElement.color;
+    decorationStyle.textDecorationThickness = '1.5px';
+  }
   
   return (
-    <span style={{
-      position: 'relative',
-      display: 'inline',
-      width: '100%',
-      height: '100%',
-    }}>
+    <span style={decorationStyle}>
       {content}
-      {hasDecoration && textElement.textDecoration === 'underline' && (
-        <span style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: '0.15em',
-          height: '0.08em',
-          backgroundColor: textElement.color,
-        }} />
-      )}
-      {hasDecoration && textElement.textDecoration === 'line-through' && (
-        <span style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: '45%',
-          height: '0.08em',
-          backgroundColor: textElement.color,
-        }} />
-      )}
     </span>
   );
 };
