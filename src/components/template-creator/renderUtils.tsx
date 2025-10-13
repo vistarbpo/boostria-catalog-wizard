@@ -35,7 +35,9 @@ export const renderTextDecoration = (textElement: TextElement, content: string) 
   return (
     <span style={{
       position: 'relative',
-      display: 'inline-block',
+      display: 'inline',
+      width: '100%',
+      height: '100%',
     }}>
       {content}
       {hasDecoration && textElement.textDecoration === 'underline' && (
@@ -43,8 +45,8 @@ export const renderTextDecoration = (textElement: TextElement, content: string) 
           position: 'absolute',
           left: 0,
           right: 0,
-          bottom: '0.1em',
-          height: '0.1em',
+          bottom: '0.15em',
+          height: '0.08em',
           backgroundColor: textElement.color,
         }} />
       )}
@@ -53,10 +55,9 @@ export const renderTextDecoration = (textElement: TextElement, content: string) 
           position: 'absolute',
           left: 0,
           right: 0,
-          top: '50%',
-          height: '0.1em',
+          top: '45%',
+          height: '0.08em',
           backgroundColor: textElement.color,
-          transform: 'translateY(-50%)',
         }} />
       )}
     </span>
@@ -90,8 +91,7 @@ export const getButtonStyles = (buttonElement: ButtonElement, baseStyle: React.C
       direction: buttonElement.direction || 'ltr',
       whiteSpace: 'nowrap' as const,
       userSelect: 'none' as const,
-      lineHeight: '1',
-      display: 'block',
+      textAlign: 'center' as const,
     },
   };
 };
