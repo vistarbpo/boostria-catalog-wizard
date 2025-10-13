@@ -1,6 +1,14 @@
 import React, { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { CanvasElement as CanvasElementType, TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement, Position } from '../../types/canvas';
 import { RotateCw } from 'lucide-react';
+import {
+  getTextStyles,
+  renderTextDecoration,
+  getButtonStyles,
+  getImageStyles,
+  getShapeStyles,
+  renderTriangleSVG,
+} from './renderUtils';
 
 // Helper function to get border radius CSS value
 const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
@@ -418,69 +426,24 @@ const CanvasElementComponent = function CanvasElement({
       case 'text': {
         const textElement = element as TextElement;
         const textContent = formatDynamicText(textElement);
-        const hasDecoration = textElement.textDecoration && textElement.textDecoration !== 'none';
+        const textStyles = getTextStyles(textElement, baseStyle);
         
         return (
           <div
             style={{
-              ...baseStyle,
-              color: textElement.color,
-              fontSize: `${textElement.fontSize}px`,
-              fontFamily: textElement.fontFamily,
-              fontWeight: textElement.fontWeight,
-              textAlign: textElement.textAlign,
-              direction: textElement.direction || 'ltr',
-              letterSpacing: `${textElement.letterSpacing}px`,
-              lineHeight: textElement.lineHeight,
-              textTransform: textElement.textTransform || 'none',
-              backgroundColor: textElement.backgroundColor,
-              border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
-              padding: `${textElement.padding.top}px ${textElement.padding.right}px ${textElement.padding.bottom}px ${textElement.padding.left}px`,
-              whiteSpace: textElement.textWrapping ? 'normal' : 'nowrap',
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              ...textStyles,
               cursor: element.locked ? 'not-allowed' : 'text',
-              position: 'relative',
+              visibility: element.visible ? 'visible' : 'hidden',
             }}
           >
-            <span style={{
-              position: 'relative',
-              display: 'inline-block',
-            }}>
-              {textContent}
-              {hasDecoration && textElement.textDecoration === 'underline' && (
-                <span style={{
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  bottom: '0.1em',
-                  height: '0.1em',
-                  backgroundColor: textElement.color,
-                }} />
-              )}
-              {hasDecoration && textElement.textDecoration === 'line-through' && (
-                <span style={{
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  top: '50%',
-                  height: '0.1em',
-                  backgroundColor: textElement.color,
-                  transform: 'translateY(-50%)',
-                }} />
-              )}
-            </span>
+            {renderTextDecoration(textElement, textContent)}
           </div>
         );
       }
 
       case 'button': {
         const buttonElement = element as ButtonElement;
-        const borderRadius = buttonElement.cornerRadii 
-          ? `${buttonElement.cornerRadii.topLeft}px ${buttonElement.cornerRadii.topRight}px ${buttonElement.cornerRadii.bottomRight}px ${buttonElement.cornerRadii.bottomLeft}px`
-          : buttonElement.cornerRadius || 0;
+        const buttonStyles = getButtonStyles(buttonElement, baseStyle);
         
         // Create a hidden span to measure text width for auto-layout
         const textMeasureRef = useRef<HTMLSpanElement>(null);
@@ -525,36 +488,14 @@ const CanvasElementComponent = function CanvasElement({
             <div
               data-button-element="true"
               style={{
-                ...baseStyle,
-                backgroundColor: buttonElement.backgroundColor,
-                borderRadius,
-                border: buttonElement.borderWidth > 0 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}` : 'none',
+                ...buttonStyles.container,
                 cursor: element.locked ? 'not-allowed' : 'pointer',
-                boxSizing: 'border-box',
                 width: '100%',
                 height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingTop: `${buttonElement.padding.top}px`,
-                paddingRight: `${buttonElement.padding.right}px`,
-                paddingBottom: `${buttonElement.padding.bottom}px`,
-                paddingLeft: `${buttonElement.padding.left}px`,
+                visibility: element.visible ? 'visible' : 'hidden',
               }}
             >
-              <span
-                style={{
-                  color: buttonElement.color,
-                  fontSize: `${buttonElement.fontSize}px`,
-                  fontFamily: buttonElement.fontFamily,
-                  fontWeight: buttonElement.fontWeight,
-                  direction: buttonElement.direction || 'ltr',
-                  whiteSpace: 'nowrap',
-                  userSelect: 'none',
-                  lineHeight: '1',
-                  display: 'block',
-                }}
-              >
+              <span style={buttonStyles.text}>
                 {buttonElement.content}
               </span>
             </div>
@@ -564,34 +505,15 @@ const CanvasElementComponent = function CanvasElement({
 
       case 'shape': {
         const shapeElement = element as ShapeElement;
-        
-        // Base style for all shapes
-        const shapeStyle: React.CSSProperties = {
-          ...baseStyle,
-          border: shapeElement.strokeWidth > 0 ? `${shapeElement.strokeWidth}px solid ${shapeElement.strokeColor}` : undefined,
-        };
+        const shapeStyles = getShapeStyles(shapeElement, baseStyle);
 
-        // Handle image fill
-        if (shapeElement.fillType === 'image' && shapeElement.fillImageUrl) {
-          shapeStyle.backgroundImage = `url(${shapeElement.fillImageUrl})`;
-          shapeStyle.backgroundSize = 
-            shapeElement.fillMode === 'cover' ? 'cover' :
-            shapeElement.fillMode === 'contain' ? 'contain' :
-            shapeElement.fillMode === 'stretch' ? '100% 100%' :
-            shapeElement.fillMode === 'tile' ? 'auto' : 'cover';
-          shapeStyle.backgroundRepeat = shapeElement.fillMode === 'tile' ? 'repeat' : 'no-repeat';
-          shapeStyle.backgroundPosition = 'center';
-        } else {
-          shapeStyle.backgroundColor = shapeElement.fillColor;
-        }
-
-        switch (shapeElement.shapeType) {
+        switch (shapeStyles.shapeType) {
           case 'rectangle':
             return (
               <div
                 style={{
-                  ...shapeStyle,
-                  borderRadius: getBorderRadiusStyle(shapeElement),
+                  ...shapeStyles.base,
+                  borderRadius: shapeStyles.borderRadius,
                 }}
               />
             );
@@ -599,42 +521,16 @@ const CanvasElementComponent = function CanvasElement({
             return (
               <div
                 style={{
-                  ...shapeStyle,
+                  ...shapeStyles.base,
                   borderRadius: '50%',
                 }}
               />
             );
           case 'triangle':
             return (
-              <svg 
-                width="100%" 
-                height="100%" 
-                viewBox="0 0 100 100" 
-                style={baseStyle}
-              >
-                <defs>
-                  {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
-                    <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
-                      <image 
-                        href={shapeElement.fillImageUrl} 
-                        x="0" y="0" 
-                        width="100" height="100" 
-                        preserveAspectRatio={
-                          shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
-                          shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
-                          'none'
-                        }
-                      />
-                    </pattern>
-                  )}
-                </defs>
-                <polygon 
-                  points="50,10 90,90 10,90" 
-                  fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
-                  stroke={shapeElement.strokeColor}
-                  strokeWidth={shapeElement.strokeWidth}
-                />
-              </svg>
+              <div style={baseStyle}>
+                {renderTriangleSVG(shapeElement)}
+              </div>
             );
           case 'star':
             return (
