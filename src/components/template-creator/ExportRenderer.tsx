@@ -68,7 +68,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
-              position: 'relative',
+              boxSizing: 'border-box',
             }}
           >
             <span style={{
