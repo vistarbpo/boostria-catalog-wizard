@@ -697,49 +697,31 @@ const CanvasElementComponent = function CanvasElement({
 
       case 'image': {
         const imageElement = element as ImageElement;
+        const imageStyles = getImageStyles(imageElement, baseStyle);
         
-        // Use dynamic image URL if fillType is 'dynamic' and fillImageUrl is set
-        const imageSrc = imageElement.fillType === 'dynamic' && imageElement.fillImageUrl 
-          ? imageElement.fillImageUrl 
-          : imageElement.src;
-        
-        const imageStyle: React.CSSProperties = {
-          ...baseStyle,
-          borderRadius: getBorderRadiusStyle(imageElement as any),
-        };
-
-        // Determine objectFit - prioritize objectFit property
-        let objectFit: React.CSSProperties['objectFit'] = imageElement.objectFit || 'cover';
-        
-        // Only override if using dynamic fill with explicit fillMode
-        if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl && imageElement.fillMode) {
-          if (imageElement.fillMode === 'tile') {
-            imageStyle.backgroundImage = `url(${imageElement.fillImageUrl})`;
-            imageStyle.backgroundRepeat = 'repeat';
-            imageStyle.backgroundSize = 'auto';
-            imageStyle.backgroundPosition = 'center';
-            // Return empty div with background for tiling
-            return <div style={imageStyle} />;
-          }
-          
-          // Map fillMode to objectFit
-          objectFit = 
-            imageElement.fillMode === 'cover' ? 'cover' :
-            imageElement.fillMode === 'contain' ? 'contain' :
-            imageElement.fillMode === 'stretch' ? 'fill' :
-            imageElement.fillMode === 'center' ? 'none' :
-            'cover';
+        if (imageStyles.isTile) {
+          return (
+            <div
+              style={{
+                ...imageStyles.container,
+                backgroundImage: `url(${imageStyles.imageSrc})`,
+                backgroundRepeat: 'repeat',
+                backgroundSize: 'auto',
+                backgroundPosition: 'center',
+              }}
+            />
+          );
         }
-        
-        imageStyle.objectFit = objectFit;
-        
+          
         return (
-          <img
-            src={imageSrc}
-            alt={imageElement.alt || ''}
-            style={imageStyle}
-            draggable={false}
-          />
+          <div style={imageStyles.container}>
+            <img
+              src={imageStyles.imageSrc}
+              alt={imageElement.alt || ''}
+              style={imageStyles.image}
+              draggable={false}
+            />
+          </div>
         );
       }
 
