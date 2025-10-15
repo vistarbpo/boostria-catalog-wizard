@@ -12,6 +12,7 @@ import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { AlignLeft, AlignCenter, AlignRight, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, Bold, Italic, Underline, Strikethrough, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings } from "lucide-react";
+import { ColorPicker } from "../ui/color-picker";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement } from "../../types/canvas";
 import { useProduct } from "../../contexts/ProductContext";
@@ -373,8 +374,11 @@ export function PropertiesPanel({
 
               {/* Text Color */}
               <div>
-                <Label className="text-xs">Text Color</Label>
-                <Input type="color" value={(selectedElement as TextElement).color} onChange={e => updateElementProperty('color', e.target.value)} className="h-8" />
+                <Label className="text-xs mb-1 block">Text Color</Label>
+                <ColorPicker
+                  value={(selectedElement as TextElement).color}
+                  onChange={(color) => updateElementProperty('color', color)}
+                />
               </div>
 
               {/* Text Alignment */}
@@ -583,12 +587,18 @@ export function PropertiesPanel({
               {/* Colors */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label className="text-xs">Text Color</Label>
-                  <Input type="color" value={(selectedElement as ButtonElement).color} onChange={e => updateElementProperty('color', e.target.value)} className="h-8" />
+                  <Label className="text-xs mb-1 block">Text Color</Label>
+                  <ColorPicker
+                    value={(selectedElement as ButtonElement).color}
+                    onChange={(color) => updateElementProperty('color', color)}
+                  />
                 </div>
                 <div>
-                  <Label className="text-xs">Background Color</Label>
-                  <Input type="color" value={(selectedElement as ButtonElement).backgroundColor} onChange={e => updateElementProperty('backgroundColor', e.target.value)} className="h-8" />
+                  <Label className="text-xs mb-1 block">Background Color</Label>
+                  <ColorPicker
+                    value={(selectedElement as ButtonElement).backgroundColor}
+                    onChange={(color) => updateElementProperty('backgroundColor', color)}
+                  />
                 </div>
               </div>
 
@@ -823,8 +833,11 @@ export function PropertiesPanel({
 
               {/* Fill Color (only for solid fill) */}
               {((selectedElement as ShapeElement).fillType === 'solid' || !(selectedElement as ShapeElement).fillType) && <div>
-                  <Label className="text-xs">Fill Color</Label>
-                  <Input type="color" value={(selectedElement as ShapeElement).fillColor} onChange={e => updateElementProperty('fillColor', e.target.value)} className="h-8" />
+                  <Label className="text-xs mb-1 block">Fill Color</Label>
+                  <ColorPicker
+                    value={(selectedElement as ShapeElement).fillColor}
+                    onChange={(color) => updateElementProperty('fillColor', color)}
+                  />
                 </div>}
 
               {/* Media Source (only for image fill) */}
@@ -882,8 +895,11 @@ export function PropertiesPanel({
               {/* Stroke */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label className="text-xs">Stroke Color</Label>
-                  <Input type="color" value={(selectedElement as ShapeElement).strokeColor || '#000000'} onChange={e => updateElementProperty('strokeColor', e.target.value)} className="h-8" />
+                  <Label className="text-xs mb-1 block">Stroke Color</Label>
+                  <ColorPicker
+                    value={(selectedElement as ShapeElement).strokeColor || '#000000'}
+                    onChange={(color) => updateElementProperty('strokeColor', color)}
+                  />
                 </div>
                 <div>
                   <Label className="text-xs">Stroke Width</Label>
