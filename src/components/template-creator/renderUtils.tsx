@@ -87,26 +87,40 @@ export const getImageStyles = (imageElement: ImageElement, baseStyle: React.CSSP
     ? `${imageElement.cornerRadii.topLeft}px ${imageElement.cornerRadii.topRight}px ${imageElement.cornerRadii.bottomRight}px ${imageElement.cornerRadii.bottomLeft}px`
     : imageElement.cornerRadius || 0;
 
+  // Determine image source
   const imageSrc = imageElement.fillType === 'dynamic' && imageElement.fillImageUrl
     ? imageElement.fillImageUrl
     : imageElement.src;
 
-  // Determine objectFit - prioritize dynamic fillMode if set, otherwise use objectFit property or default to 'cover'
-  let objectFit: React.CSSProperties['objectFit'] = 'cover';
-  
-  if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl && imageElement.fillMode) {
-    // Dynamic image with fillMode specified
-    objectFit =
-      imageElement.fillMode === 'cover' ? 'cover' :
-      imageElement.fillMode === 'contain' ? 'contain' :
-      imageElement.fillMode === 'stretch' ? 'fill' :
-      imageElement.fillMode === 'center' ? 'none' :
-      'cover';
-  } else if (imageElement.objectFit) {
-    // Use explicitly set objectFit
-    objectFit = imageElement.objectFit;
-  }
-  // Otherwise defaults to 'cover'
+  // Determine objectFit with proper priority
+  const getObjectFit = (): React.CSSProperties['objectFit'] => {
+    // For dynamic fills with tile mode, handle separately
+    if (imageElement.fillType === 'dynamic' && imageElement.fillMode === 'tile') {
+      return undefined; // Handled by background properties
+    }
+
+    // If there's a dynamic fill with a specific fillMode, use it
+    if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl && imageElement.fillMode) {
+      const fillModeMap: Record<string, React.CSSProperties['objectFit']> = {
+        cover: 'cover',
+        contain: 'contain',
+        stretch: 'fill',
+        center: 'none',
+      };
+      return fillModeMap[imageElement.fillMode] || 'cover';
+    }
+
+    // Use explicit objectFit if set
+    if (imageElement.objectFit) {
+      return imageElement.objectFit;
+    }
+
+    // Default to cover
+    return 'cover';
+  };
+
+  const objectFit = getObjectFit();
+  const isTile = imageElement.fillType === 'dynamic' && imageElement.fillMode === 'tile';
 
   return {
     container: {
@@ -121,7 +135,7 @@ export const getImageStyles = (imageElement: ImageElement, baseStyle: React.CSSP
       display: 'block',
     },
     imageSrc,
-    isTile: imageElement.fillType === 'dynamic' && imageElement.fillMode === 'tile',
+    isTile,
   };
 };
 
