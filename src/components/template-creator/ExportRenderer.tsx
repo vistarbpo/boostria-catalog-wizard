@@ -67,7 +67,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
 
       case 'button': {
         const buttonElement = element as ButtonElement;
-        const buttonStyles = getButtonStyles(buttonElement, baseStyle);
+        const borderRadius = buttonElement.cornerRadii
+          ? `${buttonElement.cornerRadii.topLeft}px ${buttonElement.cornerRadii.topRight}px ${buttonElement.cornerRadii.bottomRight}px ${buttonElement.cornerRadii.bottomLeft}px`
+          : buttonElement.cornerRadius || 0;
 
         return (
           <div
@@ -84,13 +86,30 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              backgroundColor: buttonElement.backgroundColor,
+              borderRadius,
+              border: buttonElement.borderWidth > 0
+                ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
+                : 'none',
+              boxSizing: 'border-box',
+              padding: `${buttonElement.padding.top}px ${buttonElement.padding.right}px ${buttonElement.padding.bottom}px ${buttonElement.padding.left}px`,
+              pointerEvents: 'none',
             }}
           >
-            <div style={buttonStyles.container}>
-              <span style={buttonStyles.text}>
-                {buttonElement.content}
-              </span>
-            </div>
+            <span style={{
+              color: buttonElement.color,
+              fontSize: `${buttonElement.fontSize}px`,
+              fontFamily: buttonElement.fontFamily,
+              fontWeight: buttonElement.fontWeight,
+              direction: buttonElement.direction || 'ltr',
+              whiteSpace: 'nowrap',
+              userSelect: 'none',
+              textAlign: 'center',
+              lineHeight: '1',
+              alignSelf: 'center',
+            }}>
+              {buttonElement.content}
+            </span>
           </div>
         );
       }
