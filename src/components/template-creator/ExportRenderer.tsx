@@ -57,30 +57,11 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         const imageElement = element as ImageElement;
         const imageStyles = getImageStyles(imageElement, baseStyle);
         
-        if (imageStyles.isTile) {
-          return (
-            <div
-              key={element.id}
-              style={{
-                ...imageStyles.container,
-                backgroundImage: `url(${imageStyles.imageSrc})`,
-                backgroundRepeat: 'repeat',
-                backgroundSize: 'auto',
-                backgroundPosition: 'center',
-              }}
-            />
-          );
-        }
-          
         return (
-          <div key={element.id} style={imageStyles.container}>
-            <img
-              src={imageStyles.imageSrc}
-              alt={imageElement.alt || ''}
-              style={imageStyles.image}
-              crossOrigin="anonymous"
-            />
-          </div>
+          <div
+            key={element.id}
+            style={imageStyles.container}
+          />
         );
       }
 

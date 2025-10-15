@@ -699,29 +699,8 @@ const CanvasElementComponent = function CanvasElement({
         const imageElement = element as ImageElement;
         const imageStyles = getImageStyles(imageElement, baseStyle);
         
-        if (imageStyles.isTile) {
-          return (
-            <div
-              style={{
-                ...imageStyles.container,
-                backgroundImage: `url(${imageStyles.imageSrc})`,
-                backgroundRepeat: 'repeat',
-                backgroundSize: 'auto',
-                backgroundPosition: 'center',
-              }}
-            />
-          );
-        }
-          
         return (
-          <div style={imageStyles.container}>
-            <img
-              src={imageStyles.imageSrc}
-              alt={imageElement.alt || ''}
-              style={imageStyles.image}
-              draggable={false}
-            />
-          </div>
+          <div style={imageStyles.container} />
         );
       }
 

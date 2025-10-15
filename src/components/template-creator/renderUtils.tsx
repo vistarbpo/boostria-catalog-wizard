@@ -92,61 +92,37 @@ export const getImageStyles = (imageElement: ImageElement, baseStyle: React.CSSP
     ? imageElement.fillImageUrl
     : imageElement.src;
 
-  // Determine objectFit with proper priority
-  const getObjectFit = (): React.CSSProperties['objectFit'] => {
-    // For tile mode, handled separately  
-    if (imageElement.fillType === 'dynamic' && imageElement.fillMode === 'tile') {
-      return undefined; // Handled by background properties
-    }
+  // Determine fill mode (same priority as shapes)
+  const fillMode = imageElement.fillType === 'dynamic' 
+    ? (imageElement.fillMode || 'cover')
+    : (imageElement.fillMode || imageElement.objectFit || 'cover');
 
-    // Priority 1: If dynamic fill is active, ALWAYS use fillMode and ignore objectFit
-    if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl) {
-      // Use fillMode if set, otherwise default to 'cover'
-      const mode = imageElement.fillMode || 'cover';
-      const fillModeMap: Record<string, React.CSSProperties['objectFit']> = {
-        cover: 'cover',
-        contain: 'contain',
-        stretch: 'fill',
-        center: 'none',
-      };
-      return fillModeMap[mode] || 'cover';
-    }
-
-    // Priority 2: For non-dynamic images, use explicit objectFit if set
-    if (imageElement.objectFit) {
-      return imageElement.objectFit;
-    }
-
-    // Priority 3: Default to cover
-    return 'cover';
+  // Use background image approach (same as shapes) for consistency
+  const containerStyle: React.CSSProperties = {
+    ...baseStyle,
+    overflow: 'hidden',
+    borderRadius,
+    backgroundImage: `url(${imageSrc})`,
+    backgroundPosition: 'center',
   };
 
-  const objectFit = getObjectFit();
-  const isTile = imageElement.fillType === 'dynamic' && imageElement.fillMode === 'tile';
-
-  console.log('Image render:', {
-    id: imageElement.id,
-    fillType: imageElement.fillType,
-    fillMode: imageElement.fillMode,
-    objectFit: imageElement.objectFit,
-    calculatedObjectFit: objectFit,
-    isTile
-  });
+  // Apply background sizing based on fill mode
+  if (fillMode === 'tile') {
+    containerStyle.backgroundRepeat = 'repeat';
+    containerStyle.backgroundSize = 'auto';
+  } else {
+    containerStyle.backgroundRepeat = 'no-repeat';
+    containerStyle.backgroundSize = 
+      fillMode === 'cover' ? 'cover' :
+      fillMode === 'contain' ? 'contain' :
+      fillMode === 'stretch' || fillMode === 'fill' ? '100% 100%' :
+      fillMode === 'center' || fillMode === 'none' ? 'auto' : 'cover';
+  }
 
   return {
-    container: {
-      ...baseStyle,
-      overflow: 'hidden',
-      borderRadius,
-    },
-    image: {
-      width: '100%',
-      height: '100%',
-      objectFit,
-      display: 'block',
-    },
+    container: containerStyle,
     imageSrc,
-    isTile,
+    fillMode,
   };
 };
 
