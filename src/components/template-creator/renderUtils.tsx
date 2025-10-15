@@ -91,16 +91,22 @@ export const getImageStyles = (imageElement: ImageElement, baseStyle: React.CSSP
     ? imageElement.fillImageUrl
     : imageElement.src;
 
-  let objectFit: React.CSSProperties['objectFit'] = imageElement.objectFit || 'cover';
-
+  // Determine objectFit - prioritize dynamic fillMode if set, otherwise use objectFit property or default to 'cover'
+  let objectFit: React.CSSProperties['objectFit'] = 'cover';
+  
   if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl && imageElement.fillMode) {
+    // Dynamic image with fillMode specified
     objectFit =
       imageElement.fillMode === 'cover' ? 'cover' :
       imageElement.fillMode === 'contain' ? 'contain' :
       imageElement.fillMode === 'stretch' ? 'fill' :
       imageElement.fillMode === 'center' ? 'none' :
       'cover';
+  } else if (imageElement.objectFit) {
+    // Use explicitly set objectFit
+    objectFit = imageElement.objectFit;
   }
+  // Otherwise defaults to 'cover'
 
   return {
     container: {
