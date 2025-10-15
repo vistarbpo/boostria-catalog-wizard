@@ -94,13 +94,15 @@ export const getImageStyles = (imageElement: ImageElement, baseStyle: React.CSSP
 
   // Determine objectFit with proper priority
   const getObjectFit = (): React.CSSProperties['objectFit'] => {
-    // For dynamic fills with tile mode, handle separately
+    // For tile mode, handled separately  
     if (imageElement.fillType === 'dynamic' && imageElement.fillMode === 'tile') {
       return undefined; // Handled by background properties
     }
 
-    // If there's a dynamic fill with a specific fillMode, use it
-    if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl && imageElement.fillMode) {
+    // Priority 1: If dynamic fill is active with fillMode, use fillMode
+    // BUT only if fillMode is actually set (not undefined/null)
+    if (imageElement.fillType === 'dynamic' && imageElement.fillImageUrl && 
+        imageElement.fillMode && imageElement.fillMode !== 'tile') {
       const fillModeMap: Record<string, React.CSSProperties['objectFit']> = {
         cover: 'cover',
         contain: 'contain',
@@ -110,17 +112,26 @@ export const getImageStyles = (imageElement: ImageElement, baseStyle: React.CSSP
       return fillModeMap[imageElement.fillMode] || 'cover';
     }
 
-    // Use explicit objectFit if set
+    // Priority 2: Use explicit objectFit if set
     if (imageElement.objectFit) {
       return imageElement.objectFit;
     }
 
-    // Default to cover
+    // Priority 3: Default to cover
     return 'cover';
   };
 
   const objectFit = getObjectFit();
   const isTile = imageElement.fillType === 'dynamic' && imageElement.fillMode === 'tile';
+
+  console.log('Image render:', {
+    id: imageElement.id,
+    fillType: imageElement.fillType,
+    fillMode: imageElement.fillMode,
+    objectFit: imageElement.objectFit,
+    calculatedObjectFit: objectFit,
+    isTile
+  });
 
   return {
     container: {
