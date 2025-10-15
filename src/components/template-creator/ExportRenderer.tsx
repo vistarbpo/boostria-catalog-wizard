@@ -106,7 +106,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               userSelect: 'none',
               textAlign: 'center',
               lineHeight: 'normal',
-              alignSelf: 'center',
             }}>
               {buttonElement.content}
             </span>
