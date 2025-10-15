@@ -70,10 +70,27 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         const buttonStyles = getButtonStyles(buttonElement, baseStyle);
 
         return (
-          <div key={element.id} style={buttonStyles.container}>
-            <span style={buttonStyles.text}>
-              {buttonElement.content}
-            </span>
+          <div
+            key={element.id}
+            style={{
+              position: 'absolute',
+              left: `${element.position.x}px`,
+              top: `${element.position.y}px`,
+              width: `${element.size.width}px`,
+              height: `${element.size.height}px`,
+              transform: `rotate(${element.rotation}deg)`,
+              opacity: element.opacity / 100,
+              zIndex: element.zIndex,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div style={buttonStyles.container}>
+              <span style={buttonStyles.text}>
+                {buttonElement.content}
+              </span>
+            </div>
           </div>
         );
       }
