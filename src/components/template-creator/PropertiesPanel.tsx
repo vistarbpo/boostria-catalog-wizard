@@ -11,7 +11,7 @@ import { Badge } from "../ui/badge";
 import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
-import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, Strikethrough, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, Bold, Italic, Underline, Strikethrough, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings } from "lucide-react";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement } from "../../types/canvas";
 import { useProduct } from "../../contexts/ProductContext";
@@ -211,27 +211,25 @@ export function PropertiesPanel({
 
             {/* Alignment */}
             <div>
-              <Label className="text-xs mb-2 block">Align to Canvas</Label>
-              <div className="grid grid-cols-3 gap-1 mb-2">
+              <Label className="text-xs mb-2 block">Align</Label>
+              <div className="grid grid-cols-6 gap-1">
                 <Button variant="outline" size="sm" onClick={() => alignToCanvas('left')} className="h-8 p-0" title="Align Left">
                   <AlignLeft className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => alignToCanvas('center')} className="h-8 p-0" title="Align Center">
+                <Button variant="outline" size="sm" onClick={() => alignToCanvas('center')} className="h-8 p-0" title="Align Center Horizontal">
                   <AlignCenter className="w-4 h-4" />
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => alignToCanvas('right')} className="h-8 p-0" title="Align Right">
                   <AlignRight className="w-4 h-4" />
                 </Button>
-              </div>
-              <div className="grid grid-cols-3 gap-1">
                 <Button variant="outline" size="sm" onClick={() => alignToCanvas('top')} className="h-8 p-0" title="Align Top">
-                  <ArrowUp className="w-4 h-4" />
+                  <AlignVerticalJustifyStart className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => alignToCanvas('middle')} className="h-8 p-0" title="Align Middle">
-                  <Maximize2 className="w-4 h-4" />
+                <Button variant="outline" size="sm" onClick={() => alignToCanvas('middle')} className="h-8 p-0" title="Align Center Vertical">
+                  <AlignVerticalJustifyCenter className="w-4 h-4" />
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => alignToCanvas('bottom')} className="h-8 p-0" title="Align Bottom">
-                  <ArrowDown className="w-4 h-4" />
+                  <AlignVerticalJustifyEnd className="w-4 h-4" />
                 </Button>
               </div>
             </div>

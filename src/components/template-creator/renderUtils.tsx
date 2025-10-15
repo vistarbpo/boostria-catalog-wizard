@@ -78,6 +78,10 @@ export const getButtonStyles = (buttonElement: ButtonElement, baseStyle: React.C
       whiteSpace: 'nowrap' as const,
       userSelect: 'none' as const,
       textAlign: 'center' as const,
+      lineHeight: '1',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   };
 };
