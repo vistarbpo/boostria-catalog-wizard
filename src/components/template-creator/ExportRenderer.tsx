@@ -97,6 +97,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             }}
           >
             <span style={{
+              display: 'inline-block',
               color: buttonElement.color,
               fontSize: `${buttonElement.fontSize}px`,
               fontFamily: buttonElement.fontFamily,
