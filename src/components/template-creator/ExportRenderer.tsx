@@ -108,6 +108,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               transform: 'translateZ(0)',
               backfaceVisibility: 'hidden',
               WebkitFontSmoothing: 'antialiased',
+              verticalAlign: 'middle',
             } as React.CSSProperties}>
               {buttonElement.content}
             </span>
