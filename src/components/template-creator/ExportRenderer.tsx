@@ -108,19 +108,18 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               transform: `rotate(${element.rotation}deg)`,
               opacity: element.opacity / 100,
               zIndex: element.zIndex,
-              display: 'table',
               backgroundColor: buttonElement.backgroundColor,
               borderRadius,
               border: buttonElement.borderWidth > 0
                 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
                 : 'none',
               pointerEvents: 'none',
+              textAlign: 'center',
+              lineHeight: `${element.size.height}px`,
+              overflow: 'hidden',
             }}
           >
             <span style={{
-              display: 'table-cell',
-              verticalAlign: 'middle',
-              textAlign: 'center',
               color: buttonElement.color,
               fontSize: `${buttonElement.fontSize}px`,
               fontFamily: buttonElement.fontFamily,
