@@ -91,8 +91,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               border: buttonElement.borderWidth > 0
                 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
                 : 'none',
-              boxSizing: 'border-box',
-              padding: `${buttonElement.padding.top}px ${buttonElement.padding.right}px ${buttonElement.padding.bottom}px ${buttonElement.padding.left}px`,
               pointerEvents: 'none',
             }}
           >
