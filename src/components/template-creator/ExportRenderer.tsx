@@ -104,8 +104,11 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               whiteSpace: 'nowrap',
               userSelect: 'none',
               textAlign: 'center',
-              lineHeight: 'normal',
-            }}>
+              lineHeight: '1',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden',
+              WebkitFontSmoothing: 'antialiased',
+            } as React.CSSProperties}>
               {buttonElement.content}
             </span>
           </div>
