@@ -95,6 +95,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             }}
           >
             <span style={{
+              position: 'relative',
+              top: '50%',
+              transform: 'translateY(-50%)',
               display: 'inline-block',
               color: buttonElement.color,
               fontSize: `${buttonElement.fontSize}px`,
@@ -105,10 +108,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               userSelect: 'none',
               textAlign: 'center',
               lineHeight: '1',
-              transform: 'translateZ(0)',
               backfaceVisibility: 'hidden',
               WebkitFontSmoothing: 'antialiased',
-              verticalAlign: 'middle',
             } as React.CSSProperties}>
               {buttonElement.content}
             </span>
