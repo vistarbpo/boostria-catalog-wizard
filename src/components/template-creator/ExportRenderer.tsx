@@ -108,9 +108,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               transform: `rotate(${element.rotation}deg)`,
               opacity: element.opacity / 100,
               zIndex: element.zIndex,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: 'table',
               backgroundColor: buttonElement.backgroundColor,
               borderRadius,
               border: buttonElement.borderWidth > 0
@@ -120,7 +118,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             }}
           >
             <span style={{
-              display: 'inline-block',
+              display: 'table-cell',
+              verticalAlign: 'middle',
+              textAlign: 'center',
               color: buttonElement.color,
               fontSize: `${buttonElement.fontSize}px`,
               fontFamily: buttonElement.fontFamily,
@@ -128,12 +128,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               direction: buttonElement.direction || 'ltr',
               whiteSpace: 'nowrap',
               userSelect: 'none',
-              textAlign: 'center',
-              lineHeight: '1',
-              transform: 'translateZ(0)',
-              backfaceVisibility: 'hidden',
-              WebkitFontSmoothing: 'antialiased',
-              verticalAlign: 'middle',
             } as React.CSSProperties}>
               {buttonElement.content}
             </span>
