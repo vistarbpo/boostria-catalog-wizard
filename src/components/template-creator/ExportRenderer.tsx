@@ -114,14 +114,14 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
                 : 'none',
               pointerEvents: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingTop: `${-element.size.height * 0.25}px`,
               overflow: 'hidden',
             }}
           >
             <span style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -75%)',
               color: buttonElement.color,
               fontSize: `${buttonElement.fontSize}px`,
               fontFamily: buttonElement.fontFamily,
