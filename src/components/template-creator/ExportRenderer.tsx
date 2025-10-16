@@ -114,8 +114,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 ? `${buttonElement.borderWidth}px solid ${buttonElement.borderColor}`
                 : 'none',
               pointerEvents: 'none',
-              textAlign: 'center',
-              lineHeight: `${element.size.height}px`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingTop: `${-element.size.height * 0.25}px`,
               overflow: 'hidden',
             }}
           >
