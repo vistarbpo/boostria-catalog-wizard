@@ -56,12 +56,37 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
       case 'image': {
         const imageElement = element as ImageElement;
         const imageStyles = getImageStyles(imageElement, baseStyle);
+        const borderRadius = imageElement.cornerRadii
+          ? `${imageElement.cornerRadii.topLeft}px ${imageElement.cornerRadii.topRight}px ${imageElement.cornerRadii.bottomRight}px ${imageElement.cornerRadii.bottomLeft}px`
+          : imageElement.cornerRadius || 0;
+        
+        const objectFit = 
+          imageStyles.fillMode === 'cover' ? 'cover' :
+          imageStyles.fillMode === 'contain' ? 'contain' :
+          imageStyles.fillMode === 'stretch' || imageStyles.fillMode === 'fill' ? 'fill' :
+          (imageStyles.fillMode === 'center' || imageStyles.fillMode === 'tile') ? 'none' : 'cover';
         
         return (
           <div
             key={element.id}
-            style={imageStyles.container}
-          />
+            style={{
+              ...baseStyle,
+              overflow: 'hidden',
+              borderRadius,
+            }}
+          >
+            <img
+              src={imageStyles.imageSrc}
+              alt=""
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit,
+                objectPosition: 'center',
+                display: 'block',
+              }}
+            />
+          </div>
         );
       }
 
