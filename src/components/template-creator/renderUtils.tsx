@@ -38,24 +38,10 @@ export const renderTextDecoration = (textElement: TextElement, content: string) 
     decorationStyle.textDecorationThickness = '1.5px';
     decorationStyle.textUnderlineOffset = '2px';
   } else if (textElement.textDecoration === 'line-through') {
-    decorationStyle.position = 'relative';
-    decorationStyle.display = 'inline-block';
-  }
-  
-  if (textElement.textDecoration === 'line-through') {
-    return (
-      <span style={decorationStyle}>
-        {content}
-        <span style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: '65%',
-          height: '2px',
-          backgroundColor: textElement.color,
-        }} />
-      </span>
-    );
+    decorationStyle.textDecoration = 'line-through';
+    decorationStyle.textDecorationColor = textElement.color;
+    decorationStyle.textDecorationThickness = '2px';
+    decorationStyle.textDecorationStyle = 'solid';
   }
   
   return (
