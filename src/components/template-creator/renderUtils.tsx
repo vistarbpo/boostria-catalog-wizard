@@ -50,7 +50,7 @@ export const renderTextDecoration = (textElement: TextElement, content: string) 
           position: 'absolute',
           left: 0,
           right: 0,
-          top: '60%',
+          top: '65%',
           height: '2px',
           backgroundColor: textElement.color,
         }} />
