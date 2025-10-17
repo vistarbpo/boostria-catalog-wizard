@@ -128,10 +128,11 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
     { icon: Heart, name: "Heart", type: "heart" as const },
     { icon: Plus, name: "Plus", type: "plus" as const },
     { icon: ArrowRight, name: "Arrow", type: "arrow" as const },
-    { icon: Diamond, name: "Diamond", type: "diamond" as const }
+    { icon: Diamond, name: "Diamond", type: "diamond" as const },
+    { icon: RectangleHorizontal, name: "Line", type: "line" as const }
   ];
 
-  const handleAddShape = (shapeType: "rectangle" | "circle" | "triangle" | "star" | "heart" | "plus" | "arrow" | "diamond") => {
+  const handleAddShape = (shapeType: "rectangle" | "circle" | "triangle" | "star" | "heart" | "plus" | "arrow" | "diamond" | "line") => {
     const centerX = canvasStore.canvasState.canvasSize.width / 2 - 60;
     const centerY = canvasStore.canvasState.canvasSize.height / 2 - 40;
     canvasStore.addShapeElement(shapeType, { x: centerX, y: centerY });

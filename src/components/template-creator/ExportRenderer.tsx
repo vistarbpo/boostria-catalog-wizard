@@ -178,6 +178,33 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               </div>
             );
           
+          case 'line':
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...baseStyle,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 100 100" 
+                  preserveAspectRatio="none"
+                >
+                  <line 
+                    x1="0" 
+                    y1="50" 
+                    x2="100" 
+                    y2="50" 
+                    stroke={shapeElement.strokeColor || shapeElement.fillColor}
+                    strokeWidth={shapeElement.strokeWidth || 2}
+                  />
+                </svg>
+              </div>
+            );
+          
           default:
             return (
               <div

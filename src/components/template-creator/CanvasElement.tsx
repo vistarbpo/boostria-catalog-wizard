@@ -692,6 +692,25 @@ const CanvasElementComponent = function CanvasElement({
                 />
               </svg>
             );
+          case 'line':
+            return (
+              <svg 
+                width="100%" 
+                height="100%" 
+                viewBox="0 0 100 100" 
+                preserveAspectRatio="none"
+                style={baseStyle}
+              >
+                <line 
+                  x1="0" 
+                  y1="50" 
+                  x2="100" 
+                  y2="50" 
+                  stroke={shapeElement.strokeColor || shapeElement.fillColor}
+                  strokeWidth={shapeElement.strokeWidth || 2}
+                />
+              </svg>
+            );
         }
       }
 

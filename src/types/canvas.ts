@@ -66,7 +66,7 @@ export interface TextElement extends BaseElement {
 
 export interface ShapeElement extends BaseElement {
   type: 'shape';
-  shapeType: 'rectangle' | 'circle' | 'triangle' | 'star' | 'heart' | 'polygon' | 'plus' | 'arrow' | 'diamond';
+  shapeType: 'rectangle' | 'circle' | 'triangle' | 'star' | 'heart' | 'polygon' | 'plus' | 'arrow' | 'diamond' | 'line';
   fillColor: string;
   fillType: 'solid' | 'image';
   fillSource?: string; // For dynamic fills like 'image_link', 'additional_image_link', etc.
