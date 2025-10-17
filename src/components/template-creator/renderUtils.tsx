@@ -41,6 +41,9 @@ export const renderTextDecoration = (textElement: TextElement, content: string) 
     decorationStyle.textDecoration = 'line-through';
     decorationStyle.textDecorationColor = textElement.color;
     decorationStyle.textDecorationThickness = '1.5px';
+    decorationStyle.textDecorationSkipInk = 'none';
+    decorationStyle.display = 'inline-block';
+    decorationStyle.lineHeight = textElement.lineHeight;
   }
   
   return (
