@@ -178,6 +178,206 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               </div>
             );
           
+          case 'star':
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...baseStyle,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 100 100"
+                >
+                  <defs>
+                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
+                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
+                        <image 
+                          href={shapeElement.fillImageUrl} 
+                          x="0" y="0" 
+                          width="100" height="100" 
+                          preserveAspectRatio={
+                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
+                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
+                            'none'
+                          }
+                        />
+                      </pattern>
+                    )}
+                  </defs>
+                  <polygon 
+                    points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" 
+                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
+                    stroke={shapeElement.strokeColor}
+                    strokeWidth={shapeElement.strokeWidth}
+                  />
+                </svg>
+              </div>
+            );
+          
+          case 'heart':
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...baseStyle,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 100 100"
+                >
+                  <defs>
+                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
+                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
+                        <image 
+                          href={shapeElement.fillImageUrl} 
+                          x="0" y="0" 
+                          width="100" height="100" 
+                          preserveAspectRatio={
+                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
+                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
+                            'none'
+                          }
+                        />
+                      </pattern>
+                    )}
+                  </defs>
+                  <path 
+                    d="M50,25 C50,25 25,0 0,25 C0,50 50,100 50,100 C50,100 100,50 100,25 C75,0 50,25 50,25 Z" 
+                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
+                    stroke={shapeElement.strokeColor}
+                    strokeWidth={shapeElement.strokeWidth}
+                  />
+                </svg>
+              </div>
+            );
+          
+          case 'plus':
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...baseStyle,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 100 100"
+                >
+                  <defs>
+                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
+                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
+                        <image 
+                          href={shapeElement.fillImageUrl} 
+                          x="0" y="0" 
+                          width="100" height="100" 
+                          preserveAspectRatio={
+                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
+                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
+                            'none'
+                          }
+                        />
+                      </pattern>
+                    )}
+                  </defs>
+                  <polygon 
+                    points="40,0 60,0 60,40 100,40 100,60 60,60 60,100 40,100 40,60 0,60 0,40 40,40" 
+                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
+                    stroke={shapeElement.strokeColor}
+                    strokeWidth={shapeElement.strokeWidth}
+                  />
+                </svg>
+              </div>
+            );
+          
+          case 'diamond':
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...baseStyle,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 100 100"
+                >
+                  <defs>
+                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
+                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
+                        <image 
+                          href={shapeElement.fillImageUrl} 
+                          x="0" y="0" 
+                          width="100" height="100" 
+                          preserveAspectRatio={
+                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
+                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
+                            'none'
+                          }
+                        />
+                      </pattern>
+                    )}
+                  </defs>
+                  <polygon 
+                    points="50,0 100,50 50,100 0,50" 
+                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
+                    stroke={shapeElement.strokeColor}
+                    strokeWidth={shapeElement.strokeWidth}
+                  />
+                </svg>
+              </div>
+            );
+          
+          case 'arrow':
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...baseStyle,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 100 100"
+                >
+                  <defs>
+                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
+                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
+                        <image 
+                          href={shapeElement.fillImageUrl} 
+                          x="0" y="0" 
+                          width="100" height="100" 
+                          preserveAspectRatio={
+                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
+                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
+                            'none'
+                          }
+                        />
+                      </pattern>
+                    )}
+                  </defs>
+                  <polygon 
+                    points="0,20 60,20 60,0 100,50 60,100 60,80 0,80" 
+                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
+                    stroke={shapeElement.strokeColor}
+                    strokeWidth={shapeElement.strokeWidth}
+                  />
+                </svg>
+              </div>
+            );
+          
           case 'line':
             return (
               <div
