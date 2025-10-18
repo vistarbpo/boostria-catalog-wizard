@@ -46,9 +46,44 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         const textElement = element as TextElement;
         const textStyles = getTextStyles(textElement, baseStyle);
         
+        // Custom export-specific text decoration rendering
+        const renderExportTextDecoration = () => {
+          if (textElement.textDecoration === 'underline') {
+            return (
+              <span style={{
+                textDecoration: 'underline',
+                textDecorationColor: textElement.color,
+                textDecorationThickness: '1.5px',
+                textUnderlineOffset: '2px',
+              }}>
+                {textElement.content}
+              </span>
+            );
+          } else if (textElement.textDecoration === 'line-through') {
+            return (
+              <span style={{ 
+                position: 'relative',
+                display: 'inline-block',
+              }}>
+                {textElement.content}
+                <span style={{
+                  position: 'absolute',
+                  left: '0',
+                  right: '0',
+                  top: '72%',
+                  height: '2px',
+                  backgroundColor: textElement.color,
+                  pointerEvents: 'none',
+                }} />
+              </span>
+            );
+          }
+          return <span>{textElement.content}</span>;
+        };
+        
         return (
           <div key={element.id} style={textStyles}>
-            {renderTextDecoration(textElement, textElement.content)}
+            {renderExportTextDecoration()}
           </div>
         );
       }
