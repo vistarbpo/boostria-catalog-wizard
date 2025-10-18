@@ -147,6 +147,20 @@ export interface GroupElement extends BaseElement {
   type: 'group';
   name?: string;
   children: CanvasElement[];
+  // Conditional display settings
+  conditionalDisplay?: {
+    enabled: boolean;
+    field: string; // e.g., 'rating'
+    operator: 'greater_than' | 'less_than' | 'equals' | 'not_equals';
+    value: number | string;
+  };
+  // Widget-specific metadata
+  widgetType?: 'rating' | 'custom';
+  widgetData?: {
+    starFilledColor?: string;
+    starUnfilledColor?: string;
+    textColor?: string;
+  };
 }
 
 export interface MediaSource {

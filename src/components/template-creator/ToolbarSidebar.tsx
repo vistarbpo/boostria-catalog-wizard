@@ -49,6 +49,7 @@ import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { useProduct } from "../../contexts/ProductContext";
 import { useWidgets } from "../../hooks/useWidgets";
 import { toast } from "sonner";
+import { createRatingWidget } from "./widgets/RatingWidget";
 
 type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | "widgets" | null;
 
@@ -1427,6 +1428,38 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                   >
                     <Barcode className="w-4 h-4 mr-2" />
                     Barcode Placeholder
+                  </Button>
+                </div>
+
+                {/* Rating Widget */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Rating Widget</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const centerX = canvasStore.canvasState.canvasSize.width / 2 - 90;
+                      const centerY = canvasStore.canvasState.canvasSize.height / 2 - 12;
+                      
+                      const ratingWidget = createRatingWidget({
+                        position: { x: centerX, y: centerY },
+                        rating: 4.5,
+                        starFilledColor: '#E4A709',
+                        starUnfilledColor: '#D1D5DB',
+                        textColor: '#000000',
+                        fontSize: 16,
+                        showRatingText: true
+                      });
+                      
+                      // Add the group to canvas
+                      canvasStore.canvasState.elements.push(ratingWidget);
+                      canvasStore.selectElement(ratingWidget.id);
+                      toast.success('Rating widget added');
+                    }}
+                    className="w-full justify-start"
+                  >
+                    <Star className="w-4 h-4 mr-2" />
+                    Rating Stars
                   </Button>
                 </div>
 

@@ -14,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { AlignLeft, AlignCenter, AlignRight, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, Bold, Italic, Underline, Strikethrough, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings } from "lucide-react";
 import { ColorPicker } from "../ui/color-picker";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
-import { TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement } from "../../types/canvas";
+import { TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement, GroupElement } from "../../types/canvas";
 import { useProduct } from "../../contexts/ProductContext";
 import { CanvasSettings } from "./CanvasSettings";
 import { DynamicFieldSettings } from "./DynamicFieldSettings";
@@ -1224,6 +1224,204 @@ export function PropertiesPanel({
                 )}
               </div>
             </div>}
+
+          {/* Group/Widget Properties */}
+          {selectedElement.type === 'group' && (selectedElement as any).widgetType === 'rating' && (
+            <div className="space-y-4">
+              <Separator />
+              <h4 className="text-sm font-medium">Rating Widget Settings</h4>
+              
+              {/* Star Filled Color */}
+              <div>
+                <Label className="text-xs mb-1 block">Star Filled Color</Label>
+                <ColorPicker
+                  value={(selectedElement as any).widgetData?.starFilledColor || '#E4A709'}
+                  onChange={(color) => {
+                    // Update all filled stars
+                    const groupEl = selectedElement as any;
+                    const updatedChildren = groupEl.children.map((child: any, index: number) => {
+                      if (child.type === 'shape' && child.shapeType === 'star' && index < 4) {
+                        return { ...child, fillColor: color };
+                      }
+                      return child;
+                    });
+                    updateElementProperty('children', updatedChildren);
+                    updateElementProperty('widgetData', {
+                      ...groupEl.widgetData,
+                      starFilledColor: color
+                    });
+                  }}
+                />
+              </div>
+
+              {/* Star Unfilled Color */}
+              <div>
+                <Label className="text-xs mb-1 block">Star Unfilled Color</Label>
+                <ColorPicker
+                  value={(selectedElement as any).widgetData?.starUnfilledColor || '#D1D5DB'}
+                  onChange={(color) => {
+                    // Update unfilled stars
+                    const groupEl = selectedElement as any;
+                    const updatedChildren = groupEl.children.map((child: any, index: number) => {
+                      if (child.type === 'shape' && child.shapeType === 'star' && index >= 4) {
+                        return { ...child, fillColor: color };
+                      }
+                      return child;
+                    });
+                    updateElementProperty('children', updatedChildren);
+                    updateElementProperty('widgetData', {
+                      ...groupEl.widgetData,
+                      starUnfilledColor: color
+                    });
+                  }}
+                />
+              </div>
+
+              {/* Rating Text Color */}
+              <div>
+                <Label className="text-xs mb-1 block">Text Color</Label>
+                <ColorPicker
+                  value={(selectedElement as any).widgetData?.textColor || '#000000'}
+                  onChange={(color) => {
+                    // Update text element
+                    const groupEl = selectedElement as any;
+                    const updatedChildren = groupEl.children.map((child: any) => {
+                      if (child.type === 'text') {
+                        return { ...child, color: color };
+                      }
+                      return child;
+                    });
+                    updateElementProperty('children', updatedChildren);
+                    updateElementProperty('widgetData', {
+                      ...groupEl.widgetData,
+                      textColor: color
+                    });
+                  }}
+                />
+              </div>
+
+              {/* Text Font Size */}
+              <div>
+                <Label className="text-xs">Text Font Size</Label>
+                <Input 
+                  type="number" 
+                  min="8"
+                  value={(selectedElement as any).children.find((c: any) => c.type === 'text')?.fontSize || 16}
+                  onChange={e => {
+                    const fontSize = parseFloat(e.target.value) || 16;
+                    const groupEl = selectedElement as any;
+                    const updatedChildren = groupEl.children.map((child: any) => {
+                      if (child.type === 'text') {
+                        return { ...child, fontSize: fontSize };
+                      }
+                      return child;
+                    });
+                    updateElementProperty('children', updatedChildren);
+                  }}
+                  className="h-8" 
+                />
+              </div>
+
+              {/* Text Font Weight */}
+              <div>
+                <Label className="text-xs">Text Font Weight</Label>
+                <Select 
+                  value={(selectedElement as any).children.find((c: any) => c.type === 'text')?.fontWeight || '600'}
+                  onValueChange={value => {
+                    const groupEl = selectedElement as any;
+                    const updatedChildren = groupEl.children.map((child: any) => {
+                      if (child.type === 'text') {
+                        return { ...child, fontWeight: value };
+                      }
+                      return child;
+                    });
+                    updateElementProperty('children', updatedChildren);
+                  }}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-popover">
+                    <SelectItem value="300">Light (300)</SelectItem>
+                    <SelectItem value="400">Regular (400)</SelectItem>
+                    <SelectItem value="500">Medium (500)</SelectItem>
+                    <SelectItem value="600">Semi Bold (600)</SelectItem>
+                    <SelectItem value="700">Bold (700)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Conditional Display */}
+              <div className="space-y-2">
+                <Label className="text-xs">Conditional Display</Label>
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={(selectedElement as any).conditionalDisplay?.enabled || false}
+                    onCheckedChange={checked => {
+                      if (checked) {
+                        updateElementProperty('conditionalDisplay', {
+                          enabled: true,
+                          field: 'rating',
+                          operator: 'greater_than',
+                          value: 3.0
+                        });
+                      } else {
+                        updateElementProperty('conditionalDisplay', undefined);
+                      }
+                    }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Only show if rating meets condition
+                  </span>
+                </div>
+                
+                {(selectedElement as any).conditionalDisplay?.enabled && (
+                  <div className="space-y-2 pl-4 border-l-2 border-border">
+                    <div>
+                      <Label className="text-xs">Condition</Label>
+                      <Select 
+                        value={(selectedElement as any).conditionalDisplay?.operator || 'greater_than'}
+                        onValueChange={value => {
+                          const current = (selectedElement as any).conditionalDisplay;
+                          updateElementProperty('conditionalDisplay', {
+                            ...current,
+                            operator: value
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="z-50 bg-popover">
+                          <SelectItem value="greater_than">Greater than</SelectItem>
+                          <SelectItem value="less_than">Less than</SelectItem>
+                          <SelectItem value="equals">Equals</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Threshold Value</Label>
+                      <Input 
+                        type="number" 
+                        step="0.1"
+                        min="0"
+                        max="5"
+                        value={(selectedElement as any).conditionalDisplay?.value || 3.0}
+                        onChange={e => {
+                          const current = (selectedElement as any).conditionalDisplay;
+                          updateElementProperty('conditionalDisplay', {
+                            ...current,
+                            value: parseFloat(e.target.value) || 0
+                          });
+                        }}
+                        className="h-8" 
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Z-Index */}
           <div className="space-y-4">
