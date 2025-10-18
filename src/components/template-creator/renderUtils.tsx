@@ -53,7 +53,7 @@ export const renderTextDecoration = (textElement: TextElement, content: string) 
           position: 'absolute',
           left: '0',
           right: '0',
-          top: '68%',
+          top: '50%',
           height: '2px',
           backgroundColor: textElement.color,
           pointerEvents: 'none',
