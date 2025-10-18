@@ -265,8 +265,8 @@ const CanvasElementComponent = function CanvasElement({
         let newX = element.position.x;
         let newY = element.position.y;
         
-        // Handle proportional resize with Shift
-        const isProportional = e.shiftKey;
+        // Handle proportional resize with Shift (or always for groups)
+        const isProportional = e.shiftKey || element.type === 'group';
         const aspectRatio = dragDataRef.current.startWidth / dragDataRef.current.startHeight;
         
         if (handle.includes('e')) {

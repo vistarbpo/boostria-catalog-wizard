@@ -281,9 +281,43 @@ export function useCanvasStore() {
   const updateElement = useCallback((elementId: string, updates: Partial<CanvasElement>) => {
     setCanvasStateWithHistory(prev => ({
       ...prev,
-      elements: prev.elements.map(el => 
-        el.id === elementId ? { ...el, ...updates } as CanvasElement : el
-      )
+      elements: prev.elements.map(el => {
+        if (el.id === elementId) {
+          const updatedElement = { ...el, ...updates } as CanvasElement;
+          
+          // Handle group resizing - scale children proportionally
+          if (el.type === 'group' && updates.size && (el as any).children) {
+            const group = el as any;
+            const scaleX = updates.size.width / el.size.width;
+            const scaleY = updates.size.height / el.size.height;
+            
+            // Scale children positions and sizes
+            const scaledChildren = group.children.map((child: CanvasElement) => ({
+              ...child,
+              position: {
+                x: child.position.x * scaleX,
+                y: child.position.y * scaleY
+              },
+              size: {
+                width: child.size.width * scaleX,
+                height: child.size.height * scaleY
+              },
+              // Scale font size for text elements
+              ...(child.type === 'text' ? {
+                fontSize: (child as TextElement).fontSize * Math.min(scaleX, scaleY)
+              } : {})
+            }));
+            
+            return {
+              ...updatedElement,
+              children: scaledChildren
+            } as CanvasElement;
+          }
+          
+          return updatedElement;
+        }
+        return el;
+      })
     }));
   }, [setCanvasStateWithHistory]);
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CanvasElement, TextElement, ImageElement, ButtonElement, ShapeElement } from '@/types/canvas';
+import { CanvasElement, TextElement, ImageElement, ButtonElement, ShapeElement, GroupElement } from '@/types/canvas';
 import {
   getTextStyles,
   renderTextDecoration,
@@ -452,6 +452,178 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               />
             );
         }
+      }
+
+      case 'group': {
+        const groupElement = element as GroupElement;
+        
+        // Check conditional display
+        if (groupElement.conditionalDisplay?.enabled) {
+          // For now, we'll render it - in a real export with product data,
+          // this would check the actual condition
+          // You would pass product data to ExportRenderer and evaluate here
+        }
+        
+        return (
+          <div
+            key={element.id}
+            style={{
+              ...baseStyle,
+              pointerEvents: 'auto',
+            }}
+          >
+            {groupElement.children?.map((child) => {
+              // Render child elements with offset positions
+              const childBaseStyle: React.CSSProperties = {
+                position: 'absolute',
+                left: `${child.position.x}px`,
+                top: `${child.position.y}px`,
+                width: `${child.size.width}px`,
+                height: `${child.size.height}px`,
+                transform: `rotate(${child.rotation}deg)`,
+                opacity: child.opacity / 100,
+                zIndex: child.zIndex,
+                pointerEvents: 'none',
+              };
+
+              // Render based on child type
+              if (child.type === 'text') {
+                const textChild = child as TextElement;
+                const textStyles = getTextStyles(textChild, childBaseStyle);
+                
+                const renderExportTextDecoration = () => {
+                  if (textChild.textDecoration === 'underline') {
+                    return (
+                      <span style={{
+                        textDecoration: 'underline',
+                        textDecorationColor: textChild.color,
+                        textDecorationThickness: '1.5px',
+                        textUnderlineOffset: '2px',
+                      }}>
+                        {textChild.content}
+                      </span>
+                    );
+                  } else if (textChild.textDecoration === 'line-through') {
+                    return (
+                      <span style={{ 
+                        position: 'relative',
+                        display: 'inline-block',
+                      }}>
+                        {textChild.content}
+                        <span style={{
+                          position: 'absolute',
+                          left: '0',
+                          right: '0',
+                          top: '92%',
+                          height: '2px',
+                          backgroundColor: textChild.color,
+                          pointerEvents: 'none',
+                        }} />
+                      </span>
+                    );
+                  }
+                  return <span>{textChild.content}</span>;
+                };
+                
+                return (
+                  <div key={child.id} style={textStyles}>
+                    {renderExportTextDecoration()}
+                  </div>
+                );
+              } else if (child.type === 'shape') {
+                const shapeChild = child as ShapeElement;
+                const shapeStyles = getShapeStyles(shapeChild, childBaseStyle);
+
+                switch (shapeChild.shapeType) {
+                  case 'star':
+                    return (
+                      <div
+                        key={child.id}
+                        style={{
+                          ...childBaseStyle,
+                          boxSizing: 'border-box',
+                        }}
+                      >
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                          <defs>
+                            {shapeChild.fillType === 'image' && shapeChild.fillImageUrl && (
+                              <pattern id={`pattern-${child.id}`} width="100%" height="100%">
+                                <image
+                                  href={shapeChild.fillImageUrl}
+                                  width="100%"
+                                  height="100%"
+                                  preserveAspectRatio={
+                                    shapeChild.fillMode === 'cover' ? 'xMidYMid slice' :
+                                    shapeChild.fillMode === 'contain' ? 'xMidYMid meet' :
+                                    'none'
+                                  }
+                                />
+                              </pattern>
+                            )}
+                          </defs>
+                          <polygon 
+                            points="50,10 61,40 95,40 68,60 79,90 50,70 21,90 32,60 5,40 39,40" 
+                            fill={shapeChild.fillType === 'image' ? `url(#pattern-${child.id})` : shapeChild.fillColor}
+                            stroke={shapeChild.strokeColor}
+                            strokeWidth={shapeChild.strokeWidth}
+                          />
+                        </svg>
+                      </div>
+                    );
+
+                  default:
+                    return (
+                      <div
+                        key={child.id}
+                        style={{
+                          ...shapeStyles.base,
+                          borderRadius: shapeStyles.borderRadius,
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    );
+                }
+              } else if (child.type === 'image') {
+                const imageChild = child as ImageElement;
+                const imageStyles = getImageStyles(imageChild, childBaseStyle);
+                const borderRadius = imageChild.cornerRadii
+                  ? `${imageChild.cornerRadii.topLeft}px ${imageChild.cornerRadii.topRight}px ${imageChild.cornerRadii.bottomRight}px ${imageChild.cornerRadii.bottomLeft}px`
+                  : imageChild.cornerRadius || 0;
+                
+                const objectFit = 
+                  imageStyles.fillMode === 'cover' ? 'cover' :
+                  imageStyles.fillMode === 'contain' ? 'contain' :
+                  imageStyles.fillMode === 'stretch' ? 'fill' :
+                  imageStyles.fillMode === 'center' ? 'none' :
+                  imageStyles.fillMode === 'tile' ? 'initial' :
+                  'cover';
+
+                return (
+                  <div
+                    key={child.id}
+                    style={{
+                      ...childBaseStyle,
+                      overflow: 'hidden',
+                      borderRadius,
+                    }}
+                  >
+                    <img
+                      src={imageStyles.imageSrc}
+                      alt={imageChild.alt || ''}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit,
+                      }}
+                    />
+                  </div>
+                );
+              }
+
+              return null;
+            })}
+          </div>
+        );
       }
 
       default:
