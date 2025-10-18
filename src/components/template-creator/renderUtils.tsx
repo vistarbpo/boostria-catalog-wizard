@@ -30,25 +30,39 @@ export const getTextStyles = (textElement: TextElement, baseStyle: React.CSSProp
 };
 
 export const renderTextDecoration = (textElement: TextElement, content: string) => {
-  const decorationStyle: React.CSSProperties = {};
-  
   if (textElement.textDecoration === 'underline') {
-    decorationStyle.textDecoration = 'underline';
-    decorationStyle.textDecorationColor = textElement.color;
-    decorationStyle.textDecorationThickness = '1.5px';
-    decorationStyle.textUnderlineOffset = '2px';
+    return (
+      <span style={{
+        textDecoration: 'underline',
+        textDecorationColor: textElement.color,
+        textDecorationThickness: '1.5px',
+        textUnderlineOffset: '2px',
+      }}>
+        {content}
+      </span>
+    );
   } else if (textElement.textDecoration === 'line-through') {
-    decorationStyle.textDecoration = 'line-through';
-    decorationStyle.textDecorationColor = textElement.color;
-    decorationStyle.textDecorationThickness = '2px';
-    decorationStyle.textDecorationStyle = 'solid';
+    // Custom positioned strike-through for precise control
+    return (
+      <span style={{ 
+        position: 'relative',
+        display: 'inline-block',
+      }}>
+        {content}
+        <span style={{
+          position: 'absolute',
+          left: '0',
+          right: '0',
+          top: '68%',
+          height: '2px',
+          backgroundColor: textElement.color,
+          pointerEvents: 'none',
+        }} />
+      </span>
+    );
   }
   
-  return (
-    <span style={decorationStyle}>
-      {content}
-    </span>
-  );
+  return <span>{content}</span>;
 };
 
 export const getButtonStyles = (buttonElement: ButtonElement, baseStyle: React.CSSProperties) => {
