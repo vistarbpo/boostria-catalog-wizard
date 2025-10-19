@@ -110,7 +110,8 @@ export function createRatingWidget(config: RatingWidgetConfig): GroupElement {
     widgetData: {
       starFilledColor,
       starUnfilledColor,
-      textColor
+      textColor,
+      rating
     },
     conditionalDisplay: conditionalThreshold > 0 ? {
       enabled: true,

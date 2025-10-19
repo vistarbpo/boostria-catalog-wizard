@@ -160,6 +160,7 @@ export interface GroupElement extends BaseElement {
     starFilledColor?: string;
     starUnfilledColor?: string;
     textColor?: string;
+    rating?: number;
   };
 }
 

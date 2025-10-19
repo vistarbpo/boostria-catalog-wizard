@@ -541,6 +541,20 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
 
                 switch (shapeChild.shapeType) {
                   case 'star':
+                    // Get rating from widget data
+                    const widgetRating = groupElement.widgetData?.rating || 4.5;
+                    const starIndex = parseInt(child.id.match(/star-(\d+)/)?.[1] || '0');
+                    
+                    // Calculate if this star should be filled, half-filled, or empty
+                    const filledStars = Math.floor(widgetRating);
+                    const hasHalfStar = widgetRating % 1 >= 0.5;
+                    const isHalfStar = starIndex === filledStars && hasHalfStar;
+                    const isFilled = starIndex < filledStars;
+                    
+                    // Get colors from widget data
+                    const filledColor = groupElement.widgetData?.starFilledColor || '#E4A709';
+                    const unfilledColor = groupElement.widgetData?.starUnfilledColor || '#D1D5DB';
+                    
                     return (
                       <div
                         key={child.id}
@@ -551,24 +565,22 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                       >
                         <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
                           <defs>
-                            {shapeChild.fillType === 'image' && shapeChild.fillImageUrl && (
-                              <pattern id={`pattern-${child.id}`} width="100%" height="100%">
-                                <image
-                                  href={shapeChild.fillImageUrl}
-                                  width="100%"
-                                  height="100%"
-                                  preserveAspectRatio={
-                                    shapeChild.fillMode === 'cover' ? 'xMidYMid slice' :
-                                    shapeChild.fillMode === 'contain' ? 'xMidYMid meet' :
-                                    'none'
-                                  }
-                                />
-                              </pattern>
+                            {isHalfStar && (
+                              <linearGradient id={`half-fill-${child.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="50%" stopColor={filledColor} />
+                                <stop offset="50%" stopColor={unfilledColor} />
+                              </linearGradient>
                             )}
                           </defs>
                           <polygon 
                             points="50,10 61,40 95,40 68,60 79,90 50,70 21,90 32,60 5,40 39,40" 
-                            fill={shapeChild.fillType === 'image' ? `url(#pattern-${child.id})` : shapeChild.fillColor}
+                            fill={
+                              isHalfStar 
+                                ? `url(#half-fill-${child.id})` 
+                                : isFilled 
+                                  ? filledColor 
+                                  : unfilledColor
+                            }
                             stroke={shapeChild.strokeColor}
                             strokeWidth={shapeChild.strokeWidth}
                           />

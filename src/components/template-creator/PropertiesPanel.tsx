@@ -11,7 +11,7 @@ import { Badge } from "../ui/badge";
 import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
-import { AlignLeft, AlignCenter, AlignRight, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, Bold, Italic, Underline, Strikethrough, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, Bold, Italic, Underline, Strikethrough, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings, Ungroup } from "lucide-react";
 import { ColorPicker } from "../ui/color-picker";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement, GroupElement } from "../../types/canvas";
@@ -1420,6 +1420,22 @@ export function PropertiesPanel({
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Ungroup Button for Groups */}
+          {selectedElement.type === 'group' && (
+            <div className="space-y-4">
+              <Separator />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.ungroupSelectedElement()} 
+                className="w-full"
+              >
+                <Ungroup className="w-4 h-4 mr-2" />
+                Ungroup Elements
+              </Button>
             </div>
           )}
 
