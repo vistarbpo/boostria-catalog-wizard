@@ -1251,8 +1251,73 @@ export function PropertiesPanel({
                               : [...currentProviders, provider];
                             
                             if (newProviders.length > 0) {
+                              const widgetData = (selectedElement as any).widgetData;
+                              const isSingleProvider = newProviders.length === 1;
+                              const logoHeight = 40;
+                              const logoSpacing = 12;
+                              
+                              // Regenerate children based on new providers
+                              const providerLogos: Record<string, string> = {
+                                tabby: '/bnpl/tabby.svg',
+                                tamara: '/bnpl/tamara.svg',
+                                klarna: '/bnpl/klarna.svg',
+                                afterpay: '/bnpl/afterpay.svg',
+                                affirm: '/bnpl/affirm.svg',
+                                paypal: '/bnpl/paypal.svg'
+                              };
+                              
+                              const groupEl = selectedElement as any;
+                              const textElement = groupEl.children.find((c: any) => c.type === 'text');
+                              
+                              if (isSingleProvider) {
+                                // Single provider: text + one logo
+                                const logoElement = {
+                                  id: `bnpl-logo-${Math.random().toString(36).substr(2, 9)}`,
+                                  type: 'image',
+                                  src: providerLogos[newProviders[0]],
+                                  position: { x: 320, y: 10 },
+                                  size: { width: 120, height: logoHeight },
+                                  objectFit: 'contain',
+                                  rotation: 0,
+                                  opacity: 100,
+                                  visible: true,
+                                  locked: false,
+                                  zIndex: 0,
+                                  cornerRadius: 8
+                                };
+                                
+                                updateElementProperty('children', [textElement, logoElement]);
+                                updateElementProperty('size', { width: 460, height: 60 });
+                              } else {
+                                // Multiple providers: text + multiple logos
+                                const logoElements: any[] = [];
+                                let currentX = 0;
+                                
+                                newProviders.forEach((prov: string) => {
+                                  logoElements.push({
+                                    id: `bnpl-logo-${prov}-${Math.random().toString(36).substr(2, 9)}`,
+                                    type: 'image',
+                                    src: providerLogos[prov],
+                                    position: { x: currentX, y: 45 },
+                                    size: { width: 120, height: logoHeight },
+                                    objectFit: 'contain',
+                                    rotation: 0,
+                                    opacity: 100,
+                                    visible: true,
+                                    locked: false,
+                                    zIndex: 0,
+                                    cornerRadius: 8
+                                  });
+                                  currentX += 120 + logoSpacing;
+                                });
+                                
+                                const totalLogosWidth = currentX - logoSpacing;
+                                updateElementProperty('children', [textElement, ...logoElements]);
+                                updateElementProperty('size', { width: Math.max(500, totalLogosWidth), height: 95 });
+                              }
+                              
                               updateElementProperty('widgetData', {
-                                ...(selectedElement as any).widgetData,
+                                ...widgetData,
                                 providers: newProviders
                               });
                             }
