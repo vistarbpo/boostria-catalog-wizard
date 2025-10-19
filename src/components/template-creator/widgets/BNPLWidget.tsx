@@ -13,12 +13,12 @@ export interface BNPLWidgetConfig {
 }
 
 const providerLogos: Record<BNPLProvider, string> = {
-  tabby: '/src/assets/bnpl/tabby.svg',
-  tamara: '/src/assets/bnpl/tamara.svg',
-  klarna: '/src/assets/bnpl/klarna.svg',
-  afterpay: '/src/assets/bnpl/afterpay.svg',
-  affirm: '/src/assets/bnpl/affirm.svg',
-  paypal: '/src/assets/bnpl/paypal.svg'
+  tabby: '/bnpl/tabby.svg',
+  tamara: '/bnpl/tamara.svg',
+  klarna: '/bnpl/klarna.svg',
+  afterpay: '/bnpl/afterpay.svg',
+  affirm: '/bnpl/affirm.svg',
+  paypal: '/bnpl/paypal.svg'
 };
 
 export function createBNPLWidget(config: BNPLWidgetConfig): CanvasElement[] {
