@@ -491,9 +491,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 const textChild = child as TextElement;
                 const textStyles = getTextStyles(textChild, childBaseStyle);
                 
-                // Add flex display for proper vertical centering
+                // Ensure text is vertically centered
                 textStyles.display = 'flex';
                 textStyles.alignItems = 'center';
+                textStyles.justifyContent = 'flex-start';
                 
                 const renderExportTextDecoration = () => {
                   if (textChild.textDecoration === 'underline') {
