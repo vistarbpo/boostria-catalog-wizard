@@ -37,8 +37,6 @@ export function createBNPLWidget(config: BNPLWidgetConfig): CanvasElement[] {
   const logoHeight = 40;
   const logoSpacing = 12;
 
-  const elements: CanvasElement[] = [];
-
   if (isSingleProvider) {
     // Single provider layout: Text on left, logo on right
     const textContent = `Pay ${currency} ${modifiedPrice} Now\n& Pay rest later`;
@@ -47,7 +45,7 @@ export function createBNPLWidget(config: BNPLWidgetConfig): CanvasElement[] {
       id: `bnpl-text-${Math.random().toString(36).substr(2, 9)}`,
       type: 'text',
       content: textContent,
-      position: position,
+      position: { x: 0, y: 0 },
       size: { width: 300, height: 60 },
       fontSize: fontSize,
       fontFamily: 'Inter',
@@ -73,18 +71,16 @@ export function createBNPLWidget(config: BNPLWidgetConfig): CanvasElement[] {
       id: `bnpl-logo-${Math.random().toString(36).substr(2, 9)}`,
       type: 'image',
       src: providerLogos[providers[0]],
-      position: { x: position.x + 320, y: position.y + 10 },
+      position: { x: 320, y: 10 },
       size: { width: 120, height: logoHeight },
       objectFit: 'contain',
-        rotation: 0,
-        opacity: 100,
-        visible: true,
-        locked: false,
-        zIndex: 0,
-        cornerRadius: 8
-      };
-
-    elements.push(textElement, logoElement);
+      rotation: 0,
+      opacity: 100,
+      visible: true,
+      locked: false,
+      zIndex: 0,
+      cornerRadius: 8
+    };
 
     // Group them
     const group: GroupElement = {
@@ -112,14 +108,14 @@ export function createBNPLWidget(config: BNPLWidgetConfig): CanvasElement[] {
 
     return [group];
   } else {
-    // Multiple providers layout: Text above, logos below
+    // Multiple providers layout: Text above, logos in grid below
     const textContent = `Buy now with ${currency} ${modifiedPrice} & Pay rest later`;
     
     const textElement: TextElement = {
       id: `bnpl-text-${Math.random().toString(36).substr(2, 9)}`,
       type: 'text',
       content: textContent,
-      position: position,
+      position: { x: 0, y: 0 },
       size: { width: 500, height: 30 },
       fontSize: fontSize,
       fontFamily: 'Inter',
@@ -141,31 +137,31 @@ export function createBNPLWidget(config: BNPLWidgetConfig): CanvasElement[] {
       dynamicField: 'price'
     };
 
-    elements.push(textElement);
+    // Create logos container as nested children
+    const logoElements: ImageElement[] = [];
+    let currentX = 0;
 
-    // Add logo images
-    const totalLogosWidth = providers.length * 120 + (providers.length - 1) * logoSpacing;
-    let currentX = position.x;
-
-    providers.forEach((provider, index) => {
+    providers.forEach((provider) => {
       const logoElement: ImageElement = {
         id: `bnpl-logo-${provider}-${Math.random().toString(36).substr(2, 9)}`,
         type: 'image',
         src: providerLogos[provider],
-        position: { x: currentX, y: position.y + 45 },
+        position: { x: currentX, y: 0 },
         size: { width: 120, height: logoHeight },
         objectFit: 'contain',
-          rotation: 0,
-          opacity: 100,
-          visible: true,
-          locked: false,
-          zIndex: 0,
-          cornerRadius: 8
-        };
+        rotation: 0,
+        opacity: 100,
+        visible: true,
+        locked: false,
+        zIndex: 0,
+        cornerRadius: 8
+      };
 
-      elements.push(logoElement);
+      logoElements.push(logoElement);
       currentX += 120 + logoSpacing;
     });
+
+    const totalLogosWidth = currentX - logoSpacing;
 
     // Group them
     const group: GroupElement = {
@@ -179,7 +175,10 @@ export function createBNPLWidget(config: BNPLWidgetConfig): CanvasElement[] {
       visible: true,
       locked: false,
       zIndex: 0,
-      children: elements,
+      children: [textElement, ...logoElements.map(logo => ({
+        ...logo,
+        position: { x: logo.position.x, y: 45 }
+      }))],
       widgetType: 'bnpl',
       widgetData: {
         providers,

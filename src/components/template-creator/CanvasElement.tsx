@@ -21,8 +21,25 @@ const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
 };
 
 // Helper function to format dynamic text with modifiers and formatting
-const formatDynamicText = (element: TextElement): string => {
+const formatDynamicText = (element: TextElement, parentGroup?: any): string => {
   let content = element.isDynamic ? (element.dynamicContent || element.content) : element.content;
+  
+  // Handle BNPL widget text
+  if (parentGroup?.widgetType === 'bnpl' && element.isDynamic && parentGroup.widgetData) {
+    const { price = 50, priceModifier = 4, currency = 'SAR', providers = [] } = parentGroup.widgetData;
+    const modifiedPrice = (price / priceModifier).toFixed(1);
+    
+    if (providers.length === 1) {
+      return `Pay ${currency} ${modifiedPrice} Now\n& Pay rest later`;
+    } else {
+      return `Buy now with ${currency} ${modifiedPrice} & Pay rest later`;
+    }
+  }
+  
+  // Handle rating widget text
+  if (parentGroup?.widgetType === 'rating' && element.isDynamic && element.dynamicField === 'rating' && parentGroup.widgetData?.rating) {
+    return parentGroup.widgetData.rating.toFixed(1);
+  }
   
   // If not dynamic or no modifiers/formatting, return as is
   if (!element.isDynamic || (!element.modifiers?.length && !element.formatting)) {
@@ -805,7 +822,7 @@ const CanvasElementComponent = function CanvasElement({
               alignItems: 'flex-start',
             }}
           >
-            {formatDynamicText(textEl)}
+            {formatDynamicText(textEl, parentGroup)}
           </div>
         );
       case 'shape':

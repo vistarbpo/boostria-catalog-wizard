@@ -1226,6 +1226,130 @@ export function PropertiesPanel({
             </div>}
 
           {/* Group/Widget Properties */}
+          {/* BNPL Widget Settings */}
+          {selectedElement.type === 'group' && (selectedElement as any).widgetType === 'bnpl' && (
+            <div className="space-y-4 pt-4 border-t">
+              <div>
+                <h4 className="text-sm font-medium mb-3">BNPL Widget Settings</h4>
+                
+                {/* Provider Selection */}
+                <div className="space-y-2 mb-4">
+                  <Label>Payment Providers</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(['tabby', 'tamara', 'klarna', 'afterpay', 'affirm', 'paypal'] as const).map((provider) => {
+                      const isSelected = (selectedElement as any).widgetData?.providers?.includes(provider);
+                      return (
+                        <Button
+                          key={provider}
+                          variant={isSelected ? "default" : "outline"}
+                          size="sm"
+                          className="h-auto py-2"
+                          onClick={() => {
+                            const currentProviders = (selectedElement as any).widgetData?.providers || [];
+                            const newProviders = isSelected 
+                              ? currentProviders.filter((p: string) => p !== provider)
+                              : [...currentProviders, provider];
+                            
+                            if (newProviders.length > 0) {
+                              updateElementProperty('widgetData', {
+                                ...(selectedElement as any).widgetData,
+                                providers: newProviders
+                              });
+                            }
+                          }}
+                        >
+                          {provider.charAt(0).toUpperCase() + provider.slice(1)}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Price Modifier */}
+                <div className="space-y-2 mb-4">
+                  <Label>Divide Price By</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={(selectedElement as any).widgetData?.priceModifier || 4}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 4;
+                      updateElementProperty('widgetData', {
+                        ...(selectedElement as any).widgetData,
+                        priceModifier: value
+                      });
+                    }}
+                  />
+                </div>
+
+                {/* Default Price */}
+                <div className="space-y-2 mb-4">
+                  <Label>Preview Price</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={(selectedElement as any).widgetData?.price || 50}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 50;
+                      updateElementProperty('widgetData', {
+                        ...(selectedElement as any).widgetData,
+                        price: value
+                      });
+                    }}
+                  />
+                </div>
+
+                {/* Currency */}
+                <div className="space-y-2 mb-4">
+                  <Label>Currency</Label>
+                  <Input
+                    type="text"
+                    value={(selectedElement as any).widgetData?.currency || 'SAR'}
+                    onChange={(e) => {
+                      updateElementProperty('widgetData', {
+                        ...(selectedElement as any).widgetData,
+                        currency: e.target.value
+                      });
+                    }}
+                  />
+                </div>
+
+                {/* Text Color */}
+                <div className="space-y-2 mb-4">
+                  <Label>Text Color</Label>
+                  <ColorPicker
+                    value={(selectedElement as any).widgetData?.textColor || '#000000'}
+                    onChange={(color) => {
+                      updateElementProperty('widgetData', {
+                        ...(selectedElement as any).widgetData,
+                        textColor: color
+                      });
+                    }}
+                  />
+                </div>
+
+                {/* Font Size */}
+                <div className="space-y-2">
+                  <Label>Font Size</Label>
+                  <Input
+                    type="number"
+                    min="8"
+                    max="72"
+                    value={(selectedElement as any).widgetData?.fontSize || 16}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 16;
+                      updateElementProperty('widgetData', {
+                        ...(selectedElement as any).widgetData,
+                        fontSize: value
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {selectedElement.type === 'group' && (selectedElement as any).widgetType === 'rating' && (
             <div className="space-y-4">
               <Separator />
