@@ -989,15 +989,28 @@ const CanvasElementComponent = function CanvasElement({
       case 'image':
         const imgEl = childElement as ImageElement;
         return (
-          <img
-            src={imgEl.fillType === 'dynamic' && imgEl.fillImageUrl ? imgEl.fillImageUrl : imgEl.src}
-            alt={imgEl.alt || 'Canvas image'}
+          <div
             style={{
               ...childBaseStyle,
-              objectFit: imgEl.objectFit,
+              overflow: 'hidden',
               borderRadius: getBorderRadiusStyle(imgEl as any),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
-          />
+          >
+            <img
+              src={imgEl.fillType === 'dynamic' && imgEl.fillImageUrl ? imgEl.fillImageUrl : imgEl.src}
+              alt={imgEl.alt || 'Canvas image'}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                maxWidth: '100%',
+                maxHeight: '100%',
+              }}
+            />
+          </div>
         );
       case 'svg':
         const svgEl = childElement as SVGElement;

@@ -656,6 +656,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                       ...childBaseStyle,
                       overflow: 'hidden',
                       borderRadius,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     <img
@@ -664,7 +667,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit,
+                        objectFit: 'contain',
+                        maxWidth: '100%',
+                        maxHeight: '100%',
                       }}
                     />
                   </div>
