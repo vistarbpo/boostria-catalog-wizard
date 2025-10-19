@@ -491,6 +491,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 const textChild = child as TextElement;
                 const textStyles = getTextStyles(textChild, childBaseStyle);
                 
+                // Add flex display for proper vertical centering
+                textStyles.display = 'flex';
+                textStyles.alignItems = 'center';
+                
                 const renderExportTextDecoration = () => {
                   if (textChild.textDecoration === 'underline') {
                     return (
@@ -544,7 +548,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                           boxSizing: 'border-box',
                         }}
                       >
-                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
                           <defs>
                             {shapeChild.fillType === 'image' && shapeChild.fillImageUrl && (
                               <pattern id={`pattern-${child.id}`} width="100%" height="100%">
