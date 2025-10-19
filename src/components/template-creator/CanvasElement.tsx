@@ -760,7 +760,7 @@ const CanvasElementComponent = function CanvasElement({
                   pointerEvents: 'none',
                 }}
               >
-                {renderChildElement(child)}
+                {renderChildElement(child, groupElement)}
               </div>
             ))}
           </div>
@@ -773,7 +773,7 @@ const CanvasElementComponent = function CanvasElement({
   };
 
   // Helper function to render individual child elements within a group
-  const renderChildElement = (childElement: CanvasElementType) => {
+  const renderChildElement = (childElement: CanvasElementType, parentGroup?: any) => {
     const childBaseStyle: React.CSSProperties = {
       width: '100%',
       height: '100%',
@@ -859,11 +859,56 @@ const CanvasElementComponent = function CanvasElement({
             </svg>
           );
         } else if (shapeEl.shapeType === 'star') {
+          // Check if this star is part of a rating widget
+          const widgetRating = parentGroup?.widgetData?.rating;
+          const isRatingWidget = parentGroup?.widgetType === 'rating' && widgetRating !== undefined;
+          
+          let starFill = shapeEl.fillType === 'image' ? `url(#pattern-${shapeEl.id})` : shapeEl.fillColor;
+          
+          if (isRatingWidget && parentGroup?.children) {
+            // Find the index of this star in the group
+            const starIndex = parentGroup.children.findIndex((c: any) => c.id === shapeEl.id);
+            
+            if (starIndex !== -1) {
+              const filledStars = Math.floor(widgetRating);
+              const fractionalPart = widgetRating % 1;
+              const filledColor = parentGroup.widgetData.starFilledColor || '#E4A709';
+              const unfilledColor = parentGroup.widgetData.starUnfilledColor || '#D1D5DB';
+              
+              if (starIndex < filledStars) {
+                // Fully filled star
+                starFill = filledColor;
+              } else if (starIndex === filledStars && fractionalPart > 0) {
+                // Partially filled star - use gradient
+                const fillPercentage = fractionalPart * 100;
+                return (
+                  <svg width="100%" height="100%" viewBox="0 0 100 100" style={childBaseStyle}>
+                    <defs>
+                      <linearGradient id={`half-fill-preview-${shapeEl.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset={`${fillPercentage}%`} stopColor={filledColor} />
+                        <stop offset={`${fillPercentage}%`} stopColor={unfilledColor} />
+                      </linearGradient>
+                    </defs>
+                    <polygon 
+                      points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" 
+                      fill={`url(#half-fill-preview-${shapeEl.id})`}
+                      stroke={shapeEl.strokeColor}
+                      strokeWidth={shapeEl.strokeWidth}
+                    />
+                  </svg>
+                );
+              } else {
+                // Unfilled star
+                starFill = unfilledColor;
+              }
+            }
+          }
+          
           return (
             <svg width="100%" height="100%" viewBox="0 0 100 100" style={childBaseStyle}>
               <polygon 
                 points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" 
-                fill={shapeEl.fillType === 'image' ? `url(#pattern-${shapeEl.id})` : shapeEl.fillColor}
+                fill={starFill}
                 stroke={shapeEl.strokeColor}
                 strokeWidth={shapeEl.strokeWidth}
               />

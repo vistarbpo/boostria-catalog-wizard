@@ -1442,20 +1442,22 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       const centerY = canvasStore.canvasState.canvasSize.height / 2 - 12;
                       
                       const ratingWidget = createRatingWidget({
-                        position: { x: centerX, y: centerY },
-                        rating: 4.5,
-                        starFilledColor: '#E4A709',
-                        starUnfilledColor: '#D1D5DB',
-                        textColor: '#000000',
-                        fontSize: 16,
-                        showRatingText: true
-                      });
-                      
-                      // Add the group to canvas
-                      canvasStore.canvasState.elements.push(ratingWidget);
-                      canvasStore.selectElement(ratingWidget.id);
-                      toast.success('Rating widget added');
-                    }}
+                      position: { x: centerX, y: centerY },
+                      rating: 4.5,
+                      starFilledColor: '#E4A709',
+                      starUnfilledColor: '#D1D5DB',
+                      textColor: '#000000',
+                      fontSize: 16,
+                      showRatingText: true
+                    });
+                    
+                    // Add the elements to canvas
+                    ratingWidget.forEach(element => {
+                      canvasStore.canvasState.elements.push(element);
+                    });
+                    canvasStore.selectElement(ratingWidget[0].id);
+                    toast.success('Rating widget added');
+                  }}
                     className="w-full justify-start"
                   >
                     <Star className="w-4 h-4 mr-2" />

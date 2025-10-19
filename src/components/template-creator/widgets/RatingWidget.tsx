@@ -11,7 +11,7 @@ export interface RatingWidgetConfig {
   conditionalThreshold?: number;
 }
 
-export function createRatingWidget(config: RatingWidgetConfig): GroupElement {
+export function createRatingWidget(config: RatingWidgetConfig): CanvasElement[] {
   const {
     position,
     starFilledColor = '#E4A709',
@@ -32,7 +32,7 @@ export function createRatingWidget(config: RatingWidgetConfig): GroupElement {
   const filledStars = Math.floor(rating);
   const hasHalfStar = rating % 1 >= 0.5;
 
-  const children: CanvasElement[] = [];
+  const starChildren: CanvasElement[] = [];
   let currentX = 0;
 
   // Create 5 star shapes
@@ -55,17 +55,48 @@ export function createRatingWidget(config: RatingWidgetConfig): GroupElement {
       zIndex: 0
     };
 
-    children.push(star);
+    starChildren.push(star);
     currentX += starSize + starSpacing;
   }
 
-  // Add rating text
+  const starsWidth = currentX - starSpacing;
+
+  // Create stars group
+  const starsGroup: GroupElement = {
+    id: `rating-stars-${Math.random().toString(36).substr(2, 9)}`,
+    type: 'group',
+    name: 'Rating Stars',
+    position: position,
+    size: { width: starsWidth, height: starSize },
+    rotation: 0,
+    opacity: 100,
+    visible: true,
+    locked: false,
+    zIndex: 0,
+    children: starChildren,
+    widgetType: 'rating',
+    widgetData: {
+      starFilledColor,
+      starUnfilledColor,
+      rating
+    },
+    conditionalDisplay: conditionalThreshold > 0 ? {
+      enabled: true,
+      field: 'rating',
+      operator: 'greater_than',
+      value: conditionalThreshold
+    } : undefined
+  };
+
+  const elements: CanvasElement[] = [starsGroup];
+
+  // Add rating text as separate element
   if (showRatingText) {
     const ratingText: TextElement = {
       id: `rating-text-${Math.random().toString(36).substr(2, 9)}`,
       type: 'text',
       content: rating.toFixed(1),
-      position: { x: currentX + textMarginLeft, y: (starSize - fontSize) / 2 },
+      position: { x: position.x + starsWidth + textMarginLeft, y: position.y + (starSize - fontSize) / 2 },
       size: { width: 50, height: starSize },
       fontSize: fontSize,
       fontFamily: 'Inter',
@@ -87,39 +118,8 @@ export function createRatingWidget(config: RatingWidgetConfig): GroupElement {
       dynamicField: 'rating'
     };
 
-    children.push(ratingText);
+    elements.push(ratingText);
   }
 
-  // Calculate total widget size
-  const totalWidth = currentX + (showRatingText ? textMarginLeft + 50 : 0);
-  const totalHeight = starSize;
-
-  const group: GroupElement = {
-    id: `rating-widget-${Math.random().toString(36).substr(2, 9)}`,
-    type: 'group',
-    name: 'Rating Widget',
-    position: position,
-    size: { width: totalWidth, height: totalHeight },
-    rotation: 0,
-    opacity: 100,
-    visible: true,
-    locked: false,
-    zIndex: 0,
-    children: children,
-    widgetType: 'rating',
-    widgetData: {
-      starFilledColor,
-      starUnfilledColor,
-      textColor,
-      rating
-    },
-    conditionalDisplay: conditionalThreshold > 0 ? {
-      enabled: true,
-      field: 'rating',
-      operator: 'greater_than',
-      value: conditionalThreshold
-    } : undefined
-  };
-
-  return group;
+  return elements;
 }
