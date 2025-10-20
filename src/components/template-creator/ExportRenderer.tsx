@@ -9,7 +9,7 @@ import {
   renderTriangleSVG,
 } from './renderUtils';
 
-// Helper function to generate effect styles
+// Helper function to generate effect styles for export (html2canvas compatible)
 const getEffectStyles = (element: any): React.CSSProperties => {
   const styles: React.CSSProperties = {};
   
@@ -33,23 +33,22 @@ const getEffectStyles = (element: any): React.CSSProperties => {
     styles.boxShadow = shadowParts.join(', ');
   }
   
-  // Build filter and backdrop-filter arrays
+  // Build filter array
   const filters: string[] = [];
-  const backdropFilters: string[] = [];
   
   // Add layer blur to filter
   if (blur?.enabled && blur.type === 'layer') {
     filters.push(`blur(${blur.amount}px)`);
   }
   
-  // Add background blur to backdrop-filter
-  if (blur?.enabled && blur.type === 'background') {
-    backdropFilters.push(`blur(${blur.amount}px)`);
-  }
+  // For background blur in export, we can't use backdrop-filter (not supported by html2canvas)
+  // So we'll skip it for now as it requires the background content
   
-  // Add glass effect (combines with other backdrop filters)
+  // For glass effect in export: simulate with opacity and blur
   if (glass?.enabled) {
-    backdropFilters.push(`blur(${glass.blur}px)`);
+    // Apply blur to the element itself (not backdrop-filter)
+    filters.push(`blur(${Math.min(glass.blur / 2, 5)}px)`); // Reduce blur for better visibility
+    // Use semi-transparent white background
     styles.backgroundColor = `rgba(255, 255, 255, ${glass.opacity / 100})`;
     styles.border = `1px solid rgba(255, 255, 255, ${glass.borderOpacity / 100})`;
   }
@@ -57,10 +56,6 @@ const getEffectStyles = (element: any): React.CSSProperties => {
   // Apply combined filters
   if (filters.length > 0) {
     styles.filter = filters.join(' ');
-  }
-  
-  if (backdropFilters.length > 0) {
-    styles.backdropFilter = backdropFilters.join(' ');
   }
   
   return styles;
