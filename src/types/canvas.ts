@@ -8,6 +8,35 @@ export interface Size {
   height: number;
 }
 
+export interface EffectShadow {
+  enabled: boolean;
+  type: 'drop' | 'inner';
+  color: string;
+  offsetX: number;
+  offsetY: number;
+  blur: number;
+  spread: number;
+}
+
+export interface EffectBlur {
+  enabled: boolean;
+  type: 'layer' | 'background';
+  amount: number;
+}
+
+export interface EffectGlass {
+  enabled: boolean;
+  blur: number;
+  opacity: number;
+  borderOpacity: number;
+}
+
+export interface Effects {
+  shadows: EffectShadow[];
+  blur?: EffectBlur;
+  glass?: EffectGlass;
+}
+
 export interface BaseElement {
   id: string;
   type: string;
@@ -18,6 +47,7 @@ export interface BaseElement {
   visible: boolean;
   locked: boolean;
   zIndex: number;
+  effects?: Effects;
 }
 
 export interface TextElement extends BaseElement {

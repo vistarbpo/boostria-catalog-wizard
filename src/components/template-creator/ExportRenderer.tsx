@@ -9,6 +9,49 @@ import {
   renderTriangleSVG,
 } from './renderUtils';
 
+// Helper function to generate effect styles
+const getEffectStyles = (element: any): React.CSSProperties => {
+  const styles: React.CSSProperties = {};
+  
+  if (!element.effects) return styles;
+  
+  const { shadows, blur, glass } = element.effects;
+  
+  // Build shadow styles
+  const shadowParts: string[] = [];
+  if (shadows) {
+    shadows.forEach((shadow: any) => {
+      if (shadow.enabled) {
+        const { type, color, offsetX, offsetY, blur, spread } = shadow;
+        const insetPrefix = type === 'inner' ? 'inset ' : '';
+        shadowParts.push(`${insetPrefix}${offsetX}px ${offsetY}px ${blur}px ${spread}px ${color}`);
+      }
+    });
+  }
+  
+  if (shadowParts.length > 0) {
+    styles.boxShadow = shadowParts.join(', ');
+  }
+  
+  // Add blur effect
+  if (blur?.enabled) {
+    if (blur.type === 'layer') {
+      styles.filter = `blur(${blur.amount}px)`;
+    } else if (blur.type === 'background') {
+      styles.backdropFilter = `blur(${blur.amount}px)`;
+    }
+  }
+  
+  // Add glass effect
+  if (glass?.enabled) {
+    styles.backdropFilter = `blur(${glass.blur}px)`;
+    styles.backgroundColor = `rgba(255, 255, 255, ${glass.opacity / 100})`;
+    styles.border = `1px solid rgba(255, 255, 255, ${glass.borderOpacity / 100})`;
+  }
+  
+  return styles;
+};
+
 interface ExportRendererProps {
   elements: CanvasElement[];
   canvasWidth: number;
@@ -39,6 +82,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
       opacity: element.opacity / 100,
       zIndex: element.zIndex,
       pointerEvents: 'none',
+      ...getEffectStyles(element), // Apply effects
     };
 
     switch (element.type) {

@@ -1628,6 +1628,441 @@ export function PropertiesPanel({
             </div>
           )}
 
+          {/* Effects - for images and shapes */}
+          {(selectedElement.type === 'image' || selectedElement.type === 'shape') && (
+            <div className="space-y-4">
+              <Separator />
+              <h4 className="text-sm font-medium">Effects</h4>
+              
+              {/* Drop Shadow */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs">Drop Shadow</Label>
+                  <Switch 
+                    checked={selectedElement.effects?.shadows?.some(s => s.type === 'drop' && s.enabled) || false}
+                    onCheckedChange={checked => {
+                      const effects = selectedElement.effects || { shadows: [] };
+                      const shadows = effects.shadows || [];
+                      const dropShadowIndex = shadows.findIndex(s => s.type === 'drop');
+                      
+                      if (checked) {
+                        if (dropShadowIndex >= 0) {
+                          shadows[dropShadowIndex] = { ...shadows[dropShadowIndex], enabled: true };
+                        } else {
+                          shadows.push({
+                            enabled: true,
+                            type: 'drop',
+                            color: '#000000',
+                            offsetX: 0,
+                            offsetY: 4,
+                            blur: 8,
+                            spread: 0
+                          });
+                        }
+                      } else if (dropShadowIndex >= 0) {
+                        shadows[dropShadowIndex] = { ...shadows[dropShadowIndex], enabled: false };
+                      }
+                      
+                      updateElementProperty('effects', { ...effects, shadows });
+                    }}
+                  />
+                </div>
+                
+                {selectedElement.effects?.shadows?.some(s => s.type === 'drop' && s.enabled) && (() => {
+                  const shadow = selectedElement.effects.shadows.find(s => s.type === 'drop');
+                  return shadow ? (
+                    <div className="pl-4 space-y-3 border-l-2 border-border">
+                      <div>
+                        <Label className="text-xs">Color</Label>
+                        <ColorPicker
+                          value={shadow.color}
+                          onChange={(color) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'drop');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], color };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Offset X: {shadow.offsetX}px</Label>
+                        <Slider
+                          value={[shadow.offsetX]}
+                          min={-50}
+                          max={50}
+                          step={1}
+                          onValueChange={([value]) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'drop');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], offsetX: value };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Offset Y: {shadow.offsetY}px</Label>
+                        <Slider
+                          value={[shadow.offsetY]}
+                          min={-50}
+                          max={50}
+                          step={1}
+                          onValueChange={([value]) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'drop');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], offsetY: value };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Blur: {shadow.blur}px</Label>
+                        <Slider
+                          value={[shadow.blur]}
+                          min={0}
+                          max={50}
+                          step={1}
+                          onValueChange={([value]) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'drop');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], blur: value };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Spread: {shadow.spread}px</Label>
+                        <Slider
+                          value={[shadow.spread]}
+                          min={-20}
+                          max={20}
+                          step={1}
+                          onValueChange={([value]) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'drop');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], spread: value };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+
+              {/* Inner Shadow */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs">Inner Shadow</Label>
+                  <Switch 
+                    checked={selectedElement.effects?.shadows?.some(s => s.type === 'inner' && s.enabled) || false}
+                    onCheckedChange={checked => {
+                      const effects = selectedElement.effects || { shadows: [] };
+                      const shadows = effects.shadows || [];
+                      const innerShadowIndex = shadows.findIndex(s => s.type === 'inner');
+                      
+                      if (checked) {
+                        if (innerShadowIndex >= 0) {
+                          shadows[innerShadowIndex] = { ...shadows[innerShadowIndex], enabled: true };
+                        } else {
+                          shadows.push({
+                            enabled: true,
+                            type: 'inner',
+                            color: '#000000',
+                            offsetX: 0,
+                            offsetY: 4,
+                            blur: 8,
+                            spread: 0
+                          });
+                        }
+                      } else if (innerShadowIndex >= 0) {
+                        shadows[innerShadowIndex] = { ...shadows[innerShadowIndex], enabled: false };
+                      }
+                      
+                      updateElementProperty('effects', { ...effects, shadows });
+                    }}
+                  />
+                </div>
+                
+                {selectedElement.effects?.shadows?.some(s => s.type === 'inner' && s.enabled) && (() => {
+                  const shadow = selectedElement.effects.shadows.find(s => s.type === 'inner');
+                  return shadow ? (
+                    <div className="pl-4 space-y-3 border-l-2 border-border">
+                      <div>
+                        <Label className="text-xs">Color</Label>
+                        <ColorPicker
+                          value={shadow.color}
+                          onChange={(color) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'inner');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], color };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Offset X: {shadow.offsetX}px</Label>
+                        <Slider
+                          value={[shadow.offsetX]}
+                          min={-50}
+                          max={50}
+                          step={1}
+                          onValueChange={([value]) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'inner');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], offsetX: value };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Offset Y: {shadow.offsetY}px</Label>
+                        <Slider
+                          value={[shadow.offsetY]}
+                          min={-50}
+                          max={50}
+                          step={1}
+                          onValueChange={([value]) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'inner');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], offsetY: value };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Blur: {shadow.blur}px</Label>
+                        <Slider
+                          value={[shadow.blur]}
+                          min={0}
+                          max={50}
+                          step={1}
+                          onValueChange={([value]) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'inner');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], blur: value };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Spread: {shadow.spread}px</Label>
+                        <Slider
+                          value={[shadow.spread]}
+                          min={-20}
+                          max={20}
+                          step={1}
+                          onValueChange={([value]) => {
+                            const effects = selectedElement.effects || { shadows: [] };
+                            const shadows = [...(effects.shadows || [])];
+                            const idx = shadows.findIndex(s => s.type === 'inner');
+                            if (idx >= 0) {
+                              shadows[idx] = { ...shadows[idx], spread: value };
+                              updateElementProperty('effects', { ...effects, shadows });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+
+              {/* Layer Blur */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs">Layer Blur</Label>
+                  <Switch 
+                    checked={selectedElement.effects?.blur?.enabled && selectedElement.effects.blur.type === 'layer' || false}
+                    onCheckedChange={checked => {
+                      const effects = selectedElement.effects || { shadows: [] };
+                      if (checked) {
+                        updateElementProperty('effects', { 
+                          ...effects, 
+                          blur: { enabled: true, type: 'layer', amount: 8 } 
+                        });
+                      } else {
+                        updateElementProperty('effects', { 
+                          ...effects, 
+                          blur: { ...effects.blur, enabled: false, type: 'layer', amount: 0 } 
+                        });
+                      }
+                    }}
+                  />
+                </div>
+                
+                {selectedElement.effects?.blur?.enabled && selectedElement.effects.blur.type === 'layer' && (
+                  <div className="pl-4 space-y-3 border-l-2 border-border">
+                    <div>
+                      <Label className="text-xs">Amount: {selectedElement.effects.blur.amount}px</Label>
+                      <Slider
+                        value={[selectedElement.effects.blur.amount]}
+                        min={0}
+                        max={50}
+                        step={1}
+                        onValueChange={([value]) => {
+                          const effects = selectedElement.effects || { shadows: [] };
+                          updateElementProperty('effects', { 
+                            ...effects, 
+                            blur: { ...effects.blur!, amount: value } 
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Background Blur */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs">Background Blur</Label>
+                  <Switch 
+                    checked={selectedElement.effects?.blur?.enabled && selectedElement.effects.blur.type === 'background' || false}
+                    onCheckedChange={checked => {
+                      const effects = selectedElement.effects || { shadows: [] };
+                      if (checked) {
+                        updateElementProperty('effects', { 
+                          ...effects, 
+                          blur: { enabled: true, type: 'background', amount: 8 } 
+                        });
+                      } else {
+                        updateElementProperty('effects', { 
+                          ...effects, 
+                          blur: { ...effects.blur, enabled: false, type: 'background', amount: 0 } 
+                        });
+                      }
+                    }}
+                  />
+                </div>
+                
+                {selectedElement.effects?.blur?.enabled && selectedElement.effects.blur.type === 'background' && (
+                  <div className="pl-4 space-y-3 border-l-2 border-border">
+                    <div>
+                      <Label className="text-xs">Amount: {selectedElement.effects.blur.amount}px</Label>
+                      <Slider
+                        value={[selectedElement.effects.blur.amount]}
+                        min={0}
+                        max={50}
+                        step={1}
+                        onValueChange={([value]) => {
+                          const effects = selectedElement.effects || { shadows: [] };
+                          updateElementProperty('effects', { 
+                            ...effects, 
+                            blur: { ...effects.blur!, amount: value } 
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Glass Effect */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs">Glass Effect</Label>
+                  <Switch 
+                    checked={selectedElement.effects?.glass?.enabled || false}
+                    onCheckedChange={checked => {
+                      const effects = selectedElement.effects || { shadows: [] };
+                      if (checked) {
+                        updateElementProperty('effects', { 
+                          ...effects, 
+                          glass: { enabled: true, blur: 12, opacity: 80, borderOpacity: 20 } 
+                        });
+                      } else {
+                        updateElementProperty('effects', { 
+                          ...effects, 
+                          glass: { ...effects.glass, enabled: false, blur: 0, opacity: 100, borderOpacity: 0 } 
+                        });
+                      }
+                    }}
+                  />
+                </div>
+                
+                {selectedElement.effects?.glass?.enabled && (
+                  <div className="pl-4 space-y-3 border-l-2 border-border">
+                    <div>
+                      <Label className="text-xs">Blur: {selectedElement.effects.glass.blur}px</Label>
+                      <Slider
+                        value={[selectedElement.effects.glass.blur]}
+                        min={0}
+                        max={30}
+                        step={1}
+                        onValueChange={([value]) => {
+                          const effects = selectedElement.effects || { shadows: [] };
+                          updateElementProperty('effects', { 
+                            ...effects, 
+                            glass: { ...effects.glass!, blur: value } 
+                          });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Opacity: {selectedElement.effects.glass.opacity}%</Label>
+                      <Slider
+                        value={[selectedElement.effects.glass.opacity]}
+                        min={0}
+                        max={100}
+                        step={1}
+                        onValueChange={([value]) => {
+                          const effects = selectedElement.effects || { shadows: [] };
+                          updateElementProperty('effects', { 
+                            ...effects, 
+                            glass: { ...effects.glass!, opacity: value } 
+                          });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Border Opacity: {selectedElement.effects.glass.borderOpacity}%</Label>
+                      <Slider
+                        value={[selectedElement.effects.glass.borderOpacity]}
+                        min={0}
+                        max={100}
+                        step={1}
+                        onValueChange={([value]) => {
+                          const effects = selectedElement.effects || { shadows: [] };
+                          updateElementProperty('effects', { 
+                            ...effects, 
+                            glass: { ...effects.glass!, borderOpacity: value } 
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Z-Index */}
           <div className="space-y-4">
             <Separator />
