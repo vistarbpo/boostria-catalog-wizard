@@ -33,9 +33,9 @@ const getEffectStyles = (element: any): React.CSSProperties => {
   if (shadows) {
     shadows.forEach((shadow: any) => {
       if (shadow.enabled) {
-        const { type, color, offsetX, offsetY, blur, spread } = shadow;
+        const { type, color, offsetX, offsetY, blur: shadowBlur, spread } = shadow;
         const insetPrefix = type === 'inner' ? 'inset ' : '';
-        shadowParts.push(`${insetPrefix}${offsetX}px ${offsetY}px ${blur}px ${spread}px ${color}`);
+        shadowParts.push(`${insetPrefix}${offsetX}px ${offsetY}px ${shadowBlur}px ${spread}px ${color}`);
       }
     });
   }
@@ -44,20 +44,34 @@ const getEffectStyles = (element: any): React.CSSProperties => {
     styles.boxShadow = shadowParts.join(', ');
   }
   
-  // Add blur effect
-  if (blur?.enabled) {
-    if (blur.type === 'layer') {
-      styles.filter = `blur(${blur.amount}px)`;
-    } else if (blur.type === 'background') {
-      styles.backdropFilter = `blur(${blur.amount}px)`;
-    }
+  // Build filter and backdrop-filter arrays
+  const filters: string[] = [];
+  const backdropFilters: string[] = [];
+  
+  // Add layer blur to filter
+  if (blur?.enabled && blur.type === 'layer') {
+    filters.push(`blur(${blur.amount}px)`);
   }
   
-  // Add glass effect
+  // Add background blur to backdrop-filter
+  if (blur?.enabled && blur.type === 'background') {
+    backdropFilters.push(`blur(${blur.amount}px)`);
+  }
+  
+  // Add glass effect (combines with other backdrop filters)
   if (glass?.enabled) {
-    styles.backdropFilter = `blur(${glass.blur}px)`;
+    backdropFilters.push(`blur(${glass.blur}px)`);
     styles.backgroundColor = `rgba(255, 255, 255, ${glass.opacity / 100})`;
     styles.border = `1px solid rgba(255, 255, 255, ${glass.borderOpacity / 100})`;
+  }
+  
+  // Apply combined filters
+  if (filters.length > 0) {
+    styles.filter = filters.join(' ');
+  }
+  
+  if (backdropFilters.length > 0) {
+    styles.backdropFilter = backdropFilters.join(' ');
   }
   
   return styles;
