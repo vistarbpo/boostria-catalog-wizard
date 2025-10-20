@@ -316,24 +316,20 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
             backgroundMode={canvasStore.canvasState.backgroundMode}
           />
         );
-        // Wait longer for effects to render and images to load
-        setTimeout(resolve, 500);
+        // Wait for render to complete
+        setTimeout(resolve, 200);
       });
 
-      // Capture with html2canvas with enhanced options for effects
+      // Capture with html2canvas
       const canvas = await html2canvas(tempContainer.firstChild as HTMLElement, {
         width: currentSize.width,
         height: currentSize.height,
         backgroundColor: bgColor,
-        scale: 2, // High resolution
+        scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
         imageTimeout: 0,
-        removeContainer: false, // Keep container for debugging
-        foreignObjectRendering: true, // Better CSS support
-        windowWidth: currentSize.width,
-        windowHeight: currentSize.height,
       });
 
       // Clean up

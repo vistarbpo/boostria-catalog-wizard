@@ -9,58 +9,6 @@ import {
   renderTriangleSVG,
 } from './renderUtils';
 
-// Helper function to generate effect styles for export (html2canvas compatible)
-const getEffectStyles = (element: any): React.CSSProperties => {
-  const styles: React.CSSProperties = {};
-  
-  if (!element.effects) return styles;
-  
-  const { shadows, blur, glass } = element.effects;
-  
-  // Build shadow styles
-  const shadowParts: string[] = [];
-  if (shadows) {
-    shadows.forEach((shadow: any) => {
-      if (shadow.enabled) {
-        const { type, color, offsetX, offsetY, blur: shadowBlur, spread } = shadow;
-        const insetPrefix = type === 'inner' ? 'inset ' : '';
-        shadowParts.push(`${insetPrefix}${offsetX}px ${offsetY}px ${shadowBlur}px ${spread}px ${color}`);
-      }
-    });
-  }
-  
-  if (shadowParts.length > 0) {
-    styles.boxShadow = shadowParts.join(', ');
-  }
-  
-  // Build filter array
-  const filters: string[] = [];
-  
-  // Add layer blur to filter
-  if (blur?.enabled && blur.type === 'layer') {
-    filters.push(`blur(${blur.amount}px)`);
-  }
-  
-  // For background blur in export, we can't use backdrop-filter (not supported by html2canvas)
-  // So we'll skip it for now as it requires the background content
-  
-  // For glass effect in export: simulate with opacity and blur
-  if (glass?.enabled) {
-    // Apply blur to the element itself (not backdrop-filter)
-    filters.push(`blur(${Math.min(glass.blur / 2, 5)}px)`); // Reduce blur for better visibility
-    // Use semi-transparent white background
-    styles.backgroundColor = `rgba(255, 255, 255, ${glass.opacity / 100})`;
-    styles.border = `1px solid rgba(255, 255, 255, ${glass.borderOpacity / 100})`;
-  }
-  
-  // Apply combined filters
-  if (filters.length > 0) {
-    styles.filter = filters.join(' ');
-  }
-  
-  return styles;
-};
-
 interface ExportRendererProps {
   elements: CanvasElement[];
   canvasWidth: number;
@@ -91,7 +39,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
       opacity: element.opacity / 100,
       zIndex: element.zIndex,
       pointerEvents: 'none',
-      ...getEffectStyles(element), // Apply effects
     };
 
     switch (element.type) {

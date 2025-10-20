@@ -20,63 +20,6 @@ const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
   return shapeEl.cornerRadius || 0;
 };
 
-// Helper function to generate effect styles
-const getEffectStyles = (element: any): React.CSSProperties => {
-  const styles: React.CSSProperties = {};
-  
-  if (!element.effects) return styles;
-  
-  const { shadows, blur, glass } = element.effects;
-  
-  // Build shadow styles
-  const shadowParts: string[] = [];
-  if (shadows) {
-    shadows.forEach((shadow: any) => {
-      if (shadow.enabled) {
-        const { type, color, offsetX, offsetY, blur: shadowBlur, spread } = shadow;
-        const insetPrefix = type === 'inner' ? 'inset ' : '';
-        shadowParts.push(`${insetPrefix}${offsetX}px ${offsetY}px ${shadowBlur}px ${spread}px ${color}`);
-      }
-    });
-  }
-  
-  if (shadowParts.length > 0) {
-    styles.boxShadow = shadowParts.join(', ');
-  }
-  
-  // Build filter and backdrop-filter arrays
-  const filters: string[] = [];
-  const backdropFilters: string[] = [];
-  
-  // Add layer blur to filter
-  if (blur?.enabled && blur.type === 'layer') {
-    filters.push(`blur(${blur.amount}px)`);
-  }
-  
-  // Add background blur to backdrop-filter
-  if (blur?.enabled && blur.type === 'background') {
-    backdropFilters.push(`blur(${blur.amount}px)`);
-  }
-  
-  // Add glass effect (combines with other backdrop filters)
-  if (glass?.enabled) {
-    backdropFilters.push(`blur(${glass.blur}px)`);
-    styles.backgroundColor = `rgba(255, 255, 255, ${glass.opacity / 100})`;
-    styles.border = `1px solid rgba(255, 255, 255, ${glass.borderOpacity / 100})`;
-  }
-  
-  // Apply combined filters
-  if (filters.length > 0) {
-    styles.filter = filters.join(' ');
-  }
-  
-  if (backdropFilters.length > 0) {
-    styles.backdropFilter = backdropFilters.join(' ');
-  }
-  
-  return styles;
-};
-
 // Helper function to format dynamic text with modifiers and formatting
 const formatDynamicText = (element: TextElement, parentGroup?: any): string => {
   let content = element.isDynamic ? (element.dynamicContent || element.content) : element.content;
@@ -494,7 +437,6 @@ const CanvasElementComponent = function CanvasElement({
       height: '100%',
       opacity: element.opacity / 100,
       visibility: element.visible ? 'visible' : 'hidden',
-      ...getEffectStyles(element), // Apply effects
     };
 
     switch (element.type) {
