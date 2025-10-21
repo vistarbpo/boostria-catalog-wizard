@@ -22,69 +22,69 @@ const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
 
 // Helper function to format dynamic text with modifiers and formatting
 const formatDynamicText = (element: TextElement, parentGroup?: any): string => {
-  let content = element.isDynamic ? (element.dynamicContent || element.content) : element.content;
-  
   // Handle rating widget text
   if (parentGroup?.widgetType === 'rating' && element.isDynamic && element.dynamicField === 'rating' && parentGroup.widgetData?.rating) {
     return parentGroup.widgetData.rating.toFixed(1);
   }
   
   // Handle template-based dynamic text with placeholders like "Pay {price} in 4 installments"
-  if ((element as any).isTemplate && element.isDynamic && element.dynamicField && content.includes(`{${element.dynamicField}}`)) {
-    // Get the dynamic value and apply modifiers/formatting
-    let dynamicValue = element.dynamicContent || content;
+  if ((element as any).isTemplate && element.isDynamic && element.dynamicField && element.content.includes(`{${element.dynamicField}}`)) {
+    // Get the dynamic value from dynamicContent (the source value like "$300.00")
+    let sourceValue = element.dynamicContent || element.content;
     
-    // Apply modifiers to get the calculated value
-    if (element.modifiers?.length || element.formatting) {
-      let cleanedText = dynamicValue.replace(/[^0-9.-]/g, '');
-      let value = parseFloat(cleanedText) || 0;
+    // Clean and parse the numeric value
+    let cleanedText = sourceValue.replace(/[^0-9.-]/g, '');
+    let value = parseFloat(cleanedText) || 0;
+    
+    // Apply modifiers to calculate the final value
+    if (element.modifiers) {
+      element.modifiers.forEach(mod => {
+        switch (mod.type) {
+          case 'divide':
+            if (typeof mod.value === 'number' && mod.value !== 0) {
+              value = value / mod.value;
+            }
+            break;
+          case 'multiply':
+            value = value * (mod.value || 1);
+            break;
+          case 'add':
+            value = value + (mod.value || 0);
+            break;
+          case 'subtract':
+            value = value - (mod.value || 0);
+            break;
+          case 'decimals':
+            value = parseFloat(value.toFixed(mod.value || 2));
+            break;
+        }
+      });
+    }
+    
+    // Apply formatting to the calculated value
+    let formattedValue = value.toString();
+    if (element.formatting) {
+      const fmt = element.formatting;
+      formattedValue = value.toFixed(fmt.decimals ?? 2);
       
-      if (element.modifiers) {
-        element.modifiers.forEach(mod => {
-          switch (mod.type) {
-            case 'divide':
-              if (typeof mod.value === 'number' && mod.value !== 0) {
-                value = value / mod.value;
-              }
-              break;
-            case 'multiply':
-              value = value * (mod.value || 1);
-              break;
-            case 'add':
-              value = value + (mod.value || 0);
-              break;
-            case 'subtract':
-              value = value - (mod.value || 0);
-              break;
-          }
+      if (fmt.thousandsSeparator) {
+        formattedValue = parseFloat(formattedValue).toLocaleString('en-US', {
+          minimumFractionDigits: fmt.decimals ?? 2,
+          maximumFractionDigits: fmt.decimals ?? 2,
         });
       }
       
-      // Apply formatting
-      if (element.formatting) {
-        const fmt = element.formatting;
-        let formatted = value.toFixed(fmt.decimals ?? 2);
-        
-        if (fmt.thousandsSeparator) {
-          formatted = parseFloat(formatted).toLocaleString('en-US', {
-            minimumFractionDigits: fmt.decimals ?? 2,
-            maximumFractionDigits: fmt.decimals ?? 2,
-          });
-        }
-        
-        if (fmt.currencySymbol) formatted = fmt.currencySymbol + formatted;
-        if (fmt.prefix) formatted = fmt.prefix + formatted;
-        if (fmt.suffix) formatted = formatted + fmt.suffix;
-        
-        dynamicValue = formatted;
-      } else {
-        dynamicValue = value.toString();
-      }
+      if (fmt.currencySymbol) formattedValue = fmt.currencySymbol + formattedValue;
+      if (fmt.prefix) formattedValue = fmt.prefix + formattedValue;
+      if (fmt.suffix) formattedValue = formattedValue + fmt.suffix;
     }
     
-    // Replace the placeholder with the formatted value
-    return content.replace(`{${element.dynamicField}}`, dynamicValue);
+    // Replace the placeholder with the formatted value in the template
+    return element.content.replace(`{${element.dynamicField}}`, formattedValue);
   }
+  
+  // Regular dynamic content (non-template)
+  let content = element.isDynamic ? (element.dynamicContent || element.content) : element.content;
   
   // If not dynamic or no modifiers/formatting, return as is
   if (!element.isDynamic || (!element.modifiers?.length && !element.formatting)) {

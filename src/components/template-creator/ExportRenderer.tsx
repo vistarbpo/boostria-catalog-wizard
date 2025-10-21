@@ -46,6 +46,63 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         const textElement = element as TextElement;
         const textStyles = getTextStyles(textElement, baseStyle);
         
+        // Format dynamic text with template placeholders
+        const formatExportDynamicText = (el: TextElement): string => {
+          // Handle template-based dynamic text with placeholders
+          if ((el as any).isTemplate && el.isDynamic && el.dynamicField && el.content.includes(`{${el.dynamicField}}`)) {
+            let sourceValue = el.dynamicContent || el.content;
+            let cleanedText = sourceValue.replace(/[^0-9.-]/g, '');
+            let value = parseFloat(cleanedText) || 0;
+            
+            if (el.modifiers) {
+              el.modifiers.forEach(mod => {
+                switch (mod.type) {
+                  case 'divide':
+                    if (typeof mod.value === 'number' && mod.value !== 0) {
+                      value = value / mod.value;
+                    }
+                    break;
+                  case 'multiply':
+                    value = value * (mod.value || 1);
+                    break;
+                  case 'add':
+                    value = value + (mod.value || 0);
+                    break;
+                  case 'subtract':
+                    value = value - (mod.value || 0);
+                    break;
+                  case 'decimals':
+                    value = parseFloat(value.toFixed(mod.value || 2));
+                    break;
+                }
+              });
+            }
+            
+            let formattedValue = value.toString();
+            if (el.formatting) {
+              const fmt = el.formatting;
+              formattedValue = value.toFixed(fmt.decimals ?? 2);
+              
+              if (fmt.thousandsSeparator) {
+                formattedValue = parseFloat(formattedValue).toLocaleString('en-US', {
+                  minimumFractionDigits: fmt.decimals ?? 2,
+                  maximumFractionDigits: fmt.decimals ?? 2,
+                });
+              }
+              
+              if (fmt.currencySymbol) formattedValue = fmt.currencySymbol + formattedValue;
+              if (fmt.prefix) formattedValue = fmt.prefix + formattedValue;
+              if (fmt.suffix) formattedValue = formattedValue + fmt.suffix;
+            }
+            
+            return el.content.replace(`{${el.dynamicField}}`, formattedValue);
+          }
+          
+          return el.content;
+        };
+        
+        const displayContent = formatExportDynamicText(textElement);
+        
         // Custom export-specific text decoration rendering
         const renderExportTextDecoration = () => {
           if (textElement.textDecoration === 'underline') {
@@ -56,7 +113,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 textDecorationThickness: '1.5px',
                 textUnderlineOffset: '2px',
               }}>
-                {textElement.content}
+                {displayContent}
               </span>
             );
           } else if (textElement.textDecoration === 'line-through') {
@@ -65,7 +122,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 position: 'relative',
                 display: 'inline-block',
               }}>
-                {textElement.content}
+                {displayContent}
                 <span style={{
                   position: 'absolute',
                   left: '0',
@@ -78,7 +135,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               </span>
             );
           }
-          return <span>{textElement.content}</span>;
+          return <span>{displayContent}</span>;
         };
         
         return (
