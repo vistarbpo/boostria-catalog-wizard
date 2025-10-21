@@ -1504,13 +1504,17 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                     size="sm"
                     onClick={() => {
                       canvasStore.clearSelection();
-                      const centerX = canvasStore.canvasState.canvasSize.width / 2 - 200;
-                      const centerY = canvasStore.canvasState.canvasSize.height / 2 - 30;
+                      const centerX = canvasStore.canvasState.canvasSize.width / 2 - 150;
+                      const centerY = canvasStore.canvasState.canvasSize.height / 2 - 20;
                       
-                      // Add text with dynamic price field
+                      // Calculate default price divided by 4
+                      const priceValue = parseFloat(currentProduct.price.replace(/[^0-9.]/g, '')) || 300;
+                      const dividedPrice = (priceValue / 4).toFixed(2);
+                      
+                      // Add text with dynamic price field and default divide modifier
                       canvasStore.addTextElement(
                         { x: centerX, y: centerY },
-                        'Pay {price} in 4 installments',
+                        `Pay $${dividedPrice} in 4 installments`,
                         {
                           isDynamic: true,
                           dynamicField: 'price',
@@ -1518,25 +1522,21 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                           fontSize: 18,
                           fontWeight: '500',
                           color: '#000000',
-                          size: { width: 300, height: 40 }
+                          size: { width: 350, height: 40 },
+                          modifiers: [{
+                            id: Math.random().toString(36).substr(2, 9),
+                            type: 'divide',
+                            value: 4
+                          }],
+                          formatting: {
+                            currencySymbol: '$',
+                            decimals: 2,
+                            thousandsSeparator: false
+                          }
                         }
                       );
                       
-                      // Add Tabby logo
-                      setTimeout(() => {
-                        canvasStore.addImageElement('/bnpl/tabby.svg', { x: centerX + 320, y: centerY });
-                        setTimeout(() => {
-                          const logoElement = canvasStore.getSelectedElement();
-                          if (logoElement) {
-                            canvasStore.updateElement(logoElement.id, {
-                              size: { width: 80, height: 40 },
-                              objectFit: 'contain'
-                            });
-                          }
-                        }, 50);
-                      }, 100);
-                      
-                      toast.success('BNPL widget added - customize text and add more logos from Images section');
+                      toast.success('BNPL text added with divide by 4 modifier - add logos from Images section');
                     }}
                     className="w-full justify-start"
                   >
