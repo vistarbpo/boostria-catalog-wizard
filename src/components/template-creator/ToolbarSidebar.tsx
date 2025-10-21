@@ -1507,14 +1507,14 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       const centerX = canvasStore.canvasState.canvasSize.width / 2 - 150;
                       const centerY = canvasStore.canvasState.canvasSize.height / 2 - 20;
                       
-                      // Add text with dynamic price field and default divide modifier
+                      // Add text with template-based dynamic price
                       canvasStore.addTextElement(
                         { x: centerX, y: centerY },
                         'Pay {price} in 4 installments',
                         {
                           isDynamic: true,
                           dynamicField: 'price',
-                          dynamicContent: currentProduct.price,
+                          dynamicContent: currentProduct.price, // Source value for calculations
                           fontSize: 18,
                           fontWeight: '500',
                           color: '#000000',
@@ -1528,7 +1528,9 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                             currencySymbol: '$',
                             decimals: 2,
                             thousandsSeparator: false
-                          }
+                          },
+                          // Mark as template for placeholder replacement
+                          isTemplate: true
                         }
                       );
                       

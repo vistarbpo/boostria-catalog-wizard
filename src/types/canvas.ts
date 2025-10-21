@@ -49,6 +49,7 @@ export interface TextElement extends BaseElement {
   isDynamic?: boolean;
   dynamicField?: string; // Field name from product data like 'title', 'price', etc.
   dynamicContent?: string; // Resolved content when isDynamic is true
+  isTemplate?: boolean; // Whether to use placeholder replacement like "Pay {price} in 4 installments"
   // Formatting and modifiers
   formatting?: {
     prefix?: string;
