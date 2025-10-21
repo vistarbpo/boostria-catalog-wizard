@@ -1507,14 +1507,10 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       const centerX = canvasStore.canvasState.canvasSize.width / 2 - 150;
                       const centerY = canvasStore.canvasState.canvasSize.height / 2 - 20;
                       
-                      // Calculate default price divided by 4
-                      const priceValue = parseFloat(currentProduct.price.replace(/[^0-9.]/g, '')) || 300;
-                      const dividedPrice = (priceValue / 4).toFixed(2);
-                      
                       // Add text with dynamic price field and default divide modifier
                       canvasStore.addTextElement(
                         { x: centerX, y: centerY },
-                        `Pay $${dividedPrice} in 4 installments`,
+                        'Pay {price} in 4 installments',
                         {
                           isDynamic: true,
                           dynamicField: 'price',
