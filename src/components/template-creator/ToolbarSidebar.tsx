@@ -1496,6 +1496,55 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                   </Button>
                 </div>
 
+                {/* BNPL Widget */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">BNPL Widget</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      canvasStore.clearSelection();
+                      const centerX = canvasStore.canvasState.canvasSize.width / 2 - 200;
+                      const centerY = canvasStore.canvasState.canvasSize.height / 2 - 30;
+                      
+                      // Add text with dynamic price field
+                      canvasStore.addTextElement(
+                        { x: centerX, y: centerY },
+                        'Pay {price} in 4 installments',
+                        {
+                          isDynamic: true,
+                          dynamicField: 'price',
+                          dynamicContent: currentProduct.price,
+                          fontSize: 18,
+                          fontWeight: '500',
+                          color: '#000000',
+                          size: { width: 300, height: 40 }
+                        }
+                      );
+                      
+                      // Add Tabby logo
+                      setTimeout(() => {
+                        canvasStore.addImageElement('/bnpl/tabby.svg', { x: centerX + 320, y: centerY });
+                        setTimeout(() => {
+                          const logoElement = canvasStore.getSelectedElement();
+                          if (logoElement) {
+                            canvasStore.updateElement(logoElement.id, {
+                              size: { width: 80, height: 40 },
+                              objectFit: 'contain'
+                            });
+                          }
+                        }, 50);
+                      }, 100);
+                      
+                      toast.success('BNPL widget added - customize text and add more logos from Images section');
+                    }}
+                    className="w-full justify-start"
+                  >
+                    <BadgePercent className="w-4 h-4 mr-2" />
+                    Buy Now Pay Later
+                  </Button>
+                </div>
+
 
                 {/* Button Widget */}
                 <div className="space-y-2">
