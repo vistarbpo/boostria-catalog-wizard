@@ -50,7 +50,6 @@ import { useProduct } from "../../contexts/ProductContext";
 import { useWidgets } from "../../hooks/useWidgets";
 import { toast } from "sonner";
 import { createRatingWidget } from "./widgets/RatingWidget";
-import { createBNPLWidget, BNPLProvider } from './widgets/BNPLWidget';
 
 type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | "widgets" | null;
 
@@ -805,6 +804,37 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                     ))}
                   </div>
                 </div>
+
+                {/* BNPL Logos Section */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">BNPL Payment Logos</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { name: 'Tabby', logo: '/bnpl/tabby.svg' },
+                      { name: 'Tamara', logo: '/bnpl/tamara.svg' },
+                      { name: 'Klarna', logo: '/bnpl/klarna.svg' },
+                      { name: 'Afterpay', logo: '/bnpl/afterpay.svg' },
+                      { name: 'Affirm', logo: '/bnpl/affirm.svg' },
+                      { name: 'PayPal', logo: '/bnpl/paypal.svg' },
+                    ].map((provider) => (
+                      <div key={provider.name} className="relative">
+                        <Button
+                          variant="outline"
+                          className="h-16 w-full p-2 overflow-hidden"
+                          onClick={() => {
+                            canvasStore.addImageElement(provider.logo);
+                          }}
+                        >
+                          <img
+                            src={provider.logo}
+                            alt={provider.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               
                 {/* Uploaded Images */}
                 {uploadedAssets.length > 0 && (
@@ -1466,39 +1496,6 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                   </Button>
                 </div>
 
-                {/* BNPL Widget */}
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">BNPL Widget</h4>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const centerX = canvasStore.canvasState.canvasSize.width / 2 - 230;
-                      const centerY = canvasStore.canvasState.canvasSize.height / 2 - 30;
-                      
-                      const bnplWidget = createBNPLWidget({
-                        position: { x: centerX, y: centerY },
-                        providers: ['tabby'] as BNPLProvider[],
-                        priceModifier: 4,
-                        price: 50,
-                        currency: 'SAR',
-                        textColor: '#000000',
-                        fontSize: 16
-                      });
-                    
-                      // Add the elements to canvas
-                      bnplWidget.forEach(element => {
-                        canvasStore.canvasState.elements.push(element);
-                      });
-                      canvasStore.selectElement(bnplWidget[0].id);
-                      toast.success('BNPL widget added');
-                    }}
-                    className="w-full justify-start"
-                  >
-                    <BadgePercent className="w-4 h-4 mr-2" />
-                    Buy Now Pay Later
-                  </Button>
-                </div>
 
                 {/* Button Widget */}
                 <div className="space-y-2">

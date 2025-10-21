@@ -155,17 +155,12 @@ export interface GroupElement extends BaseElement {
     value: number | string;
   };
   // Widget-specific metadata
-  widgetType?: 'rating' | 'custom' | 'bnpl';
+  widgetType?: 'rating' | 'custom';
   widgetData?: {
     starFilledColor?: string;
     starUnfilledColor?: string;
     textColor?: string;
     rating?: number;
-    providers?: string[];
-    priceModifier?: number;
-    price?: number;
-    currency?: string;
-    fontSize?: number;
   };
 }
 

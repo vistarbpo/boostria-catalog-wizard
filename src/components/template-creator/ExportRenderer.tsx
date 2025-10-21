@@ -496,32 +496,14 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                   textContent = groupElement.widgetData.rating.toFixed(1);
                 }
                 
-                // Handle dynamic content for BNPL widget text
-                if (groupElement.widgetType === 'bnpl' && textChild.isDynamic && groupElement.widgetData) {
-                  const { price = 50, priceModifier = 4, currency = 'SAR', providers = [] } = groupElement.widgetData;
-                  const modifiedPrice = (price / priceModifier).toFixed(1);
-                  
-                  if (providers.length === 1) {
-                    textContent = `Pay ${currency} ${modifiedPrice} Now\n& Pay rest later`;
-                  } else {
-                    textContent = `Buy now with ${currency} ${modifiedPrice} & Pay rest later`;
-                  }
-                }
-                
                 // Update text color from widgetData if exists
                 let displayColor = textChild.color;
-                if (groupElement.widgetType === 'bnpl' && groupElement.widgetData?.textColor) {
-                  displayColor = groupElement.widgetData.textColor;
-                }
                 if (groupElement.widgetType === 'rating' && textChild.isDynamic && textChild.dynamicField === 'rating' && groupElement.widgetData?.textColor) {
                   displayColor = groupElement.widgetData.textColor;
                 }
                 
                 // Update fontSize from widgetData if exists
                 let displayFontSize = textChild.fontSize;
-                if (groupElement.widgetType === 'bnpl' && groupElement.widgetData?.fontSize) {
-                  displayFontSize = groupElement.widgetData.fontSize;
-                }
                 
                 const textStyles = {
                   ...getTextStyles({ ...textChild, color: displayColor, fontSize: displayFontSize, content: textContent }, childBaseStyle),
