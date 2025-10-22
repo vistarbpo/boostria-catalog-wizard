@@ -18,6 +18,7 @@ export interface BaseElement {
   visible: boolean;
   locked: boolean;
   zIndex: number;
+  aspectRatioLocked?: boolean; // Lock aspect ratio during resize
 }
 
 export interface TextElement extends BaseElement {

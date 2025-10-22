@@ -403,7 +403,8 @@ const CanvasElementComponent = function CanvasElement({
       let newWidth = dragDataRef.current.startWidth;
       let newHeight = dragDataRef.current.startHeight;
       
-      const isProportional = e.shiftKey;
+      // Lock aspect ratio for images by default, or when aspectRatioLocked is true, or when Shift is pressed
+      const isProportional = e.shiftKey || element.type === 'image' || element.aspectRatioLocked;
       const aspectRatio = dragDataRef.current.startWidth / dragDataRef.current.startHeight;
       
       if (handle.includes('e')) {

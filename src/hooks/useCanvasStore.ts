@@ -200,7 +200,8 @@ export function useCanvasStore() {
           fillType: dynamicProps?.fillType || 'original',
           fillMode: 'cover',
           fillSource: dynamicProps?.fillSource,
-          fillImageUrl: dynamicProps?.fillImageUrl
+          fillImageUrl: dynamicProps?.fillImageUrl,
+          aspectRatioLocked: true // Lock aspect ratio for all images by default
         };
 
         return {
@@ -235,7 +236,8 @@ export function useCanvasStore() {
           fillType: dynamicProps?.fillType || 'original',
           fillMode: 'cover',
           fillSource: dynamicProps?.fillSource,
-          fillImageUrl: dynamicProps?.fillImageUrl
+          fillImageUrl: dynamicProps?.fillImageUrl,
+          aspectRatioLocked: true // Lock aspect ratio for all images by default
         };
 
         return {
