@@ -810,12 +810,12 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                   <h4 className="text-sm font-medium">BNPL Payment Logos</h4>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { name: 'Tabby', logo: '/bnpl/tabby.svg' },
-                      { name: 'Tamara', logo: '/bnpl/tamara.svg' },
-                      { name: 'Klarna', logo: '/bnpl/klarna.svg' },
-                      { name: 'Afterpay', logo: '/bnpl/afterpay.svg' },
-                      { name: 'Affirm', logo: '/bnpl/affirm.svg' },
-                      { name: 'PayPal', logo: '/bnpl/paypal.svg' },
+                      { name: 'Tabby', logo: '/bnpl/tabby.png' },
+                      { name: 'Tamara', logo: '/bnpl/tamara.png' },
+                      { name: 'Klarna', logo: '/bnpl/klarna.png' },
+                      { name: 'Afterpay', logo: '/bnpl/afterpay.png' },
+                      { name: 'Affirm', logo: '/bnpl/affirm.png' },
+                      { name: 'PayPal', logo: '/bnpl/paypal.png' },
                     ].map((provider) => (
                       <div key={provider.name} className="relative">
                         <Button
