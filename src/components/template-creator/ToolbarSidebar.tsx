@@ -50,6 +50,7 @@ import { useProduct } from "../../contexts/ProductContext";
 import { useWidgets } from "../../hooks/useWidgets";
 import { toast } from "sonner";
 import { createRatingWidget } from "./widgets/RatingWidget";
+import { createPriceWidget, priceWidgetPresets } from "./widgets/PriceWidget";
 
 type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | "widgets" | null;
 
@@ -1639,44 +1640,110 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                   </div>
                 </div>
 
-                {/* Price Tag */}
+                {/* Price Widget */}
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Price Display</h4>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const centerX = canvasStore.canvasState.canvasSize.width / 2 - 80;
-                      const centerY = canvasStore.canvasState.canvasSize.height - 100;
-                      
-                      // Add price background
-                      canvasStore.addShapeElement('rectangle', { x: centerX - 10, y: centerY - 10 });
-                      setTimeout(() => {
-                        const bgShape = canvasStore.getSelectedElement();
-                        if (bgShape) {
-                          canvasStore.updateElement(bgShape.id, {
-                            size: { width: 180, height: 60 },
-                            fillColor: '#000000',
-                            strokeWidth: 0,
-                            opacity: 0.9
-                          });
-                          
-                          // Add price text
-                          setTimeout(() => {
-                            canvasStore.addTextElement({ x: centerX, y: centerY }, '$99.99', {
-                              fontSize: 32,
-                              fontWeight: '700',
-                              color: '#ffffff'
-                            });
-                          }, 100);
-                        }
-                      }, 100);
-                    }}
-                    className="w-full justify-start"
-                  >
-                 <BadgePercent className="w-4 h-4 mr-2" />
-                    Price Tag
-                  </Button>
+                  <h4 className="text-sm font-medium">Price Widget</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Default Style */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+                        const centerY = canvasStore.canvasState.canvasSize.height / 2 - 40;
+                        
+                        const priceWidget = createPriceWidget({
+                          position: { x: centerX, y: centerY },
+                          ...priceWidgetPresets.default
+                        });
+                        
+                        priceWidget.forEach(element => {
+                          canvasStore.canvasState.elements.push(element);
+                        });
+                        canvasStore.selectElement(priceWidget[0].id);
+                        toast.success('Price widget added');
+                      }}
+                      className="justify-start"
+                    >
+                      <BadgePercent className="w-4 h-4 mr-1" />
+                      Default
+                    </Button>
+
+                    {/* Large Bold Style */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+                        const centerY = canvasStore.canvasState.canvasSize.height / 2 - 40;
+                        
+                        const priceWidget = createPriceWidget({
+                          position: { x: centerX, y: centerY },
+                          ...priceWidgetPresets.largeBold
+                        });
+                        
+                        priceWidget.forEach(element => {
+                          canvasStore.canvasState.elements.push(element);
+                        });
+                        canvasStore.selectElement(priceWidget[0].id);
+                        toast.success('Price widget added');
+                      }}
+                      className="justify-start"
+                    >
+                      <BadgePercent className="w-4 h-4 mr-1" />
+                      Large
+                    </Button>
+
+                    {/* Red Badge Style */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+                        const centerY = canvasStore.canvasState.canvasSize.height / 2 - 40;
+                        
+                        const priceWidget = createPriceWidget({
+                          position: { x: centerX, y: centerY },
+                          ...priceWidgetPresets.redBadge
+                        });
+                        
+                        priceWidget.forEach(element => {
+                          canvasStore.canvasState.elements.push(element);
+                        });
+                        canvasStore.selectElement(priceWidget[0].id);
+                        toast.success('Price widget added');
+                      }}
+                      className="justify-start"
+                    >
+                      <BadgePercent className="w-4 h-4 mr-1" />
+                      Badge
+                    </Button>
+
+                    {/* Side by Side Style */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const centerX = canvasStore.canvasState.canvasSize.width / 2 - 100;
+                        const centerY = canvasStore.canvasState.canvasSize.height / 2 - 20;
+                        
+                        const priceWidget = createPriceWidget({
+                          position: { x: centerX, y: centerY },
+                          ...priceWidgetPresets.sideBySide
+                        });
+                        
+                        priceWidget.forEach(element => {
+                          canvasStore.canvasState.elements.push(element);
+                        });
+                        canvasStore.selectElement(priceWidget[0].id);
+                        toast.success('Price widget added');
+                      }}
+                      className="justify-start"
+                    >
+                      <BadgePercent className="w-4 h-4 mr-1" />
+                      Inline
+                    </Button>
+                  </div>
                 </div>
                 </div>
               </div>
