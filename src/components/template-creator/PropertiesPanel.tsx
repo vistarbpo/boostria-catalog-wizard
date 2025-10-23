@@ -381,6 +381,23 @@ export function PropertiesPanel({
                 />
               </div>
 
+              {/* Background Color */}
+              <div>
+                <Label className="text-xs mb-1 block">Background Color</Label>
+                <ColorPicker
+                  value={(selectedElement as TextElement).backgroundColor || 'transparent'}
+                  onChange={(color) => updateElementProperty('backgroundColor', color === 'transparent' ? undefined : color)}
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-1 h-6 text-xs w-full"
+                  onClick={() => updateElementProperty('backgroundColor', undefined)}
+                >
+                  Clear Background
+                </Button>
+              </div>
+
               {/* Text Alignment */}
               <div>
                 <Label className="text-xs mb-2 block">Text Alignment</Label>

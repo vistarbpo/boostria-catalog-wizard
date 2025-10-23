@@ -51,6 +51,12 @@ export interface TextElement extends BaseElement {
   dynamicField?: string; // Field name from product data like 'title', 'price', etc.
   dynamicContent?: string; // Resolved content when isDynamic is true
   isTemplate?: boolean; // Whether to use placeholder replacement like "Pay {price} in 4 installments"
+  fallbackField?: string; // Fallback field if dynamicField is empty
+  conditionalDisplay?: {
+    dependsOn?: string; // Field name to check
+    hideIfEmpty?: boolean; // Hide if the dependsOn field is empty
+    hideIfEqual?: string; // Hide if dynamicField equals this field
+  };
   // Formatting and modifiers
   formatting?: {
     prefix?: string;

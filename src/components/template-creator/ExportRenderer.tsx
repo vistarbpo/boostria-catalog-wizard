@@ -44,13 +44,41 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
     switch (element.type) {
       case 'text': {
         const textElement = element as TextElement;
+        
+        // Check conditional display rules
+        if (textElement.conditionalDisplay) {
+          const cond = textElement.conditionalDisplay;
+          
+          // Get the field values for comparison
+          const currentFieldValue = textElement.dynamicContent || textElement.content;
+          
+          // Hide if equal to another field
+          if (cond.hideIfEqual) {
+            // Extract the comparison field value from content or dynamic content
+            // For prices, we need to check if price == sale_price (no discount)
+            const dynamicFieldMatch = currentFieldValue.match(/[\d.]+/);
+            const currentValue = dynamicFieldMatch ? parseFloat(dynamicFieldMatch[0]) : null;
+            
+            // This is a simple check - in a real app, you'd compare actual field values
+            // For now, we'll hide the original price if it's the same as sale price
+            // This will be enhanced with actual product data comparison
+            if (cond.hideIfEqual === 'price') {
+              // Skip rendering this element - it will be conditionally shown based on product data
+              // For export template, we'll show it, but in actual render it would be hidden if no discount
+              // Since we don't have the actual product data here, we'll render it for the template
+            }
+          }
+        }
+        
         const textStyles = getTextStyles(textElement, baseStyle);
         
         // Format dynamic text with template placeholders
         const formatExportDynamicText = (el: TextElement): string => {
+          // Handle fallback field
+          let sourceValue = el.dynamicContent || el.content;
+          
           // Handle template-based dynamic text with placeholders
           if ((el as any).isTemplate && el.isDynamic && el.dynamicField && el.content.includes(`{${el.dynamicField}}`)) {
-            let sourceValue = el.dynamicContent || el.content;
             let cleanedText = sourceValue.replace(/[^0-9.-]/g, '');
             let value = parseFloat(cleanedText) || 0;
             

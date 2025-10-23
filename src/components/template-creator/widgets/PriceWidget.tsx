@@ -21,6 +21,7 @@ export interface PriceWidgetConfig {
   backgroundColor?: string; // For badge-style
   padding?: number; // For badge-style
   spacing?: number; // Gap between prices
+  conditionalDisplay?: boolean; // Hide original price if no sale_price exists
 }
 
 export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
@@ -37,18 +38,19 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
     currencySymbol = '$',
     showOriginalPrice = true,
     backgroundColor,
-    padding = 12,
-    spacing = 8
+    padding = 16,
+    spacing = 8,
+    conditionalDisplay = true
   } = config;
 
   const elements: CanvasElement[] = [];
 
-  // Calculate positions based on style
+  // Calculate positions based on style with better size estimation
   let salePricePos = { ...position };
   let originalPricePos = { ...position };
   
-  const estimatedSalePriceWidth = salePriceFontSize * 3.5; // Rough estimate
-  const estimatedOriginalPriceWidth = originalPriceFontSize * 3.5;
+  const estimatedSalePriceWidth = salePriceFontSize * 4.5; // Increased for better fit
+  const estimatedOriginalPriceWidth = originalPriceFontSize * 4.5;
 
   switch (style) {
     case 'stacked-large-small':
@@ -95,7 +97,7 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
       type: 'text',
       content: `${currencySymbol}48.00`,
       position: originalPricePos,
-      size: { width: estimatedOriginalPriceWidth, height: originalPriceFontSize + 4 },
+      size: { width: estimatedOriginalPriceWidth, height: originalPriceFontSize + 8 },
       fontSize: originalPriceFontSize,
       fontFamily: fontFamily,
       fontWeight: originalPriceFontWeight,
@@ -118,8 +120,13 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
       formatting: {
         prefix: currencySymbol,
         decimals: 2
-      }
-    };
+      },
+      conditionalDisplay: conditionalDisplay ? {
+        dependsOn: 'sale_price',
+        hideIfEmpty: false,
+        hideIfEqual: 'price' // Hide original if equals sale price (no discount)
+      } : undefined
+    } as TextElement;
 
     elements.push(originalPriceText);
   }
@@ -130,7 +137,7 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
     type: 'text',
     content: `${currencySymbol}28.80`,
     position: salePricePos,
-    size: { width: estimatedSalePriceWidth, height: salePriceFontSize + 4 },
+    size: { width: estimatedSalePriceWidth, height: salePriceFontSize + (style === 'badge-style' ? padding * 2 : 8) },
     fontSize: salePriceFontSize,
     fontFamily: fontFamily,
     fontWeight: salePriceFontWeight,
@@ -143,9 +150,9 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
     strokeWidth: 0,
     padding: style === 'badge-style' && backgroundColor ? { 
       top: padding, 
-      right: padding * 2, 
+      right: padding * 2.5, 
       bottom: padding, 
-      left: padding * 2 
+      left: padding * 2.5 
     } : { top: 0, right: 0, bottom: 0, left: 0 },
     rotation: 0,
     opacity: 100,
@@ -158,8 +165,9 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
     formatting: {
       prefix: currencySymbol,
       decimals: 2
-    }
-  };
+    },
+    fallbackField: 'price' // Fall back to regular price if no sale price
+  } as TextElement;
 
   elements.push(salePriceText);
 
@@ -206,8 +214,9 @@ export const priceWidgetPresets = {
     currencySymbol: '$',
     showOriginalPrice: true,
     backgroundColor: '#DC2626',
-    padding: 12,
-    spacing: 8
+    padding: 16,
+    spacing: 8,
+    conditionalDisplay: true
   },
   sideBySide: {
     style: 'side-by-side' as PriceWidgetStyle,
