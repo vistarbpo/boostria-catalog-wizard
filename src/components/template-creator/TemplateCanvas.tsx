@@ -518,10 +518,12 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
                   {!isEditing && (
                     <CanvasElement 
                       element={element} 
-                      isSelected={canvasStore.canvasState.selectedElementIds.includes(element.id)} 
+                      isSelected={canvasStore.canvasState.selectedElementIds.includes(element.id)}
+                      isMultiSelected={canvasStore.canvasState.selectedElementIds.length > 1 && canvasStore.canvasState.selectedElementIds.includes(element.id)}
                       scale={scale} 
-                      onSelect={canvasStore.selectElement} 
-                      onMove={canvasStore.moveElement} 
+                      onSelect={canvasStore.selectElement}
+                      onMove={canvasStore.moveElement}
+                      onMoveMultiple={canvasStore.moveSelectedElements}
                       onResize={canvasStore.resizeElement} 
                       onRotate={canvasStore.rotateElement} 
                        onDoubleClick={elementId => {

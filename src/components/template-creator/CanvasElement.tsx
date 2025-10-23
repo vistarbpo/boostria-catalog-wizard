@@ -167,9 +167,11 @@ const formatDynamicText = (element: TextElement, parentGroup?: any): string => {
 interface CanvasElementProps {
   element: CanvasElementType;
   isSelected: boolean;
+  isMultiSelected: boolean;
   scale: number;
   onSelect: (elementId: string, multiSelect?: boolean) => void;
   onMove: (elementId: string, newPosition: Position) => void;
+  onMoveMultiple?: (delta: Position) => void;
   onResize: (elementId: string, newSize: { width: number; height: number }) => void;
   onRotate?: (elementId: string, rotation: number) => void;
   onDoubleClick?: (elementId: string) => void;
@@ -177,10 +179,12 @@ interface CanvasElementProps {
 
 const CanvasElementComponent = function CanvasElement({ 
   element, 
-  isSelected, 
+  isSelected,
+  isMultiSelected,
   scale,
   onSelect, 
-  onMove, 
+  onMove,
+  onMoveMultiple,
   onResize,
   onRotate,
   onDoubleClick
@@ -234,9 +238,9 @@ const CanvasElementComponent = function CanvasElement({
       }
     }
     
-    // Multi-select with Ctrl/Cmd
-    const isMultiSelect = e.ctrlKey || e.metaKey;
-    onSelect(element.id, isMultiSelect);
+    // Multi-select with Ctrl/Cmd/Shift
+    const isMultiSelectKey = e.ctrlKey || e.metaKey || e.shiftKey;
+    onSelect(element.id, isMultiSelectKey);
 
     if (!(e.target instanceof HTMLElement)) return;
 
@@ -310,6 +314,10 @@ const CanvasElementComponent = function CanvasElement({
         
         const newX = dragDataRef.current.startLeft + deltaX;
         const newY = dragDataRef.current.startTop + deltaY;
+        
+        // Store delta for multi-element move
+        dragDataRef.current.lastDeltaX = deltaX;
+        dragDataRef.current.lastDeltaY = deltaY;
         
         updateElementStyle(
           { x: newX, y: newY },
@@ -394,7 +402,12 @@ const CanvasElementComponent = function CanvasElement({
       const newX = dragDataRef.current.startLeft + deltaX;
       const newY = dragDataRef.current.startTop + deltaY;
       
-      onMove(element.id, { x: newX, y: newY });
+      // If multiple elements are selected and this is one of them, move all
+      if (isMultiSelected && onMoveMultiple) {
+        onMoveMultiple({ x: deltaX, y: deltaY });
+      } else {
+        onMove(element.id, { x: newX, y: newY });
+      }
     } else if (isResizingRef.current) {
       const deltaX = (e.clientX - dragDataRef.current.startX) / scale;
       const deltaY = (e.clientY - dragDataRef.current.startY) / scale;
@@ -449,7 +462,7 @@ const CanvasElementComponent = function CanvasElement({
     isResizingRef.current = false;
     isRotatingRef.current = false;
     dragDataRef.current = {};
-  }, [element.id, scale, onMove, onResize, onRotate]);
+  }, [element.id, isMultiSelected, scale, onMove, onMoveMultiple, onResize, onRotate]);
 
   useEffect(() => {
     if (isDragging || isResizing || isRotating) {

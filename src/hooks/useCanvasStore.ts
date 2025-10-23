@@ -372,6 +372,24 @@ export function useCanvasStore() {
     updateElement(elementId, { position: newPosition });
   }, [updateElement]);
 
+  const moveSelectedElements = useCallback((delta: Position) => {
+    setCanvasStateWithHistory(prev => ({
+      ...prev,
+      elements: prev.elements.map(el => {
+        if (prev.selectedElementIds.includes(el.id)) {
+          return {
+            ...el,
+            position: {
+              x: el.position.x + delta.x,
+              y: el.position.y + delta.y
+            }
+          };
+        }
+        return el;
+      })
+    }));
+  }, [setCanvasStateWithHistory]);
+
   const resizeElement = useCallback((elementId: string, newSize: { width: number; height: number }) => {
     updateElement(elementId, { size: newSize });
   }, [updateElement]);
@@ -615,6 +633,7 @@ export function useCanvasStore() {
     deleteElement,
     deleteSelected,
     moveElement,
+    moveSelectedElements,
     resizeElement,
     updateCanvasSize,
     updateZoom,
