@@ -49,8 +49,8 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
   let salePricePos = { ...position };
   let originalPricePos = { ...position };
   
-  const estimatedSalePriceWidth = salePriceFontSize * 4.5; // Increased for better fit
-  const estimatedOriginalPriceWidth = originalPriceFontSize * 4.5;
+  const estimatedSalePriceWidth = salePriceFontSize * 5; // Increased for better fit
+  const estimatedOriginalPriceWidth = originalPriceFontSize * 5;
 
   switch (style) {
     case 'stacked-large-small':
@@ -102,7 +102,7 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
       fontFamily: fontFamily,
       fontWeight: originalPriceFontWeight,
       color: originalPriceColor,
-      textAlign: 'left',
+      textAlign: 'center',
       letterSpacing: 0,
       lineHeight: 1.2,
       autoSize: true,
@@ -137,12 +137,12 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
     type: 'text',
     content: `${currencySymbol}28.80`,
     position: salePricePos,
-    size: { width: estimatedSalePriceWidth, height: salePriceFontSize + (style === 'badge-style' ? padding * 2 : 8) },
-    fontSize: salePriceFontSize,
-    fontFamily: fontFamily,
-    fontWeight: salePriceFontWeight,
-    color: salePriceColor,
-    textAlign: 'left',
+      size: { width: estimatedSalePriceWidth, height: salePriceFontSize + (style === 'badge-style' ? padding * 2 : 8) },
+      fontSize: salePriceFontSize,
+      fontFamily: fontFamily,
+      fontWeight: salePriceFontWeight,
+      color: salePriceColor,
+      textAlign: 'center',
     letterSpacing: 0,
     lineHeight: 1.2,
     autoSize: true,
@@ -150,9 +150,9 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
     strokeWidth: 0,
     padding: style === 'badge-style' && backgroundColor ? { 
       top: padding, 
-      right: padding * 2.5, 
+      right: padding * 2, 
       bottom: padding, 
-      left: padding * 2.5 
+      left: padding * 2 
     } : { top: 0, right: 0, bottom: 0, left: 0 },
     rotation: 0,
     opacity: 100,
