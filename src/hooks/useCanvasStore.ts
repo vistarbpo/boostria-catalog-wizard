@@ -46,6 +46,7 @@ export function useCanvasStore() {
 
   const addTextElement = useCallback((position: Position, initialContent?: string, overrides?: Partial<TextElement>) => {
     setCanvasStateWithHistory(prev => {
+      const maxZIndex = prev.elements.length > 0 ? Math.max(...prev.elements.map(e => e.zIndex)) : 0;
       const newElement: TextElement = {
         id: generateId(),
         type: 'text',
@@ -55,7 +56,7 @@ export function useCanvasStore() {
         opacity: 100,
         visible: true,
         locked: false,
-        zIndex: prev.elements.length + 1,
+        zIndex: maxZIndex + 1,
         content: initialContent || 'Text',
         fontFamily: 'Inter',
         fontSize: 32,
@@ -83,6 +84,7 @@ export function useCanvasStore() {
 
   const addButtonElement = useCallback((position: Position, initialContent?: string, overrides?: Partial<ButtonElement>) => {
     setCanvasStateWithHistory(prev => {
+      const maxZIndex = prev.elements.length > 0 ? Math.max(...prev.elements.map(e => e.zIndex)) : 0;
       const newElement: ButtonElement = {
         id: generateId(),
         type: 'button',
@@ -92,7 +94,7 @@ export function useCanvasStore() {
         opacity: 100,
         visible: true,
         locked: false,
-        zIndex: prev.elements.length + 1,
+        zIndex: maxZIndex + 1,
         content: initialContent || 'SHOP NOW!',
         fontFamily: 'Inter',
         fontSize: 16,
@@ -125,6 +127,7 @@ export function useCanvasStore() {
     setCanvasStateWithHistory(prev => {
       const size = shapeType === 'circle' ? { width: 100, height: 100 } : { width: 120, height: 80 };
       
+      const maxZIndex = prev.elements.length > 0 ? Math.max(...prev.elements.map(e => e.zIndex)) : 0;
       const newElement: ShapeElement = {
         id: generateId(),
         type: 'shape',
@@ -134,7 +137,7 @@ export function useCanvasStore() {
         opacity: 100,
         visible: true,
         locked: false,
-        zIndex: prev.elements.length + 1,
+        zIndex: maxZIndex + 1,
         shapeType,
         fillColor: '#000000',
         fillType: 'solid',
@@ -188,6 +191,7 @@ export function useCanvasStore() {
         // Check if it's a logo (brand logo or BNPL logo)
         const isLogo = dynamicProps?.fillSource === 'brand_logo' || src.includes('/bnpl/');
         
+        const maxZIndex = prev.elements.length > 0 ? Math.max(...prev.elements.map(e => e.zIndex)) : 0;
         const newElement: ImageElement = {
           id: generateId(),
           type: 'image',
@@ -197,7 +201,7 @@ export function useCanvasStore() {
           opacity: 100,
           visible: true,
           locked: false,
-          zIndex: prev.elements.length + 1,
+          zIndex: maxZIndex + 1,
           aspectRatioLocked: isLogo,
           src,
           objectFit: 'cover',
@@ -227,6 +231,7 @@ export function useCanvasStore() {
         // Check if it's a logo (brand logo or BNPL logo)
         const isLogo = dynamicProps?.fillSource === 'brand_logo' || src.includes('/bnpl/');
         
+        const maxZIndex = prev.elements.length > 0 ? Math.max(...prev.elements.map(e => e.zIndex)) : 0;
         const newElement: ImageElement = {
           id: generateId(),
           type: 'image',
@@ -236,7 +241,7 @@ export function useCanvasStore() {
           opacity: 100,
           visible: true,
           locked: false,
-          zIndex: prev.elements.length + 1,
+          zIndex: maxZIndex + 1,
           aspectRatioLocked: isLogo,
           src,
           objectFit: 'cover',
@@ -259,6 +264,7 @@ export function useCanvasStore() {
 
   const addSVGElement = useCallback((svgContent: string, position: Position) => {
     setCanvasStateWithHistory(prev => {
+      const maxZIndex = prev.elements.length > 0 ? Math.max(...prev.elements.map(e => e.zIndex)) : 0;
       const newElement: SVGElement = {
         id: generateId(),
         type: 'svg',
@@ -268,7 +274,7 @@ export function useCanvasStore() {
         opacity: 100,
         visible: true,
         locked: false,
-        zIndex: prev.elements.length + 1,
+        zIndex: maxZIndex + 1,
         svgContent,
         preserveAspectRatio: 'xMidYMid meet',
         fillColor: undefined,
@@ -563,32 +569,78 @@ export function useCanvasStore() {
     const selectedIds = canvasState.selectedElementIds;
     if (selectedIds.length === 0) return;
 
-    setCanvasStateWithHistory(prev => ({
-      ...prev,
-      elements: prev.elements.map(el => {
-        if (selectedIds.includes(el.id)) {
-          const maxZIndex = Math.max(...prev.elements.map(e => e.zIndex));
-          return el.zIndex < maxZIndex ? { ...el, zIndex: el.zIndex + 1 } : el;
+    setCanvasStateWithHistory(prev => {
+      // Sort elements by zIndex
+      const sortedElements = [...prev.elements].sort((a, b) => a.zIndex - b.zIndex);
+      
+      // For each selected element, find the next higher element and swap z-indices
+      const updatedElements = [...prev.elements];
+      
+      selectedIds.forEach(selectedId => {
+        const currentElement = updatedElements.find(el => el.id === selectedId);
+        if (!currentElement) return;
+        
+        // Find the element with the next higher z-index
+        const higherElements = sortedElements.filter(el => 
+          el.zIndex > currentElement.zIndex && !selectedIds.includes(el.id)
+        );
+        
+        if (higherElements.length > 0) {
+          const nextHigher = higherElements[0];
+          const currentIndex = updatedElements.findIndex(el => el.id === selectedId);
+          const nextIndex = updatedElements.findIndex(el => el.id === nextHigher.id);
+          
+          // Swap z-indices
+          const tempZIndex = updatedElements[currentIndex].zIndex;
+          updatedElements[currentIndex] = { ...updatedElements[currentIndex], zIndex: nextHigher.zIndex };
+          updatedElements[nextIndex] = { ...updatedElements[nextIndex], zIndex: tempZIndex };
         }
-        return el;
-      })
-    }));
+      });
+      
+      return {
+        ...prev,
+        elements: updatedElements
+      };
+    });
   }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
 
   const sendBackward = useCallback(() => {
     const selectedIds = canvasState.selectedElementIds;
     if (selectedIds.length === 0) return;
 
-    setCanvasStateWithHistory(prev => ({
-      ...prev,
-      elements: prev.elements.map(el => {
-        if (selectedIds.includes(el.id)) {
-          const minZIndex = Math.min(...prev.elements.map(e => e.zIndex));
-          return el.zIndex > minZIndex ? { ...el, zIndex: el.zIndex - 1 } : el;
+    setCanvasStateWithHistory(prev => {
+      // Sort elements by zIndex
+      const sortedElements = [...prev.elements].sort((a, b) => a.zIndex - b.zIndex);
+      
+      // For each selected element, find the next lower element and swap z-indices
+      const updatedElements = [...prev.elements];
+      
+      selectedIds.forEach(selectedId => {
+        const currentElement = updatedElements.find(el => el.id === selectedId);
+        if (!currentElement) return;
+        
+        // Find the element with the next lower z-index
+        const lowerElements = sortedElements.filter(el => 
+          el.zIndex < currentElement.zIndex && !selectedIds.includes(el.id)
+        );
+        
+        if (lowerElements.length > 0) {
+          const nextLower = lowerElements[lowerElements.length - 1];
+          const currentIndex = updatedElements.findIndex(el => el.id === selectedId);
+          const nextIndex = updatedElements.findIndex(el => el.id === nextLower.id);
+          
+          // Swap z-indices
+          const tempZIndex = updatedElements[currentIndex].zIndex;
+          updatedElements[currentIndex] = { ...updatedElements[currentIndex], zIndex: nextLower.zIndex };
+          updatedElements[nextIndex] = { ...updatedElements[nextIndex], zIndex: tempZIndex };
         }
-        return el;
-      })
-    }));
+      });
+      
+      return {
+        ...prev,
+        elements: updatedElements
+      };
+    });
   }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
 
   const bringToFront = useCallback(() => {

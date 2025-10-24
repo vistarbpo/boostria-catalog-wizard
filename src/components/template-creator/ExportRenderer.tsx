@@ -72,6 +72,12 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         
         const textStyles = getTextStyles(textElement, baseStyle);
         
+        // Check if this is a price widget text (has dynamic price fields)
+        const isPriceWidgetText = textElement.isDynamic && 
+          (textElement.dynamicField === 'price' || 
+           textElement.dynamicField === 'sale_price' || 
+           textElement.dynamicField === 'compare_at_price');
+        
         // Format dynamic text with template placeholders
         const formatExportDynamicText = (el: TextElement): string => {
           // Handle fallback field
@@ -166,9 +172,26 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           return <span>{displayContent}</span>;
         };
         
+        // Apply price widget text fix if needed
+        const finalTextStyles = isPriceWidgetText ? {
+          ...textStyles,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: textElement.textAlign === 'center' ? 'center' : 
+                          textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+        } : textStyles;
+        
         return (
-          <div key={element.id} style={textStyles}>
-            {renderExportTextDecoration()}
+          <div key={element.id} style={finalTextStyles}>
+            {isPriceWidgetText ? (
+              <span style={{
+                transform: 'translateY(-8%)',
+              }}>
+                {renderExportTextDecoration()}
+              </span>
+            ) : (
+              renderExportTextDecoration()
+            )}
           </div>
         );
       }

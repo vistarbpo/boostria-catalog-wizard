@@ -1484,8 +1484,13 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                     });
                     
                     // Add the elements to canvas
-                    ratingWidget.forEach(element => {
-                      canvasStore.canvasState.elements.push(element);
+                    const maxZIndex = canvasStore.canvasState.elements.length > 0 
+                      ? Math.max(...canvasStore.canvasState.elements.map(e => e.zIndex)) 
+                      : 0;
+                    
+                    ratingWidget.forEach((element, index) => {
+                      const updatedElement = { ...element, zIndex: maxZIndex + index + 1 };
+                      canvasStore.canvasState.elements.push(updatedElement);
                     });
                     canvasStore.selectElement(ratingWidget[0].id);
                     toast.success('Rating widget added');
@@ -1657,8 +1662,13 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                           ...priceWidgetPresets.default
                         });
                         
-                        priceWidget.forEach(element => {
-                          canvasStore.canvasState.elements.push(element);
+                        const maxZIndex = canvasStore.canvasState.elements.length > 0 
+                          ? Math.max(...canvasStore.canvasState.elements.map(e => e.zIndex)) 
+                          : 0;
+                        
+                        priceWidget.forEach((element, index) => {
+                          const updatedElement = { ...element, zIndex: maxZIndex + index + 1 };
+                          canvasStore.canvasState.elements.push(updatedElement);
                         });
                         canvasStore.selectElement(priceWidget[0].id);
                         toast.success('Price widget added');
@@ -1682,8 +1692,13 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                           ...priceWidgetPresets.largeBold
                         });
                         
-                        priceWidget.forEach(element => {
-                          canvasStore.canvasState.elements.push(element);
+                        const maxZIndex = canvasStore.canvasState.elements.length > 0 
+                          ? Math.max(...canvasStore.canvasState.elements.map(e => e.zIndex)) 
+                          : 0;
+                        
+                        priceWidget.forEach((element, index) => {
+                          const updatedElement = { ...element, zIndex: maxZIndex + index + 1 };
+                          canvasStore.canvasState.elements.push(updatedElement);
                         });
                         canvasStore.selectElement(priceWidget[0].id);
                         toast.success('Price widget added');
@@ -1707,8 +1722,13 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                           ...priceWidgetPresets.redBadge
                         });
                         
-                        priceWidget.forEach(element => {
-                          canvasStore.canvasState.elements.push(element);
+                        const maxZIndex = canvasStore.canvasState.elements.length > 0 
+                          ? Math.max(...canvasStore.canvasState.elements.map(e => e.zIndex)) 
+                          : 0;
+                        
+                        priceWidget.forEach((element, index) => {
+                          const updatedElement = { ...element, zIndex: maxZIndex + index + 1 };
+                          canvasStore.canvasState.elements.push(updatedElement);
                         });
                         canvasStore.selectElement(priceWidget[0].id);
                         toast.success('Price widget added');
@@ -1732,8 +1752,13 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                           ...priceWidgetPresets.sideBySide
                         });
                         
-                        priceWidget.forEach(element => {
-                          canvasStore.canvasState.elements.push(element);
+                        const maxZIndex = canvasStore.canvasState.elements.length > 0 
+                          ? Math.max(...canvasStore.canvasState.elements.map(e => e.zIndex)) 
+                          : 0;
+                        
+                        priceWidget.forEach((element, index) => {
+                          const updatedElement = { ...element, zIndex: maxZIndex + index + 1 };
+                          canvasStore.canvasState.elements.push(updatedElement);
                         });
                         canvasStore.selectElement(priceWidget[0].id);
                         toast.success('Price widget added');
