@@ -185,6 +185,9 @@ export function useCanvasStore() {
           y: (prev.canvasSize.height - Math.round(height)) / 2
         };
         
+        // Check if it's a logo (brand logo or BNPL logo)
+        const isLogo = dynamicProps?.fillSource === 'brand_logo' || src.includes('/bnpl/');
+        
         const newElement: ImageElement = {
           id: generateId(),
           type: 'image',
@@ -195,7 +198,7 @@ export function useCanvasStore() {
           visible: true,
           locked: false,
           zIndex: prev.elements.length + 1,
-          aspectRatioLocked: dynamicProps?.fillSource === 'brand_logo' || false,
+          aspectRatioLocked: isLogo,
           src,
           objectFit: 'cover',
           fillType: dynamicProps?.fillType || 'original',
@@ -221,6 +224,9 @@ export function useCanvasStore() {
           y: (prev.canvasSize.height - 200) / 2
         };
         
+        // Check if it's a logo (brand logo or BNPL logo)
+        const isLogo = dynamicProps?.fillSource === 'brand_logo' || src.includes('/bnpl/');
+        
         const newElement: ImageElement = {
           id: generateId(),
           type: 'image',
@@ -231,7 +237,7 @@ export function useCanvasStore() {
           visible: true,
           locked: false,
           zIndex: prev.elements.length + 1,
-          aspectRatioLocked: dynamicProps?.fillSource === 'brand_logo' || false,
+          aspectRatioLocked: isLogo,
           src,
           objectFit: 'cover',
           fillType: dynamicProps?.fillType || 'original',
