@@ -11,7 +11,7 @@ import { Badge } from "../ui/badge";
 import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
-import { AlignLeft, AlignCenter, AlignRight, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, Bold, Italic, Underline, Strikethrough, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings, Ungroup } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, Bold, Italic, Underline, Strikethrough, Palette, Plus, MoreHorizontal, ChevronDown, Link as LinkIcon, Eye, Square, Maximize2, RotateCcw, Type, Grid3X3, ArrowUp, ArrowDown, Trash2, Link2, Settings, Ungroup, Lock, Unlock } from "lucide-react";
 import { ColorPicker } from "../ui/color-picker";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
 import { TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement, GroupElement } from "../../types/canvas";
@@ -181,20 +181,72 @@ export function PropertiesPanel({
             </div>
 
             {/* Size */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label className="text-xs">Width</Label>
-                <Input type="number" value={Math.round(selectedElement.size.width)} onChange={e => updateElementProperty('size', {
-                ...selectedElement.size,
-                width: parseFloat(e.target.value) || 1
-              })} className="h-8" />
-              </div>
-              <div>
-                <Label className="text-xs">Height</Label>
-                <Input type="number" value={Math.round(selectedElement.size.height)} onChange={e => updateElementProperty('size', {
-                ...selectedElement.size,
-                height: parseFloat(e.target.value) || 1
-              })} className="h-8" />
+            <div className="space-y-2">
+              {selectedElement.type === 'image' && (
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs">Dimensions</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => updateElementProperty('aspectRatioLocked', !(selectedElement as ImageElement).aspectRatioLocked)}
+                    title={(selectedElement as ImageElement).aspectRatioLocked ? "Unlock aspect ratio" : "Lock aspect ratio"}
+                  >
+                    {(selectedElement as ImageElement).aspectRatioLocked ? (
+                      <Lock className="w-3 h-3" />
+                    ) : (
+                      <Unlock className="w-3 h-3 opacity-30" />
+                    )}
+                  </Button>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">Width</Label>
+                  <Input 
+                    type="number" 
+                    value={Math.round(selectedElement.size.width)} 
+                    onChange={e => {
+                      const newWidth = parseFloat(e.target.value) || 1;
+                      if (selectedElement.type === 'image' && (selectedElement as ImageElement).aspectRatioLocked) {
+                        const aspectRatio = selectedElement.size.width / selectedElement.size.height;
+                        updateElementProperty('size', {
+                          width: newWidth,
+                          height: newWidth / aspectRatio
+                        });
+                      } else {
+                        updateElementProperty('size', {
+                          ...selectedElement.size,
+                          width: newWidth
+                        });
+                      }
+                    }} 
+                    className="h-8" 
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Height</Label>
+                  <Input 
+                    type="number" 
+                    value={Math.round(selectedElement.size.height)} 
+                    onChange={e => {
+                      const newHeight = parseFloat(e.target.value) || 1;
+                      if (selectedElement.type === 'image' && (selectedElement as ImageElement).aspectRatioLocked) {
+                        const aspectRatio = selectedElement.size.width / selectedElement.size.height;
+                        updateElementProperty('size', {
+                          width: newHeight * aspectRatio,
+                          height: newHeight
+                        });
+                      } else {
+                        updateElementProperty('size', {
+                          ...selectedElement.size,
+                          height: newHeight
+                        });
+                      }
+                    }} 
+                    className="h-8" 
+                  />
+                </div>
               </div>
             </div>
 

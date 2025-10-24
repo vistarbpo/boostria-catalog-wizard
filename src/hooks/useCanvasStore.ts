@@ -195,13 +195,13 @@ export function useCanvasStore() {
           visible: true,
           locked: false,
           zIndex: prev.elements.length + 1,
+          aspectRatioLocked: dynamicProps?.fillSource === 'brand_logo' || false,
           src,
           objectFit: 'cover',
           fillType: dynamicProps?.fillType || 'original',
           fillMode: 'cover',
           fillSource: dynamicProps?.fillSource,
-          fillImageUrl: dynamicProps?.fillImageUrl,
-          aspectRatioLocked: true // Lock aspect ratio for all images by default
+          fillImageUrl: dynamicProps?.fillImageUrl
         };
 
         return {
@@ -231,13 +231,13 @@ export function useCanvasStore() {
           visible: true,
           locked: false,
           zIndex: prev.elements.length + 1,
+          aspectRatioLocked: dynamicProps?.fillSource === 'brand_logo' || false,
           src,
           objectFit: 'cover',
           fillType: dynamicProps?.fillType || 'original',
           fillMode: 'cover',
           fillSource: dynamicProps?.fillSource,
-          fillImageUrl: dynamicProps?.fillImageUrl,
-          aspectRatioLocked: true // Lock aspect ratio for all images by default
+          fillImageUrl: dynamicProps?.fillImageUrl
         };
 
         return {
