@@ -172,26 +172,40 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           return <span>{displayContent}</span>;
         };
         
-        // Apply price widget text fix if needed
-        const finalTextStyles = isPriceWidgetText ? {
-          ...textStyles,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: textElement.textAlign === 'center' ? 'center' : 
-                          textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
-        } : textStyles;
-        
-        return (
-          <div key={element.id} style={finalTextStyles}>
-            {isPriceWidgetText ? (
+        // Apply price widget text positioning using button approach
+        if (isPriceWidgetText) {
+          return (
+            <div key={element.id} style={{
+              ...baseStyle,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: textElement.textAlign === 'center' ? 'center' : 
+                              textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+            }}>
               <span style={{
-                transform: 'translateY(-8%)',
-              }}>
+                position: 'absolute',
+                top: '50%',
+                left: textElement.textAlign === 'center' ? '50%' : 
+                      textElement.textAlign === 'right' ? 'auto' : '0',
+                right: textElement.textAlign === 'right' ? '0' : 'auto',
+                transform: textElement.textAlign === 'center' ? 'translate(-50%, -75%)' : 'translateY(-75%)',
+                color: textElement.color,
+                fontSize: `${textElement.fontSize}px`,
+                fontFamily: textElement.fontFamily,
+                fontWeight: textElement.fontWeight,
+                direction: textElement.direction || 'ltr',
+                whiteSpace: 'nowrap',
+                userSelect: 'none',
+              } as React.CSSProperties}>
                 {renderExportTextDecoration()}
               </span>
-            ) : (
-              renderExportTextDecoration()
-            )}
+            </div>
+          );
+        }
+        
+        return (
+          <div key={element.id} style={textStyles}>
+            {renderExportTextDecoration()}
           </div>
         );
       }
