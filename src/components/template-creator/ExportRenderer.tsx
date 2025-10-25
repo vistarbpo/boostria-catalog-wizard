@@ -172,7 +172,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           return <span>{displayContent}</span>;
         };
         
-        // Apply price widget text positioning using button approach
+        // Apply price widget text positioning - perfectly centered
         if (isPriceWidgetText) {
           return (
             <div key={element.id} style={{
@@ -188,7 +188,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 left: textElement.textAlign === 'center' ? '50%' : 
                       textElement.textAlign === 'right' ? 'auto' : '0',
                 right: textElement.textAlign === 'right' ? '0' : 'auto',
-                transform: textElement.textAlign === 'center' ? 'translate(-50%, -75%)' : 'translateY(-75%)',
+                transform: textElement.textAlign === 'center' ? 'translate(-50%, -50%)' : 'translateY(-50%)',
                 color: textElement.color,
                 fontSize: `${textElement.fontSize}px`,
                 fontFamily: textElement.fontFamily,
