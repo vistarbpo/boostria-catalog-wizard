@@ -192,7 +192,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 left: textElement.textAlign === 'center' ? '50%' : 
                       textElement.textAlign === 'right' ? 'auto' : '0',
                 right: textElement.textAlign === 'right' ? '0' : 'auto',
-                transform: textElement.textAlign === 'center' ? 'translate(-50%, -50%)' : 'translateY(-50%)',
+                transform: textElement.textAlign === 'center' ? 'translate(-50%, -25%)' : 'translateY(-25%)',
                 color: textElement.color,
                 fontSize: `${textElement.fontSize}px`,
                 fontFamily: textElement.fontFamily,
