@@ -177,10 +177,14 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           return (
             <div key={element.id} style={{
               ...baseStyle,
+              backgroundColor: textElement.backgroundColor,
+              border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
+              padding: `${textElement.padding.top}px ${textElement.padding.right}px ${textElement.padding.bottom}px ${textElement.padding.left}px`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: textElement.textAlign === 'center' ? 'center' : 
                               textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              boxSizing: 'border-box',
             }}>
               <span style={{
                 position: 'absolute',
