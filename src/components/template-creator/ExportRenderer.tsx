@@ -161,7 +161,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                   position: 'absolute',
                   left: '0',
                   right: '0',
-                  top: '42%',
+                  top: '92%',
                   height: '2px',
                   backgroundColor: textElement.color,
                   pointerEvents: 'none',
@@ -192,9 +192,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 left: textElement.textAlign === 'center' ? '50%' : 
                       textElement.textAlign === 'right' ? 'auto' : '0',
                 right: textElement.textAlign === 'right' ? '0' : 'auto',
-                transform: textElement.textDecoration === 'line-through' 
-                  ? (textElement.textAlign === 'center' ? 'translate(-50%, -80%)' : 'translateY(-80%)')
-                  : (textElement.textAlign === 'center' ? 'translate(-50%, -75%)' : 'translateY(-75%)'),
+                transform: textElement.textAlign === 'center' ? 'translate(-50%, -75%)' : 'translateY(-75%)',
                 color: textElement.color,
                 fontSize: `${textElement.fontSize}px`,
                 fontFamily: textElement.fontFamily,
