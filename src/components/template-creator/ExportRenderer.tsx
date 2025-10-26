@@ -174,6 +174,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         
         // Apply price widget text positioning - perfectly centered
         if (isPriceWidgetText) {
+          // Strike-through prices (original price) should be centered
+          const isStrikePrice = textElement.textDecoration === 'line-through';
+          const verticalTransform = isStrikePrice ? '-50%' : '-75%';
+          
           return (
             <div key={element.id} style={{
               ...baseStyle,
@@ -192,7 +196,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 left: textElement.textAlign === 'center' ? '50%' : 
                       textElement.textAlign === 'right' ? 'auto' : '0',
                 right: textElement.textAlign === 'right' ? '0' : 'auto',
-                transform: textElement.textAlign === 'center' ? 'translate(-50%, -75%)' : 'translateY(-75%)',
+                transform: textElement.textAlign === 'center' ? `translate(-50%, ${verticalTransform})` : `translateY(${verticalTransform})`,
                 color: textElement.color,
                 fontSize: `${textElement.fontSize}px`,
                 fontFamily: textElement.fontFamily,
