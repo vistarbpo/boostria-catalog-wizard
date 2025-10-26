@@ -115,6 +115,7 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
       locked: false,
       zIndex: 0,
       textDecoration: 'line-through',
+      backgroundColor: '#fafafa',
       isDynamic: true,
       dynamicField: 'price',
       formatting: {
