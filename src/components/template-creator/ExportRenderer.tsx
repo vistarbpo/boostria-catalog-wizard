@@ -161,7 +161,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                   position: 'absolute',
                   left: '0',
                   right: '0',
-                  top: '92%',
+                  top: '45%',
                   height: '2px',
                   backgroundColor: textElement.color,
                   pointerEvents: 'none',
