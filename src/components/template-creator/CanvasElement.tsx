@@ -240,7 +240,12 @@ const CanvasElementComponent = function CanvasElement({
     
     // Multi-select with Ctrl/Cmd/Shift
     const isMultiSelectKey = e.ctrlKey || e.metaKey || e.shiftKey;
-    onSelect(element.id, isMultiSelectKey);
+    
+    // If clicking an already selected element without multi-select key, maintain selection
+    // Otherwise, handle selection as normal
+    if (!isSelected || isMultiSelectKey) {
+      onSelect(element.id, isMultiSelectKey);
+    }
 
     if (!(e.target instanceof HTMLElement)) return;
 
@@ -291,7 +296,7 @@ const CanvasElementComponent = function CanvasElement({
         startTop: element.position.y
       };
     }
-  }, [element, onSelect, onDoubleClick]);
+  }, [element, isSelected, onSelect, onDoubleClick]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDraggingRef.current && !isResizingRef.current && !isRotatingRef.current) return;
@@ -402,10 +407,14 @@ const CanvasElementComponent = function CanvasElement({
       const newX = dragDataRef.current.startLeft + deltaX;
       const newY = dragDataRef.current.startTop + deltaY;
       
+      console.log('Mouse up - isMultiSelected:', isMultiSelected, 'deltaX:', deltaX, 'deltaY:', deltaY);
+      
       // If multiple elements are selected and this is one of them, move all
       if (isMultiSelected && onMoveMultiple) {
+        console.log('Calling onMoveMultiple with delta:', { x: deltaX, y: deltaY });
         onMoveMultiple({ x: deltaX, y: deltaY });
       } else {
+        console.log('Calling onMove for single element');
         onMove(element.id, { x: newX, y: newY });
       }
     } else if (isResizingRef.current) {
@@ -462,7 +471,7 @@ const CanvasElementComponent = function CanvasElement({
     isResizingRef.current = false;
     isRotatingRef.current = false;
     dragDataRef.current = {};
-  }, [element.id, isMultiSelected, scale, onMove, onMoveMultiple, onResize, onRotate]);
+  }, [element.id, element.aspectRatioLocked, isMultiSelected, scale, onMove, onMoveMultiple, onResize, onRotate]);
 
   useEffect(() => {
     if (isDragging || isResizing || isRotating) {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { CanvasElement, CanvasState, TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement, Position } from '../types/canvas';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -673,8 +673,16 @@ export function useCanvasStore() {
     });
   }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
 
-  const canUndo = historyIndexRef.current > 0;
-  const canRedo = historyIndexRef.current < historyRef.current.length - 1;
+  // Use state for reactive undo/redo availability
+  const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false });
+
+  // Update history state whenever history changes
+  useEffect(() => {
+    setHistoryState({
+      canUndo: historyIndexRef.current > 0,
+      canRedo: historyIndexRef.current < historyRef.current.length - 1
+    });
+  }, [canvasState]);
 
   return {
     canvasState,
@@ -708,7 +716,7 @@ export function useCanvasStore() {
     sendToBack,
     undo,
     redo,
-    canUndo,
-    canRedo
+    canUndo: historyState.canUndo,
+    canRedo: historyState.canRedo
   };
 }
