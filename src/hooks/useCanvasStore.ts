@@ -19,7 +19,9 @@ export function useCanvasStore() {
   // Use refs for history management to avoid closure issues
   const historyRef = useRef<CanvasState[]>([initialState]);
   const historyIndexRef = useRef(0);
-  const [, forceUpdate] = useState({});
+  
+  // State for reactive undo/redo availability
+  const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false });
 
   // Wrapper for setState that saves to history
   const setCanvasStateWithHistory = useCallback((updater: (prev: CanvasState) => CanvasState) => {
@@ -39,7 +41,12 @@ export function useCanvasStore() {
         historyIndexRef.current++;
       }
       
-      forceUpdate({});
+      // Update history state for reactive undo/redo buttons
+      setHistoryState({
+        canUndo: historyIndexRef.current > 0,
+        canRedo: historyIndexRef.current < historyRef.current.length - 1
+      });
+      
       return newState;
     });
   }, []);
@@ -553,7 +560,10 @@ export function useCanvasStore() {
     if (historyIndexRef.current > 0) {
       historyIndexRef.current--;
       setCanvasState(historyRef.current[historyIndexRef.current]);
-      forceUpdate({});
+      setHistoryState({
+        canUndo: historyIndexRef.current > 0,
+        canRedo: historyIndexRef.current < historyRef.current.length - 1
+      });
     }
   }, []);
 
@@ -561,7 +571,10 @@ export function useCanvasStore() {
     if (historyIndexRef.current < historyRef.current.length - 1) {
       historyIndexRef.current++;
       setCanvasState(historyRef.current[historyIndexRef.current]);
-      forceUpdate({});
+      setHistoryState({
+        canUndo: historyIndexRef.current > 0,
+        canRedo: historyIndexRef.current < historyRef.current.length - 1
+      });
     }
   }, []);
 
@@ -672,17 +685,6 @@ export function useCanvasStore() {
       };
     });
   }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
-
-  // Use state for reactive undo/redo availability
-  const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false });
-
-  // Update history state whenever history changes
-  useEffect(() => {
-    setHistoryState({
-      canUndo: historyIndexRef.current > 0,
-      canRedo: historyIndexRef.current < historyRef.current.length - 1
-    });
-  }, [canvasState]);
 
   return {
     canvasState,
