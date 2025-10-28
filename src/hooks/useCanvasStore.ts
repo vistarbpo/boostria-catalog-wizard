@@ -696,6 +696,138 @@ export function useCanvasStore() {
     });
   }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
 
+  // Alignment functions
+  const alignElements = useCallback((alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom', alignTo: 'selection' | 'canvas') => {
+    const selectedIds = canvasState.selectedElementIds;
+    if (selectedIds.length === 0) return;
+
+    setCanvasStateWithHistory(prev => {
+      const selectedElements = prev.elements.filter(el => selectedIds.includes(el.id));
+      
+      // Calculate bounds
+      let bounds = { left: 0, top: 0, right: 0, bottom: 0 };
+      
+      if (alignTo === 'canvas') {
+        bounds = {
+          left: 0,
+          top: 0,
+          right: prev.canvasSize.width,
+          bottom: prev.canvasSize.height
+        };
+      } else {
+        // Calculate selection bounds
+        const lefts = selectedElements.map(el => el.position.x);
+        const tops = selectedElements.map(el => el.position.y);
+        const rights = selectedElements.map(el => el.position.x + el.size.width);
+        const bottoms = selectedElements.map(el => el.position.y + el.size.height);
+        
+        bounds = {
+          left: Math.min(...lefts),
+          top: Math.min(...tops),
+          right: Math.max(...rights),
+          bottom: Math.max(...bottoms)
+        };
+      }
+      
+      const boundsWidth = bounds.right - bounds.left;
+      const boundsHeight = bounds.bottom - bounds.top;
+      const centerX = bounds.left + boundsWidth / 2;
+      const centerY = bounds.top + boundsHeight / 2;
+      
+      // Update element positions based on alignment
+      return {
+        ...prev,
+        elements: prev.elements.map(el => {
+          if (!selectedIds.includes(el.id)) return el;
+          
+          const newPosition = { ...el.position };
+          
+          switch (alignment) {
+            case 'left':
+              newPosition.x = bounds.left;
+              break;
+            case 'center':
+              newPosition.x = centerX - el.size.width / 2;
+              break;
+            case 'right':
+              newPosition.x = bounds.right - el.size.width;
+              break;
+            case 'top':
+              newPosition.y = bounds.top;
+              break;
+            case 'middle':
+              newPosition.y = centerY - el.size.height / 2;
+              break;
+            case 'bottom':
+              newPosition.y = bounds.bottom - el.size.height;
+              break;
+          }
+          
+          return { ...el, position: newPosition };
+        })
+      };
+    });
+  }, [canvasState.selectedElementIds, canvasState.canvasSize, setCanvasStateWithHistory]);
+
+  const distributeElements = useCallback((direction: 'horizontal' | 'vertical') => {
+    const selectedIds = canvasState.selectedElementIds;
+    if (selectedIds.length < 3) return; // Need at least 3 elements to distribute
+
+    setCanvasStateWithHistory(prev => {
+      const selectedElements = prev.elements
+        .filter(el => selectedIds.includes(el.id))
+        .sort((a, b) => {
+          if (direction === 'horizontal') {
+            return a.position.x - b.position.x;
+          } else {
+            return a.position.y - b.position.y;
+          }
+        });
+      
+      const first = selectedElements[0];
+      const last = selectedElements[selectedElements.length - 1];
+      
+      let totalSpace: number;
+      let totalElementSize: number;
+      
+      if (direction === 'horizontal') {
+        totalSpace = (last.position.x + last.size.width) - first.position.x;
+        totalElementSize = selectedElements.reduce((sum, el) => sum + el.size.width, 0);
+      } else {
+        totalSpace = (last.position.y + last.size.height) - first.position.y;
+        totalElementSize = selectedElements.reduce((sum, el) => sum + el.size.height, 0);
+      }
+      
+      const gap = (totalSpace - totalElementSize) / (selectedElements.length - 1);
+      
+      let currentPos = direction === 'horizontal' ? first.position.x : first.position.y;
+      
+      return {
+        ...prev,
+        elements: prev.elements.map(el => {
+          const elementIndex = selectedElements.findIndex(sel => sel.id === el.id);
+          if (elementIndex === -1) return el;
+          if (elementIndex === 0 || elementIndex === selectedElements.length - 1) return el;
+          
+          const element = selectedElements[elementIndex];
+          const prevElement = selectedElements[elementIndex - 1];
+          
+          const newPosition = { ...el.position };
+          
+          if (direction === 'horizontal') {
+            currentPos = prevElement.position.x + prevElement.size.width + gap;
+            newPosition.x = currentPos;
+          } else {
+            currentPos = prevElement.position.y + prevElement.size.height + gap;
+            newPosition.y = currentPos;
+          }
+          
+          return { ...el, position: newPosition };
+        })
+      };
+    });
+  }, [canvasState.selectedElementIds, setCanvasStateWithHistory]);
+
   return {
     canvasState,
     addTextElement,
@@ -726,6 +858,8 @@ export function useCanvasStore() {
     sendBackward,
     bringToFront,
     sendToBack,
+    alignElements,
+    distributeElements,
     undo,
     redo,
     canUndo: historyState.canUndo,

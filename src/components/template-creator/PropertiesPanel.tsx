@@ -25,6 +25,8 @@ export function PropertiesPanel({
   canvasStore
 }: PropertiesPanelProps) {
   const selectedElement = canvasStore.getSelectedElement();
+  const selectedElements = canvasStore.getSelectedElements?.() || [];
+  const isMultiSelect = selectedElements.length > 1;
 
   // Add error handling for useProduct
   const {
@@ -131,7 +133,7 @@ export function PropertiesPanel({
     }
     updateElementProperty('position', newPosition);
   };
-  if (!selectedElement) {
+  if (!selectedElement && !isMultiSelect) {
     return <div className="w-80 bg-card border-l border-border h-full flex flex-col">
         <div className="p-4 border-b border-border">
           <h3 className="text-lg font-semibold">Canvas Settings</h3>
@@ -142,6 +144,221 @@ export function PropertiesPanel({
           </div>
         </ScrollArea>
       </div>;
+  }
+
+  // Multi-select view
+  if (isMultiSelect) {
+    return <div className="w-80 bg-card border-l border-border h-full flex flex-col">
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold">Multiple Selection</h3>
+          <Badge variant="secondary" className="text-xs">
+            {selectedElements.length} items
+          </Badge>
+        </div>
+      </div>
+
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-6">
+          {/* Align to Selection */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Align to Selection</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('left', 'selection')} 
+                className="h-9" 
+                title="Align Left"
+              >
+                <AlignLeft className="w-4 h-4 mr-1" />
+                Left
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('center', 'selection')} 
+                className="h-9" 
+                title="Align Center"
+              >
+                <AlignCenter className="w-4 h-4 mr-1" />
+                Center
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('right', 'selection')} 
+                className="h-9" 
+                title="Align Right"
+              >
+                <AlignRight className="w-4 h-4 mr-1" />
+                Right
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('top', 'selection')} 
+                className="h-9" 
+                title="Align Top"
+              >
+                <AlignVerticalJustifyStart className="w-4 h-4 mr-1" />
+                Top
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('middle', 'selection')} 
+                className="h-9" 
+                title="Align Middle"
+              >
+                <AlignVerticalJustifyCenter className="w-4 h-4 mr-1" />
+                Middle
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('bottom', 'selection')} 
+                className="h-9" 
+                title="Align Bottom"
+              >
+                <AlignVerticalJustifyEnd className="w-4 h-4 mr-1" />
+                Bottom
+              </Button>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Align to Canvas */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Align to Canvas</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('left', 'canvas')} 
+                className="h-9" 
+                title="Align Left"
+              >
+                <AlignLeft className="w-4 h-4 mr-1" />
+                Left
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('center', 'canvas')} 
+                className="h-9" 
+                title="Align Center"
+              >
+                <AlignCenter className="w-4 h-4 mr-1" />
+                Center
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('right', 'canvas')} 
+                className="h-9" 
+                title="Align Right"
+              >
+                <AlignRight className="w-4 h-4 mr-1" />
+                Right
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('top', 'canvas')} 
+                className="h-9" 
+                title="Align Top"
+              >
+                <AlignVerticalJustifyStart className="w-4 h-4 mr-1" />
+                Top
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('middle', 'canvas')} 
+                className="h-9" 
+                title="Align Middle"
+              >
+                <AlignVerticalJustifyCenter className="w-4 h-4 mr-1" />
+                Middle
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.alignElements?.('bottom', 'canvas')} 
+                className="h-9" 
+                title="Align Bottom"
+              >
+                <AlignVerticalJustifyEnd className="w-4 h-4 mr-1" />
+                Bottom
+              </Button>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Distribute */}
+          {selectedElements.length >= 3 && (
+            <>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Distribute</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => canvasStore.distributeElements?.('horizontal')} 
+                    className="h-9" 
+                    title="Distribute Horizontally"
+                  >
+                    <Grid3X3 className="w-4 h-4 mr-1" />
+                    Horizontal
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => canvasStore.distributeElements?.('vertical')} 
+                    className="h-9" 
+                    title="Distribute Vertically"
+                  >
+                    <Grid3X3 className="w-4 h-4 mr-1 rotate-90" />
+                    Vertical
+                  </Button>
+                </div>
+              </div>
+              <Separator />
+            </>
+          )}
+
+          {/* Layer Controls */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Arrange</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.bringToFront?.()} 
+                className="h-9"
+                title="Bring to Front"
+              >
+                <ArrowUp className="w-4 h-4 mr-1" />
+                To Front
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => canvasStore.sendToBack?.()} 
+                className="h-9"
+                title="Send to Back"
+              >
+                <ArrowDown className="w-4 h-4 mr-1" />
+                To Back
+              </Button>
+            </div>
+          </div>
+        </div>
+      </ScrollArea>
+    </div>;
   }
   return <div className="w-80 bg-card border-l border-border h-full flex flex-col">
       {/* Header */}
@@ -264,7 +481,7 @@ export function PropertiesPanel({
 
             {/* Alignment */}
             <div>
-              <Label className="text-xs mb-2 block">Align</Label>
+              <Label className="text-xs mb-2 block">Align to Canvas</Label>
               <div className="grid grid-cols-6 gap-1">
                 <Button variant="outline" size="sm" onClick={() => alignToCanvas('left')} className="h-8 p-0" title="Align Left">
                   <AlignLeft className="w-4 h-4" />
