@@ -172,12 +172,22 @@ export function useCanvasStore() {
     img.onload = () => {
       const { naturalWidth, naturalHeight } = img;
       
-      // Scale down if image is too large (max 800px on longest side)
-      const maxSize = 800;
+      // Check if it's a BNPL logo for smaller sizing
+      const isBNPLLogo = src.includes('/bnpl/');
+      
+      // Scale down if image is too large (max 800px on longest side, or 50px height for BNPL)
+      const maxSize = isBNPLLogo ? 50 : 800;
       let width = naturalWidth;
       let height = naturalHeight;
       
-      if (width > maxSize || height > maxSize) {
+      if (isBNPLLogo) {
+        // For BNPL logos, constrain by height
+        if (height > maxSize) {
+          const aspectRatio = width / height;
+          height = maxSize;
+          width = maxSize * aspectRatio;
+        }
+      } else if (width > maxSize || height > maxSize) {
         const aspectRatio = width / height;
         if (width > height) {
           width = maxSize;

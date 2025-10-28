@@ -1524,6 +1524,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                           fontSize: 18,
                           fontWeight: '500',
                           color: '#000000',
+                          textAlign: 'center',
                           size: { width: 350, height: 40 },
                           modifiers: [{
                             id: Math.random().toString(36).substr(2, 9),
