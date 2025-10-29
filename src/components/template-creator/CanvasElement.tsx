@@ -169,6 +169,7 @@ interface CanvasElementProps {
   isSelected: boolean;
   isMultiSelected: boolean;
   scale: number;
+  selectedElements?: CanvasElementType[];
   onSelect: (elementId: string, multiSelect?: boolean) => void;
   onMove: (elementId: string, newPosition: Position) => void;
   onMoveMultiple?: (delta: Position) => void;
@@ -182,6 +183,7 @@ const CanvasElementComponent = function CanvasElement({
   isSelected,
   isMultiSelected,
   scale,
+  selectedElements = [],
   onSelect, 
   onMove,
   onMoveMultiple,
@@ -324,11 +326,26 @@ const CanvasElementComponent = function CanvasElement({
         dragDataRef.current.lastDeltaX = deltaX;
         dragDataRef.current.lastDeltaY = deltaY;
         
+        // Update current element
         updateElementStyle(
           { x: newX, y: newY },
           element.size,
           element.rotation
         );
+        
+        // If multi-selected, update all other selected elements visually
+        if (isMultiSelected && selectedElements.length > 1) {
+          selectedElements.forEach(el => {
+            if (el.id !== element.id) {
+              const otherElement = document.querySelector(`[data-element-id="${el.id}"]`) as HTMLElement;
+              if (otherElement) {
+                const newOtherX = el.position.x + deltaX;
+                const newOtherY = el.position.y + deltaY;
+                otherElement.style.transform = `translate3d(${newOtherX}px, ${newOtherY}px, 0) rotate(${el.rotation}deg)`;
+              }
+            }
+          });
+        }
       } else if (isResizingRef.current) {
         // Smooth resize
         const deltaX = (currentX - dragDataRef.current.startX) / scale;
@@ -392,7 +409,7 @@ const CanvasElementComponent = function CanvasElement({
         );
       }
     });
-  }, [element, scale, updateElementStyle, onRotate]);
+  }, [element, scale, updateElementStyle, onRotate, selectedElements, isMultiSelected]);
 
   const handleMouseUp = useCallback((e: MouseEvent) => {
     if (animationFrameRef.current) {
@@ -1107,6 +1124,7 @@ const CanvasElementComponent = function CanvasElement({
   return (
     <div
       ref={elementRef}
+      data-element-id={element.id}
       className={`absolute select-none will-change-transform transition-shadow duration-200 ${
         isSelected 
           ? 'ring-2 ring-blue-500 ring-opacity-60 shadow-lg z-10' 

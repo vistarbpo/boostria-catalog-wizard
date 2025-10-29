@@ -520,12 +520,13 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
                       element={element} 
                       isSelected={canvasStore.canvasState.selectedElementIds.includes(element.id)}
                       isMultiSelected={canvasStore.canvasState.selectedElementIds.length > 1 && canvasStore.canvasState.selectedElementIds.includes(element.id)}
-                      scale={scale} 
+                      scale={scale}
+                      selectedElements={canvasStore.getSelectedElements()}
                       onSelect={canvasStore.selectElement}
                       onMove={canvasStore.moveElement}
                       onMoveMultiple={canvasStore.moveSelectedElements}
                       onResize={canvasStore.resizeElement} 
-                      onRotate={canvasStore.rotateElement} 
+                      onRotate={canvasStore.rotateElement}
                        onDoubleClick={elementId => {
                         if (element.type === 'text') {
                           const textElement = element as any;
