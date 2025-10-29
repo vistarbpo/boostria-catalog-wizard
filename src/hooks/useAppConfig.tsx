@@ -35,6 +35,9 @@ export interface AppConfig {
   deep_linking_enabled: boolean;
   custom_url_scheme?: string;
   
+  // Currency Settings
+  default_currency?: string;
+  
   created_at?: string;
   updated_at?: string;
 }
@@ -65,10 +68,16 @@ export const useAppConfig = () => {
         setConfig(data);
       } else {
         // Create default config if none exists
+        // Detect user's country and set default currency
+        const { detectUserCountry, getDefaultCurrencyByCountry } = await import('@/utils/currencies');
+        const userCountry = await detectUserCountry();
+        const defaultCurrency = getDefaultCurrencyByCountry(userCountry);
+        
         const defaultConfig = {
           user_id: user.id,
           web_fallback_url: window.location.origin,
           deep_linking_enabled: false,
+          default_currency: defaultCurrency,
         };
 
         const { data: newConfig, error: createError } = await supabase

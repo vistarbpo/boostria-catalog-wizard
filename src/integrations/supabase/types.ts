@@ -62,6 +62,7 @@ export type Database = {
           created_at: string
           custom_url_scheme: string | null
           deep_linking_enabled: boolean
+          default_currency: string | null
           id: string
           ios_app_store_id: string | null
           ios_bundle_id: string | null
@@ -85,6 +86,7 @@ export type Database = {
           created_at?: string
           custom_url_scheme?: string | null
           deep_linking_enabled?: boolean
+          default_currency?: string | null
           id?: string
           ios_app_store_id?: string | null
           ios_bundle_id?: string | null
@@ -108,6 +110,7 @@ export type Database = {
           created_at?: string
           custom_url_scheme?: string | null
           deep_linking_enabled?: boolean
+          default_currency?: string | null
           id?: string
           ios_app_store_id?: string | null
           ios_bundle_id?: string | null
@@ -418,14 +421,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_my_sample_products: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      create_sample_products: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      create_my_sample_products: { Args: never; Returns: string }
+      create_sample_products: { Args: never; Returns: string }
       create_sample_products_for_user: {
         Args: { p_user_id: string }
         Returns: undefined
