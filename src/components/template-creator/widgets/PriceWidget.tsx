@@ -1,4 +1,5 @@
 import { CanvasElement, GroupElement, TextElement } from "@/types/canvas";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 export type PriceWidgetStyle = 
   | 'stacked-large-small'  // Large sale price on top, small strikethrough below

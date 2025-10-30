@@ -6,6 +6,8 @@ import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { X, Plus, Trash2 } from "lucide-react";
 import { TextElement } from "../../types/canvas";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { CURRENCIES, getCurrencyByCode } from "@/utils/currencies";
 
 interface DynamicFieldSettingsProps {
   element: TextElement;
@@ -31,6 +33,7 @@ const modifierDescriptions: Record<ModifierType, string> = {
 export function DynamicFieldSettings({ element, open, onClose, onUpdate }: DynamicFieldSettingsProps) {
   const [modifiers, setModifiers] = useState(element.modifiers || []);
   const [formatting, setFormatting] = useState(element.formatting || {});
+  const { currencySymbol, currencyCode } = useCurrency();
 
   const addModifier = () => {
     const newModifier = {
@@ -163,13 +166,37 @@ export function DynamicFieldSettings({ element, open, onClose, onUpdate }: Dynam
             <Label className="text-sm font-medium">Formatting Options</Label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Currency Symbol</Label>
-                <Input
-                  placeholder="$"
-                  value={formatting.currencySymbol || ''}
-                  onChange={e => setFormatting({ ...formatting, currencySymbol: e.target.value })}
-                  className="h-8"
-                />
+                <Label className="text-xs">Currency</Label>
+                <Select 
+                  value={formatting.currencySymbol || currencySymbol}
+                  onValueChange={(value) => {
+                    const currency = getCurrencyByCode(value);
+                    const symbol = currency?.symbolType === 'svg' ? currency.code : currency?.symbol || value;
+                    setFormatting({ ...formatting, currencySymbol: symbol });
+                  }}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px] bg-popover z-50">
+                    {CURRENCIES.map((currency) => {
+                      const currencyIcon = currency.symbolType === 'svg' && currency.svgPath ? (
+                        <img src={currency.svgPath} alt={currency.code} className="w-4 h-4" />
+                      ) : (
+                        <span className="w-4 text-center">{currency.symbol}</span>
+                      );
+                      
+                      return (
+                        <SelectItem key={currency.code} value={currency.code}>
+                          <div className="flex items-center gap-2">
+                            {currencyIcon}
+                            <span className="font-medium">{currency.code}</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-xs">Decimals</Label>

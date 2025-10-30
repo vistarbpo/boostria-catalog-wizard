@@ -51,6 +51,7 @@ import { useWidgets } from "../../hooks/useWidgets";
 import { toast } from "sonner";
 import { createRatingWidget } from "./widgets/RatingWidget";
 import { createPriceWidget, priceWidgetPresets } from "./widgets/PriceWidget";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 type MenuSection = "source" | "images" | "shapes" | "text" | "layers" | "widgets" | null;
 
@@ -61,6 +62,7 @@ interface ToolbarSidebarProps {
 export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
   const [dragOverElement, setDragOverElement] = useState<string | null>(null);
+  const { currencySymbol } = useCurrency();
 
   // Add error handling for useProduct
   let productContext;
@@ -1532,7 +1534,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                             value: 4
                           }],
                           formatting: {
-                            currencySymbol: '$',
+                            currencySymbol: currencySymbol,
                             decimals: 2,
                             thousandsSeparator: false
                           },
@@ -1660,7 +1662,8 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                         
                         const priceWidget = createPriceWidget({
                           position: { x: centerX, y: centerY },
-                          ...priceWidgetPresets.default
+                          ...priceWidgetPresets.default,
+                          currencySymbol: currencySymbol
                         });
                         
                         const maxZIndex = canvasStore.canvasState.elements.length > 0 
@@ -1690,7 +1693,8 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                         
                         const priceWidget = createPriceWidget({
                           position: { x: centerX, y: centerY },
-                          ...priceWidgetPresets.largeBold
+                          ...priceWidgetPresets.largeBold,
+                          currencySymbol: currencySymbol
                         });
                         
                         const maxZIndex = canvasStore.canvasState.elements.length > 0 
@@ -1720,7 +1724,8 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                         
                         const priceWidget = createPriceWidget({
                           position: { x: centerX, y: centerY },
-                          ...priceWidgetPresets.redBadge
+                          ...priceWidgetPresets.redBadge,
+                          currencySymbol: currencySymbol
                         });
                         
                         const maxZIndex = canvasStore.canvasState.elements.length > 0 
@@ -1750,7 +1755,8 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                         
                         const priceWidget = createPriceWidget({
                           position: { x: centerX, y: centerY },
-                          ...priceWidgetPresets.sideBySide
+                          ...priceWidgetPresets.sideBySide,
+                          currencySymbol: currencySymbol
                         });
                         
                         const maxZIndex = canvasStore.canvasState.elements.length > 0 

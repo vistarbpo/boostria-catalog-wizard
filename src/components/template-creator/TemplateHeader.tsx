@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCanvasStore } from "../../hooks/useCanvasStore";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { CURRENCIES, getCurrencyByCode } from "@/utils/currencies";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface TemplateHeaderProps {
   onExport?: () => Promise<void>;
@@ -23,6 +26,7 @@ interface TemplateHeaderProps {
 
 export function TemplateHeader({ onExport, canvasStore }: TemplateHeaderProps) {
   const navigate = useNavigate();
+  const { currencyCode, setCurrency } = useCurrency();
   const selectedElements = canvasStore.getSelectedElements();
   const canGroup = selectedElements.length >= 2;
   const canUngroup = selectedElements.length === 1 && selectedElements[0]?.type === 'group';
@@ -95,6 +99,34 @@ export function TemplateHeader({ onExport, canvasStore }: TemplateHeaderProps) {
           defaultValue="My Template"
         />
         <Badge variant="secondary">Draft</Badge>
+        
+        {/* Currency Selector */}
+        <div className="flex items-center gap-2 ml-4">
+          <label className="text-sm text-muted-foreground">Currency:</label>
+          <Select value={currencyCode} onValueChange={setCurrency}>
+            <SelectTrigger className="w-[140px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="max-h-[300px] bg-popover z-50">
+              {CURRENCIES.map((currency) => {
+                const currencyIcon = currency.symbolType === 'svg' && currency.svgPath ? (
+                  <img src={currency.svgPath} alt={currency.code} className="w-4 h-4" />
+                ) : (
+                  <span className="w-4 text-center">{currency.symbol}</span>
+                );
+                
+                return (
+                  <SelectItem key={currency.code} value={currency.code}>
+                    <div className="flex items-center gap-2">
+                      {currencyIcon}
+                      <span className="font-medium">{currency.code}</span>
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Right Section */}
