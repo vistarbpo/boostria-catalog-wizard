@@ -268,8 +268,8 @@ const CanvasElementComponent = function CanvasElement({
         startLeft: element.position.x,
         startTop: element.position.y
       };
-    } else if (e.target.classList.contains('rotation-handle')) {
-      // Rotation mode
+    } else if (e.target.classList.contains('rotation-handle') || e.target.closest('.rotation-handle')) {
+      // Rotation mode - check if target or any parent has rotation-handle class
       setIsRotating(true);
       isRotatingRef.current = true;
       
