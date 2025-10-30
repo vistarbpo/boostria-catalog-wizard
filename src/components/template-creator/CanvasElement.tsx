@@ -1144,7 +1144,13 @@ const CanvasElementComponent = function CanvasElement({
       {renderElement()}
       
       {isSelected && !element.locked && (
-        <div className="absolute inset-0" style={{ transform: `rotate(-${element.rotation}deg)` }}>
+        <div 
+          className="absolute inset-0" 
+          style={{ 
+            transform: `rotate(-${element.rotation}deg)`,
+            transformOrigin: 'center center'
+          }}
+        >
           {/* Resize Handles */}
           {resizeHandles.map((handle) => (
             <div
