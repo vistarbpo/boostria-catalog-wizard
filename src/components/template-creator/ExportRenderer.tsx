@@ -72,14 +72,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         
         const textStyles = getTextStyles(textElement, baseStyle);
         
-        // Override specific styles for proper text wrapping in export when rotated
-        if (textElement.textWrapping) {
-          textStyles.whiteSpace = 'pre-wrap';
-          textStyles.wordWrap = 'break-word' as 'break-word';
-          textStyles.overflowWrap = 'break-word' as 'break-word';
-          textStyles.maxWidth = `${element.size.width}px`;
-        }
-        
         // Check if this is a price widget text (has dynamic price fields)
         const isPriceWidgetText = textElement.isDynamic && 
           (textElement.dynamicField === 'price' || 

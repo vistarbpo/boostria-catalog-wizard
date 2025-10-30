@@ -5,7 +5,7 @@ import { TextElement, ButtonElement, ImageElement, ShapeElement } from '@/types/
  * Shared rendering utilities to ensure 100% consistency between preview and export
  */
 
-export const getTextStyles = (textElement: TextElement, baseStyle: React.CSSProperties): React.CSSProperties => {
+export const getTextStyles = (textElement: TextElement, baseStyle: React.CSSProperties) => {
   return {
     ...baseStyle,
     color: textElement.color,
@@ -20,10 +20,8 @@ export const getTextStyles = (textElement: TextElement, baseStyle: React.CSSProp
     backgroundColor: textElement.backgroundColor,
     border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
     padding: `${textElement.padding.top}px ${textElement.padding.right}px ${textElement.padding.bottom}px ${textElement.padding.left}px`,
-    whiteSpace: textElement.textWrapping ? 'pre-wrap' : 'nowrap',
-    wordWrap: (textElement.textWrapping ? 'break-word' : 'normal') as 'break-word' | 'normal',
-    overflowWrap: (textElement.textWrapping ? 'break-word' : 'normal') as 'break-word' | 'normal',
-    overflow: 'visible',
+    whiteSpace: textElement.textWrapping ? 'normal' : 'nowrap',
+    overflow: 'visible', // Changed from 'hidden' to prevent text cutoff
     display: 'flex',
     alignItems: 'center',
     justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
