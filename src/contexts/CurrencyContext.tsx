@@ -5,6 +5,8 @@ import { getCurrencyByCode } from '@/utils/currencies';
 interface CurrencyContextType {
   currencyCode: string;
   currencySymbol: string;
+  currencySvgPath?: string;
+  isSvgSymbol: boolean;
   setCurrency: (code: string) => void;
   isLoading: boolean;
 }
@@ -29,17 +31,17 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const currency = getCurrencyByCode(currencyCode);
-  // Always use the unicode symbol field for text display
+  const isSvgSymbol = currency?.symbolType === 'svg';
   const currencySymbol = currency?.symbol || '$';
-
-  // Debug log
-  console.log('CurrencyContext - Currency Code:', currencyCode, 'Symbol:', currencySymbol, 'Currency:', currency);
+  const currencySvgPath = currency?.svgPath;
 
   return (
     <CurrencyContext.Provider 
       value={{ 
         currencyCode, 
         currencySymbol,
+        currencySvgPath,
+        isSvgSymbol,
         setCurrency,
         isLoading: loading
       }}

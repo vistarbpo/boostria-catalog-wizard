@@ -202,14 +202,7 @@ const CanvasElementComponent = function CanvasElement({
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   
-  const { currencySymbol } = useCurrency();
-  
-  // Debug log
-  useEffect(() => {
-    if (element.type === 'text' && (element as TextElement).isDynamic) {
-      console.log('CanvasElement - Currency Symbol:', currencySymbol, 'Element:', element.id);
-    }
-  }, [currencySymbol, element]);
+  const { currencySymbol, currencySvgPath, isSvgSymbol } = useCurrency();
   
   const elementRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
@@ -546,15 +539,36 @@ const CanvasElementComponent = function CanvasElement({
         const textContent = formatDynamicText(textElement, undefined, currencySymbol);
         const textStyles = getTextStyles(textElement, baseStyle);
         
+        // Check if this is a price field with SVG symbol
+        const isPriceField = textElement.isDynamic && 
+          (textElement.dynamicField === 'price' || 
+           textElement.dynamicField === 'sale_price' || 
+           textElement.dynamicField === 'compare_at_price');
+        const showSvgSymbol = isPriceField && isSvgSymbol && currencySvgPath;
+        
         return (
           <div
             style={{
               ...textStyles,
               cursor: element.locked ? 'not-allowed' : 'text',
               visibility: element.visible ? 'visible' : 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              gap: showSvgSymbol ? '4px' : '0',
             }}
           >
-            {renderTextDecoration(textElement, textContent)}
+            {showSvgSymbol && (
+              <img 
+                src={currencySvgPath} 
+                alt={currencySymbol}
+                style={{
+                  width: `${textElement.fontSize * 0.8}px`,
+                  height: `${textElement.fontSize * 0.8}px`,
+                  flexShrink: 0,
+                }}
+              />
+            )}
+            {renderTextDecoration(textElement, showSvgSymbol ? textContent.replace(currencySymbol, '').trim() : textContent)}
           </div>
         );
       }
@@ -903,6 +917,16 @@ const CanvasElementComponent = function CanvasElement({
     switch (childElement.type) {
       case 'text':
         const textEl = childElement as TextElement;
+        const textContent = formatDynamicText(textEl, parentGroup, currencySymbol);
+        
+        // Check if this is a price field with SVG symbol
+        const isPriceField = textEl.isDynamic && 
+          (textEl.dynamicField === 'price' || 
+           textEl.dynamicField === 'sale_price' || 
+           textEl.dynamicField === 'compare_at_price');
+        const showSvgSymbol = isPriceField && isSvgSymbol && currencySvgPath;
+        const displayText = showSvgSymbol ? textContent.replace(currencySymbol, '').trim() : textContent;
+        
         return (
           <div
             style={{
@@ -921,9 +945,21 @@ const CanvasElementComponent = function CanvasElement({
               padding: `${textEl.padding.top}px ${textEl.padding.right}px ${textEl.padding.bottom}px ${textEl.padding.left}px`,
               justifyContent: textEl.textAlign === 'left' ? 'flex-start' : textEl.textAlign === 'right' ? 'flex-end' : 'center',
               alignItems: 'flex-start',
+              gap: showSvgSymbol ? '4px' : '0',
             }}
           >
-            {formatDynamicText(textEl, parentGroup, currencySymbol)}
+            {showSvgSymbol && (
+              <img 
+                src={currencySvgPath} 
+                alt={currencySymbol}
+                style={{
+                  width: `${textEl.fontSize * 0.8}px`,
+                  height: `${textEl.fontSize * 0.8}px`,
+                  flexShrink: 0,
+                }}
+              />
+            )}
+            {displayText}
           </div>
         );
       case 'shape':

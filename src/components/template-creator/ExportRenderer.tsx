@@ -29,10 +29,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   backgroundImageUrl,
   backgroundMode,
 }) => {
-  const { currencySymbol } = useCurrency();
-  
-  // Debug log
-  console.log('ExportRenderer - Currency Symbol:', currencySymbol);
+  const { currencySymbol, currencySvgPath, isSvgSymbol } = useCurrency();
   
   const renderElement = (element: CanvasElement) => {
     const baseStyle: React.CSSProperties = {
@@ -183,6 +180,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         
         // Apply price widget text positioning - perfectly centered
         if (isPriceWidgetText) {
+          const showSvgSymbol = isSvgSymbol && currencySvgPath;
+          const displayText = showSvgSymbol ? displayContent.replace(currencySymbol, '').trim() : displayContent;
+          
           return (
             <div key={element.id} style={{
               ...baseStyle,
@@ -193,32 +193,116 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               alignItems: 'center',
               justifyContent: textElement.textAlign === 'center' ? 'center' : 
                               textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              gap: showSvgSymbol ? '4px' : '0',
               boxSizing: 'border-box',
             }}>
-              <span style={{
+              <div style={{
                 position: 'absolute',
                 top: '50%',
                 left: textElement.textAlign === 'center' ? '50%' : 
                       textElement.textAlign === 'right' ? 'auto' : '0',
                 right: textElement.textAlign === 'right' ? '0' : 'auto',
                 transform: textElement.textAlign === 'center' ? 'translate(-50%, -75%)' : 'translateY(-75%)',
-                color: textElement.color,
-                fontSize: `${textElement.fontSize}px`,
-                fontFamily: textElement.fontFamily,
-                fontWeight: textElement.fontWeight,
-                direction: textElement.direction || 'ltr',
-                whiteSpace: 'nowrap',
-                userSelect: 'none',
-              } as React.CSSProperties}>
-                {renderExportTextDecoration()}
-              </span>
+                display: 'flex',
+                alignItems: 'center',
+                gap: showSvgSymbol ? '4px' : '0',
+              }}>
+                {showSvgSymbol && (
+                  <img 
+                    src={currencySvgPath} 
+                    alt={currencySymbol}
+                    style={{
+                      width: `${textElement.fontSize * 0.8}px`,
+                      height: `${textElement.fontSize * 0.8}px`,
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+                <span style={{
+                  color: textElement.color,
+                  fontSize: `${textElement.fontSize}px`,
+                  fontFamily: textElement.fontFamily,
+                  fontWeight: textElement.fontWeight,
+                  direction: textElement.direction || 'ltr',
+                  whiteSpace: 'nowrap',
+                  userSelect: 'none',
+                } as React.CSSProperties}>
+                  {textElement.textDecoration === 'line-through' ? (
+                    <span style={{ position: 'relative', display: 'inline-block' }}>
+                      {displayText}
+                      <span style={{
+                        position: 'absolute',
+                        left: '0',
+                        right: '0',
+                        top: '80%',
+                        height: '2px',
+                        backgroundColor: textElement.color,
+                        pointerEvents: 'none',
+                      }} />
+                    </span>
+                  ) : displayText}
+                </span>
+              </div>
             </div>
           );
         }
         
+        const showSvgSymbol = isPriceWidgetText && isSvgSymbol && currencySvgPath;
+        const displayText = showSvgSymbol ? displayContent.replace(currencySymbol, '').trim() : displayContent;
+        
+        const renderExportTextDecorationFinal = () => {
+          if (textElement.textDecoration === 'underline') {
+            return (
+              <span style={{
+                textDecoration: 'underline',
+                textDecorationColor: textElement.color,
+                textDecorationThickness: '1.5px',
+                textUnderlineOffset: '2px',
+              }}>
+                {displayText}
+              </span>
+            );
+          } else if (textElement.textDecoration === 'line-through') {
+            return (
+              <span style={{ 
+                position: 'relative',
+                display: 'inline-block',
+              }}>
+                {displayText}
+                <span style={{
+                  position: 'absolute',
+                  left: '0',
+                  right: '0',
+                  top: '80%',
+                  height: '2px',
+                  backgroundColor: textElement.color,
+                  pointerEvents: 'none',
+                }} />
+              </span>
+            );
+          }
+          return <span>{displayText}</span>;
+        };
+        
         return (
-          <div key={element.id} style={textStyles}>
-            {renderExportTextDecoration()}
+          <div key={element.id} style={{
+            ...textStyles,
+            display: 'flex',
+            alignItems: 'center',
+            gap: showSvgSymbol ? '4px' : '0',
+          }}>
+            {showSvgSymbol && (
+              <img 
+                src={currencySvgPath} 
+                alt={currencySymbol}
+                style={{
+                  width: `${textElement.fontSize * 0.8}px`,
+                  height: `${textElement.fontSize * 0.8}px`,
+                  flexShrink: 0,
+                }}
+              />
+            )}
+            {renderExportTextDecorationFinal()}
           </div>
         );
       }
