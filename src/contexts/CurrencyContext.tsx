@@ -29,9 +29,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const currency = getCurrencyByCode(currencyCode);
-  const currencySymbol = currency?.symbolType === 'svg' && currency?.svgPath 
-    ? currency.code 
-    : currency?.symbol || '$';
+  // Always use the unicode symbol field for text display
+  const currencySymbol = currency?.symbol || '$';
 
   // Debug log
   console.log('CurrencyContext - Currency Code:', currencyCode, 'Symbol:', currencySymbol, 'Currency:', currency);
