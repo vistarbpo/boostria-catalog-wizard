@@ -9,6 +9,7 @@ import {
   getShapeStyles,
   renderTriangleSVG,
 } from './renderUtils';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 // Helper function to get border radius CSS value
 const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
@@ -21,7 +22,7 @@ const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
 };
 
 // Helper function to format dynamic text with modifiers and formatting
-const formatDynamicText = (element: TextElement, parentGroup?: any): string => {
+const formatDynamicText = (element: TextElement, parentGroup?: any, globalCurrencySymbol?: string): string => {
   // Handle rating widget text
   if (parentGroup?.widgetType === 'rating' && element.isDynamic && element.dynamicField === 'rating' && parentGroup.widgetData?.rating) {
     return parentGroup.widgetData.rating.toFixed(1);
@@ -74,9 +75,12 @@ const formatDynamicText = (element: TextElement, parentGroup?: any): string => {
         });
       }
       
-      if (fmt.currencySymbol) formattedValue = fmt.currencySymbol + formattedValue;
-      if (fmt.prefix) formattedValue = fmt.prefix + formattedValue;
-      if (fmt.suffix) formattedValue = formattedValue + fmt.suffix;
+      // Use global currency symbol for price fields
+      const isPriceField = element.dynamicField === 'price' || element.dynamicField === 'sale_price' || element.dynamicField === 'compare_at_price';
+      const symbolToUse = isPriceField && globalCurrencySymbol ? globalCurrencySymbol : (fmt.currencySymbol || fmt.prefix);
+      
+      if (symbolToUse) formattedValue = symbolToUse + formattedValue;
+      if (!isPriceField && fmt.suffix) formattedValue = formattedValue + fmt.suffix;
     }
     
     // Replace the placeholder with the formatted value in the template
@@ -153,9 +157,12 @@ const formatDynamicText = (element: TextElement, parentGroup?: any): string => {
       });
     }
     
-    if (fmt.currencySymbol) formatted = fmt.currencySymbol + formatted;
-    if (fmt.prefix) formatted = fmt.prefix + formatted;
-    if (fmt.suffix) formatted = formatted + fmt.suffix;
+    // Use global currency symbol for price fields
+    const isPriceField = element.dynamicField === 'price' || element.dynamicField === 'sale_price' || element.dynamicField === 'compare_at_price';
+    const symbolToUse = isPriceField && globalCurrencySymbol ? globalCurrencySymbol : (fmt.currencySymbol || fmt.prefix);
+    
+    if (symbolToUse) formatted = symbolToUse + formatted;
+    if (!isPriceField && fmt.suffix) formatted = formatted + fmt.suffix;
     
     return formatted;
   }
@@ -194,6 +201,8 @@ const CanvasElementComponent = function CanvasElement({
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
+  
+  const { currencySymbol } = useCurrency();
   
   const elementRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
@@ -527,7 +536,7 @@ const CanvasElementComponent = function CanvasElement({
     switch (element.type) {
       case 'text': {
         const textElement = element as TextElement;
-        const textContent = formatDynamicText(textElement);
+        const textContent = formatDynamicText(textElement, undefined, currencySymbol);
         const textStyles = getTextStyles(textElement, baseStyle);
         
         return (
@@ -907,7 +916,7 @@ const CanvasElementComponent = function CanvasElement({
               alignItems: 'flex-start',
             }}
           >
-            {formatDynamicText(textEl, parentGroup)}
+            {formatDynamicText(textEl, parentGroup, currencySymbol)}
           </div>
         );
       case 'shape':

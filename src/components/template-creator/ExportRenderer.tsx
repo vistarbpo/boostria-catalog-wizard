@@ -8,6 +8,7 @@ import {
   getShapeStyles,
   renderTriangleSVG,
 } from './renderUtils';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ExportRendererProps {
   elements: CanvasElement[];
@@ -28,6 +29,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   backgroundImageUrl,
   backgroundMode,
 }) => {
+  const { currencySymbol } = useCurrency();
+  
   const renderElement = (element: CanvasElement) => {
     const baseStyle: React.CSSProperties = {
       position: 'absolute',
@@ -124,9 +127,12 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 });
               }
               
-              if (fmt.currencySymbol) formattedValue = fmt.currencySymbol + formattedValue;
-              if (fmt.prefix) formattedValue = fmt.prefix + formattedValue;
-              if (fmt.suffix) formattedValue = formattedValue + fmt.suffix;
+              // Use global currency symbol for price fields
+              const isPriceField = el.dynamicField === 'price' || el.dynamicField === 'sale_price' || el.dynamicField === 'compare_at_price';
+              const symbolToUse = isPriceField ? currencySymbol : (fmt.currencySymbol || fmt.prefix);
+              
+              if (symbolToUse) formattedValue = symbolToUse + formattedValue;
+              if (!isPriceField && fmt.suffix) formattedValue = formattedValue + fmt.suffix;
             }
             
             return el.content.replace(`{${el.dynamicField}}`, formattedValue);
