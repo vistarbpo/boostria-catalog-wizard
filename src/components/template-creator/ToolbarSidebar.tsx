@@ -1518,7 +1518,7 @@ export function ToolbarSidebar({ canvasStore }: ToolbarSidebarProps) {
                       // Add text with template-based dynamic price
                       canvasStore.addTextElement(
                         { x: centerX, y: centerY },
-                        'Pay {price} in 4 installments',
+                        'Pay {currency}{price} in 4 installments',
                         {
                           isDynamic: true,
                           dynamicField: 'price',

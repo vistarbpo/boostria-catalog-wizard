@@ -88,7 +88,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           
           // Handle template-based dynamic text with placeholders
           if ((el as any).isTemplate && el.isDynamic && el.dynamicField && el.content.includes(`{${el.dynamicField}}`)) {
-            let cleanedText = sourceValue.replace(/[^0-9.-]/g, '');
+            // Strip any existing currency symbols from source
+            let cleanedText = sourceValue.replace(/[$€£¥₹﷼]/g, '').replace(/[^0-9.-]/g, '');
             let value = parseFloat(cleanedText) || 0;
             
             if (el.modifiers) {
@@ -131,20 +132,31 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               const isPriceField = el.dynamicField === 'price' || el.dynamicField === 'sale_price' || el.dynamicField === 'compare_at_price';
               const symbolToUse = isPriceField ? currencySymbol : (fmt.currencySymbol || fmt.prefix);
               
-              if (symbolToUse) formattedValue = symbolToUse + formattedValue;
+              if (symbolToUse && !isSvgSymbol) formattedValue = symbolToUse + formattedValue;
               if (!isPriceField && fmt.suffix) formattedValue = formattedValue + fmt.suffix;
             }
             
-            return el.content.replace(`{${el.dynamicField}}`, formattedValue);
+            // Handle {currency} placeholder separately
+            let finalContent = el.content.replace(`{${el.dynamicField}}`, formattedValue);
+            
+            // Replace {currency} placeholder
+            if (finalContent.includes('{currency}')) {
+              finalContent = finalContent.replace('{currency}', isSvgSymbol ? '[CURRENCY_SVG]' : currencySymbol);
+            }
+            
+            return finalContent;
           }
           
           return el.content;
         };
         
-        const displayContent = formatExportDynamicText(textElement);
+        let displayContent = formatExportDynamicText(textElement);
+        
+        // Check if this is a template-based text with {currency} placeholder
+        const hasTemplateCurrency = displayContent.includes('[CURRENCY_SVG]');
         
         // Custom export-specific text decoration rendering
-        const renderExportTextDecoration = () => {
+        const renderExportTextDecoration = (content: string | React.ReactNode) => {
           if (textElement.textDecoration === 'underline') {
             return (
               <span style={{
@@ -153,7 +165,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 textDecorationThickness: '1.5px',
                 textUnderlineOffset: '2px',
               }}>
-                {displayContent}
+                {content}
               </span>
             );
           } else if (textElement.textDecoration === 'line-through') {
@@ -162,7 +174,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 position: 'relative',
                 display: 'inline-block',
               }}>
-                {displayContent}
+                {content}
                 <span style={{
                   position: 'absolute',
                   left: '0',
@@ -175,13 +187,14 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               </span>
             );
           }
-          return <span>{displayContent}</span>;
+          return <span>{content}</span>;
         };
         
         // Apply price widget text positioning - perfectly centered
-        if (isPriceWidgetText) {
+        if (isPriceWidgetText && !hasTemplateCurrency) {
           const showSvgSymbol = isSvgSymbol && currencySvgPath;
-          const displayText = showSvgSymbol ? displayContent.replace(currencySymbol, '').trim() : displayContent;
+          displayContent = showSvgSymbol ? displayContent.replace(currencySymbol, '').trim() : displayContent;
+          const displayText = displayContent;
           
           return (
             <div key={element.id} style={{
@@ -247,42 +260,42 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           );
         }
         
-        const showSvgSymbol = isPriceWidgetText && isSvgSymbol && currencySvgPath;
-        const displayText = showSvgSymbol ? displayContent.replace(currencySymbol, '').trim() : displayContent;
+        // Handle template-based currency placeholder
+        if (hasTemplateCurrency) {
+          const parts = displayContent.split('[CURRENCY_SVG]');
+          const contentNode = (
+            <>
+              {parts[0]}
+              {isSvgSymbol && currencySvgPath && (
+                <img 
+                  src={currencySvgPath} 
+                  alt={currencySymbol}
+                  style={{
+                    width: `${textElement.fontSize * 0.8}px`,
+                    height: `${textElement.fontSize * 0.8}px`,
+                    marginLeft: parts[0] ? '2px' : '0',
+                    marginRight: parts[1] ? '2px' : '0',
+                  }}
+                />
+              )}
+              {parts[1]}
+            </>
+          );
+          
+          return (
+            <div key={element.id} style={{
+              ...textStyles,
+              display: 'flex',
+              alignItems: 'center',
+            }}>
+              {renderExportTextDecoration(contentNode)}
+            </div>
+          );
+        }
         
-        const renderExportTextDecorationFinal = () => {
-          if (textElement.textDecoration === 'underline') {
-            return (
-              <span style={{
-                textDecoration: 'underline',
-                textDecorationColor: textElement.color,
-                textDecorationThickness: '1.5px',
-                textUnderlineOffset: '2px',
-              }}>
-                {displayText}
-              </span>
-            );
-          } else if (textElement.textDecoration === 'line-through') {
-            return (
-              <span style={{ 
-                position: 'relative',
-                display: 'inline-block',
-              }}>
-                {displayText}
-                <span style={{
-                  position: 'absolute',
-                  left: '0',
-                  right: '0',
-                  top: '80%',
-                  height: '2px',
-                  backgroundColor: textElement.color,
-                  pointerEvents: 'none',
-                }} />
-              </span>
-            );
-          }
-          return <span>{displayText}</span>;
-        };
+        // Handle regular price widget text
+        const showSvgSymbol = isPriceWidgetText && isSvgSymbol && currencySvgPath && !hasTemplateCurrency;
+        displayContent = showSvgSymbol ? displayContent.replace(currencySymbol, '').trim() : displayContent;
         
         return (
           <div key={element.id} style={{
@@ -302,7 +315,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 }}
               />
             )}
-            {renderExportTextDecorationFinal()}
+            {renderExportTextDecoration(displayContent)}
           </div>
         );
       }
@@ -910,6 +923,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
 
   return (
     <div
+      id="export-canvas"
       style={{
         position: 'relative',
         width: `${canvasWidth}px`,

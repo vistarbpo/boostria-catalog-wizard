@@ -321,7 +321,12 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       });
 
       // Capture with html2canvas
-      const canvas = await html2canvas(tempContainer.firstChild as HTMLElement, {
+      const exportElement = tempContainer.querySelector('#export-canvas') as HTMLElement;
+      if (!exportElement) {
+        throw new Error('Export canvas element not found');
+      }
+      
+      const canvas = await html2canvas(exportElement, {
         width: currentSize.width,
         height: currentSize.height,
         backgroundColor: bgColor,
