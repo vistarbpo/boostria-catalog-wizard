@@ -4,6 +4,7 @@ import { ToolbarSidebar } from "@/components/template-creator/ToolbarSidebar";
 import { TemplateCanvas, TemplateCanvasRef } from "@/components/template-creator/TemplateCanvas";
 import { PropertiesPanel } from "@/components/template-creator/PropertiesPanel";
 import { ProductProvider } from "@/contexts/ProductContext";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { useCanvasStore } from "@/hooks/useCanvasStore";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -91,9 +92,11 @@ const TemplateCreateContent = () => {
 export default function TemplateCreate() {
   return (
     <ErrorBoundary>
-      <ProductProvider>
-        <TemplateCreateContent />
-      </ProductProvider>
+      <CurrencyProvider>
+        <ProductProvider>
+          <TemplateCreateContent />
+        </ProductProvider>
+      </CurrencyProvider>
     </ErrorBoundary>
   );
 }

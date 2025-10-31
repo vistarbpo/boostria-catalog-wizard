@@ -96,8 +96,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           return (
             <div key={element.id} style={{
               ...textStyles,
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
+              whiteSpace: 'nowrap',
             }}>
               {renderTextDecoration(textElement, contentNode as any)}
             </div>
@@ -111,9 +112,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         return (
           <div key={element.id} style={{
             ...textStyles,
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             gap: showPrefixSymbol ? '4px' : '0',
+            whiteSpace: 'nowrap',
           }}>
             {showPrefixSymbol && renderCurrencySymbol(currencyOptions)}
             {renderTextDecoration(textElement, finalText)}

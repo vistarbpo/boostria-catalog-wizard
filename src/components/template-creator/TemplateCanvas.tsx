@@ -20,6 +20,7 @@ import { useCanvasStore } from "../../hooks/useCanvasStore";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
 import { ExportRenderer } from './ExportRenderer';
+import { CurrencyProvider } from '@/contexts/CurrencyContext';
 interface TemplateCanvasProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
 }
@@ -306,15 +307,17 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       const root = createRoot(tempContainer);
       await new Promise<void>((resolve) => {
         root.render(
-          <ExportRenderer
-            elements={canvasStore.canvasState.elements}
-            canvasWidth={currentSize.width}
-            canvasHeight={currentSize.height}
-            backgroundColor={bgColor}
-            backgroundType={canvasStore.canvasState.backgroundType}
-            backgroundImageUrl={canvasStore.canvasState.backgroundImageUrl}
-            backgroundMode={canvasStore.canvasState.backgroundMode}
-          />
+          <CurrencyProvider>
+            <ExportRenderer
+              elements={canvasStore.canvasState.elements}
+              canvasWidth={currentSize.width}
+              canvasHeight={currentSize.height}
+              backgroundColor={bgColor}
+              backgroundType={canvasStore.canvasState.backgroundType}
+              backgroundImageUrl={canvasStore.canvasState.backgroundImageUrl}
+              backgroundMode={canvasStore.canvasState.backgroundMode}
+            />
+          </CurrencyProvider>
         );
         // Wait for render to complete
         setTimeout(resolve, 200);

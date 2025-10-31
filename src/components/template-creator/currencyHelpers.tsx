@@ -136,20 +136,19 @@ export const renderCurrencySymbol = (
   const marginRight = position === 'inline' ? '2px' : '4px';
 
   return (
-    <img 
-      src={currencySvgPath} 
-      alt={currencySymbol}
+    <span 
       style={{
+        display: 'inline-block',
         width: `${size}px`,
         height: `${size}px`,
         flexShrink: 0,
         marginLeft,
         marginRight,
-        // Make SVG match text color using CSS filters
-        filter: `brightness(0) saturate(100%)`,
-        opacity: 1,
+        backgroundColor: textColor,
+        WebkitMask: `url(${currencySvgPath}) no-repeat center / contain`,
+        mask: `url(${currencySvgPath}) no-repeat center / contain`,
       }}
-      className="currency-icon"
+      aria-label={currencySymbol}
     />
   );
 };
@@ -174,11 +173,11 @@ export const renderTextWithCurrency = (
   const parts = content.split('[CURRENCY_SVG]');
   
   return (
-    <>
+    <span style={{ display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
       {parts[0]}
       {renderCurrencySymbol(options, 'inline')}
       {parts[1]}
-    </>
+    </span>
   );
 };
 

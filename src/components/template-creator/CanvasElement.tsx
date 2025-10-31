@@ -516,8 +516,9 @@ const CanvasElementComponent = function CanvasElement({
                 ...textStyles,
                 cursor: element.locked ? 'not-allowed' : 'text',
                 visibility: element.visible ? 'visible' : 'hidden',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
+                whiteSpace: 'nowrap',
               }}
             >
               {renderTextDecoration(textElement, contentNode as any)}
@@ -535,9 +536,10 @@ const CanvasElementComponent = function CanvasElement({
               ...textStyles,
               cursor: element.locked ? 'not-allowed' : 'text',
               visibility: element.visible ? 'visible' : 'hidden',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: showSvgSymbol ? '4px' : '0',
+              whiteSpace: 'nowrap',
             }}
           >
             {showSvgSymbol && renderCurrencySymbol(currencyOptions)}
@@ -921,12 +923,13 @@ const CanvasElementComponent = function CanvasElement({
                 direction: textEl.direction || 'ltr',
                 letterSpacing: `${textEl.letterSpacing}px`,
                 lineHeight: textEl.lineHeight,
-                whiteSpace: textEl.textWrapping ? 'pre-wrap' : 'nowrap',
-                wordBreak: textEl.textWrapping ? 'break-word' : 'normal',
+                whiteSpace: 'nowrap',
+                wordBreak: 'normal',
                 overflow: 'hidden',
                 padding: `${textEl.padding.top}px ${textEl.padding.right}px ${textEl.padding.bottom}px ${textEl.padding.left}px`,
                 justifyContent: textEl.textAlign === 'left' ? 'flex-start' : textEl.textAlign === 'right' ? 'flex-end' : 'center',
                 alignItems: 'flex-start',
+                display: 'inline-flex',
               }}
             >
               {contentNode}
@@ -950,13 +953,14 @@ const CanvasElementComponent = function CanvasElement({
               direction: textEl.direction || 'ltr',
               letterSpacing: `${textEl.letterSpacing}px`,
               lineHeight: textEl.lineHeight,
-              whiteSpace: textEl.textWrapping ? 'pre-wrap' : 'nowrap',
+              whiteSpace: showSvgSymbol ? 'nowrap' : (textEl.textWrapping ? 'pre-wrap' : 'nowrap'),
               wordBreak: textEl.textWrapping ? 'break-word' : 'normal',
               overflow: 'hidden',
               padding: `${textEl.padding.top}px ${textEl.padding.right}px ${textEl.padding.bottom}px ${textEl.padding.left}px`,
               justifyContent: textEl.textAlign === 'left' ? 'flex-start' : textEl.textAlign === 'right' ? 'flex-end' : 'center',
               alignItems: 'flex-start',
               gap: showSvgSymbol ? '4px' : '0',
+              display: showSvgSymbol ? 'inline-flex' : undefined,
             }}
           >
             {showSvgSymbol && renderCurrencySymbol(currencyOptions)}
