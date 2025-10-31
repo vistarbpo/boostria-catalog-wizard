@@ -2,19 +2,17 @@ import React, { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { CanvasElement as CanvasElementType, TextElement, ShapeElement, ImageElement, SVGElement, ButtonElement, Position } from '../../types/canvas';
 import { RotateCw } from 'lucide-react';
 import {
-  getTextStyles,
-  renderTextDecoration,
   getButtonStyles,
   getImageStyles,
   getShapeStyles,
   renderTriangleSVG,
 } from './renderUtils';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { TextRenderer } from './TextRenderer';
 import {
   processTemplatePlaceholders,
-  formatDynamicValue,
-  renderCurrencySymbol,
   renderTextWithCurrency,
+  renderCurrencySymbol,
   stripCurrencySymbols,
 } from './currencyHelpers';
 
@@ -491,13 +489,6 @@ const CanvasElementComponent = function CanvasElement({
       case 'text': {
         const textElement = element as TextElement;
         const textContent = formatDynamicText(textElement, undefined, currencySymbol, isSvgSymbol);
-        const textStyles = getTextStyles(textElement, baseStyle);
-        
-        // Check if this is a price field with SVG symbol
-        const isPriceField = textElement.isDynamic && 
-          (textElement.dynamicField === 'price' || 
-           textElement.dynamicField === 'sale_price' || 
-           textElement.dynamicField === 'compare_at_price');
         
         const currencyOptions = {
           currencySymbol,
@@ -507,43 +498,30 @@ const CanvasElementComponent = function CanvasElement({
           fontSize: textElement.fontSize,
         };
         
-        // Handle template text with inline currency placeholder
-        if (textContent.includes('[CURRENCY_SVG]')) {
-          const contentNode = renderTextWithCurrency(textContent, currencyOptions);
-          return (
-            <div
-              style={{
-                ...textStyles,
-                cursor: element.locked ? 'not-allowed' : 'text',
-                visibility: element.visible ? 'visible' : 'hidden',
-                display: 'inline-flex',
-                alignItems: 'center',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {renderTextDecoration(textElement, contentNode as any)}
-            </div>
-          );
-        }
-        
-        // Handle price fields with prefix currency symbol
-        const showSvgSymbol = isPriceField && isSvgSymbol && currencySvgPath;
-        const finalText = showSvgSymbol ? stripCurrencySymbols(textContent) : textContent;
+        // Use TextRenderer with updated content
+        const elementWithContent = {
+          ...textElement,
+          content: textContent,
+        };
         
         return (
           <div
             style={{
-              ...textStyles,
+              width: '100%',
+              height: '100%',
               cursor: element.locked ? 'not-allowed' : 'text',
               visibility: element.visible ? 'visible' : 'hidden',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: showSvgSymbol ? '4px' : '0',
-              whiteSpace: 'nowrap',
             }}
           >
-            {showSvgSymbol && renderCurrencySymbol(currencyOptions)}
-            {renderTextDecoration(textElement, finalText)}
+            <TextRenderer
+              element={elementWithContent}
+              baseStyle={{
+                width: '100%',
+                height: '100%',
+                opacity: element.opacity / 100,
+              }}
+              currencyOptions={currencyOptions}
+            />
           </div>
         );
       }
