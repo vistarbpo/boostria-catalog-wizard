@@ -33,6 +33,9 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     ? currency.code 
     : currency?.symbol || '$';
 
+  // Debug log
+  console.log('CurrencyContext - Currency Code:', currencyCode, 'Symbol:', currencySymbol, 'Currency:', currency);
+
   return (
     <CurrencyContext.Provider 
       value={{ 

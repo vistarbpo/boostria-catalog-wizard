@@ -204,6 +204,13 @@ const CanvasElementComponent = function CanvasElement({
   
   const { currencySymbol } = useCurrency();
   
+  // Debug log
+  useEffect(() => {
+    if (element.type === 'text' && (element as TextElement).isDynamic) {
+      console.log('CanvasElement - Currency Symbol:', currencySymbol, 'Element:', element.id);
+    }
+  }, [currencySymbol, element]);
+  
   const elementRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   const isResizingRef = useRef(false);

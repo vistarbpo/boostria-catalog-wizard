@@ -31,6 +31,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
 }) => {
   const { currencySymbol } = useCurrency();
   
+  // Debug log
+  console.log('ExportRenderer - Currency Symbol:', currencySymbol);
+  
   const renderElement = (element: CanvasElement) => {
     const baseStyle: React.CSSProperties = {
       position: 'absolute',
