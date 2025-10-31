@@ -1,13 +1,22 @@
 import React from 'react';
 import { CanvasElement, TextElement, ImageElement, ButtonElement, ShapeElement, GroupElement } from '@/types/canvas';
 import {
+  getTextStyles,
+  renderTextDecoration,
   getButtonStyles,
   getImageStyles,
   getShapeStyles,
   renderTriangleSVG,
 } from './renderUtils';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { TextRenderer } from './TextRenderer';
+import {
+  processTemplatePlaceholders,
+  formatDynamicValue,
+  renderCurrencySymbol,
+  renderTextWithCurrency,
+  getDisplayText,
+  stripCurrencySymbols,
+} from './currencyHelpers';
 
 interface ExportRendererProps {
   elements: CanvasElement[];
@@ -46,6 +55,32 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
     switch (element.type) {
       case 'text': {
         const textElement = element as TextElement;
+        const textStyles = getTextStyles(textElement, baseStyle);
+        
+        // Check if this is a price field
+        const isPriceField = textElement.isDynamic && 
+          (textElement.dynamicField === 'price' || 
+           textElement.dynamicField === 'sale_price' || 
+           textElement.dynamicField === 'compare_at_price');
+        
+        let displayContent: string;
+        let hasCurrencyPlaceholder = false;
+        
+        // Handle different text types
+        if ((textElement as any).isTemplate && textElement.isDynamic) {
+          // Template-based text like "Pay {currency}{price} in 4 installments"
+          const result = processTemplatePlaceholders(textElement, currencySymbol, isSvgSymbol);
+          displayContent = result.content;
+          hasCurrencyPlaceholder = result.hasCurrencyPlaceholder;
+        } else if (textElement.isDynamic && textElement.dynamicContent) {
+          // Regular dynamic field
+          const sourceValue = textElement.dynamicContent;
+          displayContent = formatDynamicValue(textElement, sourceValue, currencySymbol, isSvgSymbol && isPriceField);
+        } else {
+          // Static text
+          displayContent = textElement.content;
+        }
+        
         const currencyOptions = {
           currencySymbol,
           currencySvgPath,
@@ -53,14 +88,37 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           textColor: textElement.color,
           fontSize: textElement.fontSize,
         };
+
+        // Handle template text with inline currency
+        if (hasCurrencyPlaceholder) {
+          const contentNode = renderTextWithCurrency(displayContent, currencyOptions);
+          
+          return (
+            <div key={element.id} style={textStyles}>
+              {renderTextDecoration(textElement, contentNode as any)}
+            </div>
+          );
+        }
+        
+        // Handle price fields with prefix currency symbol
+        const showPrefixSymbol = isPriceField && isSvgSymbol && currencySvgPath;
+        const finalText = showPrefixSymbol ? stripCurrencySymbols(displayContent) : displayContent;
+        
+        if (showPrefixSymbol) {
+          return (
+            <div key={element.id} style={textStyles}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                {renderCurrencySymbol(currencyOptions)}
+                {renderTextDecoration(textElement, finalText)}
+              </span>
+            </div>
+          );
+        }
         
         return (
-          <TextRenderer
-            key={element.id}
-            element={textElement}
-            baseStyle={baseStyle}
-            currencyOptions={currencyOptions}
-          />
+          <div key={element.id} style={textStyles}>
+            {renderTextDecoration(textElement, finalText)}
+          </div>
         );
       }
 
