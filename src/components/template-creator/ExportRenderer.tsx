@@ -9,6 +9,14 @@ import {
   renderTriangleSVG,
 } from './renderUtils';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import {
+  processTemplatePlaceholders,
+  formatDynamicValue,
+  renderCurrencySymbol,
+  renderTextWithCurrency,
+  getDisplayText,
+  stripCurrencySymbols,
+} from './currencyHelpers';
 
 interface ExportRendererProps {
   elements: CanvasElement[];
@@ -47,240 +55,43 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
     switch (element.type) {
       case 'text': {
         const textElement = element as TextElement;
-        
-        // Check conditional display rules
-        if (textElement.conditionalDisplay) {
-          const cond = textElement.conditionalDisplay;
-          
-          // Get the field values for comparison
-          const currentFieldValue = textElement.dynamicContent || textElement.content;
-          
-          // Hide if equal to another field
-          if (cond.hideIfEqual) {
-            // Extract the comparison field value from content or dynamic content
-            // For prices, we need to check if price == sale_price (no discount)
-            const dynamicFieldMatch = currentFieldValue.match(/[\d.]+/);
-            const currentValue = dynamicFieldMatch ? parseFloat(dynamicFieldMatch[0]) : null;
-            
-            // This is a simple check - in a real app, you'd compare actual field values
-            // For now, we'll hide the original price if it's the same as sale price
-            // This will be enhanced with actual product data comparison
-            if (cond.hideIfEqual === 'price') {
-              // Skip rendering this element - it will be conditionally shown based on product data
-              // For export template, we'll show it, but in actual render it would be hidden if no discount
-              // Since we don't have the actual product data here, we'll render it for the template
-            }
-          }
-        }
-        
         const textStyles = getTextStyles(textElement, baseStyle);
         
-        // Check if this is a price widget text (has dynamic price fields)
-        const isPriceWidgetText = textElement.isDynamic && 
+        // Check if this is a price field
+        const isPriceField = textElement.isDynamic && 
           (textElement.dynamicField === 'price' || 
            textElement.dynamicField === 'sale_price' || 
            textElement.dynamicField === 'compare_at_price');
         
-        // Format dynamic text with template placeholders
-        const formatExportDynamicText = (el: TextElement): string => {
-          // Handle fallback field
-          let sourceValue = el.dynamicContent || el.content;
-          
-          // Handle template-based dynamic text with placeholders
-          if ((el as any).isTemplate && el.isDynamic && el.dynamicField && el.content.includes(`{${el.dynamicField}}`)) {
-            // Strip any existing currency symbols from source
-            let cleanedText = sourceValue.replace(/[$€£¥₹﷼]/g, '').replace(/[^0-9.-]/g, '');
-            let value = parseFloat(cleanedText) || 0;
-            
-            if (el.modifiers) {
-              el.modifiers.forEach(mod => {
-                switch (mod.type) {
-                  case 'divide':
-                    if (typeof mod.value === 'number' && mod.value !== 0) {
-                      value = value / mod.value;
-                    }
-                    break;
-                  case 'multiply':
-                    value = value * (mod.value || 1);
-                    break;
-                  case 'add':
-                    value = value + (mod.value || 0);
-                    break;
-                  case 'subtract':
-                    value = value - (mod.value || 0);
-                    break;
-                  case 'decimals':
-                    value = parseFloat(value.toFixed(mod.value || 2));
-                    break;
-                }
-              });
-            }
-            
-            let formattedValue = value.toString();
-            if (el.formatting) {
-              const fmt = el.formatting;
-              formattedValue = value.toFixed(fmt.decimals ?? 2);
-              
-              if (fmt.thousandsSeparator) {
-                formattedValue = parseFloat(formattedValue).toLocaleString('en-US', {
-                  minimumFractionDigits: fmt.decimals ?? 2,
-                  maximumFractionDigits: fmt.decimals ?? 2,
-                });
-              }
-              
-              // Use global currency symbol for price fields
-              const isPriceField = el.dynamicField === 'price' || el.dynamicField === 'sale_price' || el.dynamicField === 'compare_at_price';
-              const symbolToUse = isPriceField ? currencySymbol : (fmt.currencySymbol || fmt.prefix);
-              
-              if (symbolToUse && !isSvgSymbol) formattedValue = symbolToUse + formattedValue;
-              if (!isPriceField && fmt.suffix) formattedValue = formattedValue + fmt.suffix;
-            }
-            
-            // Handle {currency} placeholder separately
-            let finalContent = el.content.replace(`{${el.dynamicField}}`, formattedValue);
-            
-            // Replace {currency} placeholder
-            if (finalContent.includes('{currency}')) {
-              finalContent = finalContent.replace('{currency}', isSvgSymbol ? '[CURRENCY_SVG]' : currencySymbol);
-            }
-            
-            return finalContent;
-          }
-          
-          return el.content;
-        };
+        let displayContent: string;
+        let hasCurrencyPlaceholder = false;
         
-        let displayContent = formatExportDynamicText(textElement);
-        
-        // Check if this is a template-based text with {currency} placeholder
-        const hasTemplateCurrency = displayContent.includes('[CURRENCY_SVG]');
-        
-        // Custom export-specific text decoration rendering
-        const renderExportTextDecoration = (content: string | React.ReactNode) => {
-          if (textElement.textDecoration === 'underline') {
-            return (
-              <span style={{
-                textDecoration: 'underline',
-                textDecorationColor: textElement.color,
-                textDecorationThickness: '1.5px',
-                textUnderlineOffset: '2px',
-              }}>
-                {content}
-              </span>
-            );
-          } else if (textElement.textDecoration === 'line-through') {
-            return (
-              <span style={{ 
-                position: 'relative',
-                display: 'inline-block',
-              }}>
-                {content}
-                <span style={{
-                  position: 'absolute',
-                  left: '0',
-                  right: '0',
-                  top: '80%',
-                  height: '2px',
-                  backgroundColor: textElement.color,
-                  pointerEvents: 'none',
-                }} />
-              </span>
-            );
-          }
-          return <span>{content}</span>;
-        };
-        
-        // Apply price widget text positioning - perfectly centered
-        if (isPriceWidgetText && !hasTemplateCurrency) {
-          const showSvgSymbol = isSvgSymbol && currencySvgPath;
-          displayContent = showSvgSymbol ? displayContent.replace(currencySymbol, '').trim() : displayContent;
-          const displayText = displayContent;
-          
-          return (
-            <div key={element.id} style={{
-              ...baseStyle,
-              backgroundColor: textElement.backgroundColor,
-              border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
-              padding: `${textElement.padding.top}px ${textElement.padding.right}px ${textElement.padding.bottom}px ${textElement.padding.left}px`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: textElement.textAlign === 'center' ? 'center' : 
-                              textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
-              gap: showSvgSymbol ? '4px' : '0',
-              boxSizing: 'border-box',
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: textElement.textAlign === 'center' ? '50%' : 
-                      textElement.textAlign === 'right' ? 'auto' : '0',
-                right: textElement.textAlign === 'right' ? '0' : 'auto',
-                transform: textElement.textAlign === 'center' ? 'translate(-50%, -75%)' : 'translateY(-75%)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: showSvgSymbol ? '4px' : '0',
-              }}>
-                {showSvgSymbol && (
-                  <img 
-                    src={currencySvgPath} 
-                    alt={currencySymbol}
-                    style={{
-                      width: `${textElement.fontSize * 0.8}px`,
-                      height: `${textElement.fontSize * 0.8}px`,
-                      flexShrink: 0,
-                    }}
-                  />
-                )}
-                <span style={{
-                  color: textElement.color,
-                  fontSize: `${textElement.fontSize}px`,
-                  fontFamily: textElement.fontFamily,
-                  fontWeight: textElement.fontWeight,
-                  direction: textElement.direction || 'ltr',
-                  whiteSpace: 'nowrap',
-                  userSelect: 'none',
-                } as React.CSSProperties}>
-                  {textElement.textDecoration === 'line-through' ? (
-                    <span style={{ position: 'relative', display: 'inline-block' }}>
-                      {displayText}
-                      <span style={{
-                        position: 'absolute',
-                        left: '0',
-                        right: '0',
-                        top: '80%',
-                        height: '2px',
-                        backgroundColor: textElement.color,
-                        pointerEvents: 'none',
-                      }} />
-                    </span>
-                  ) : displayText}
-                </span>
-              </div>
-            </div>
-          );
+        // Handle different text types
+        if ((textElement as any).isTemplate && textElement.isDynamic) {
+          // Template-based text like "Pay {currency}{price} in 4 installments"
+          const result = processTemplatePlaceholders(textElement, currencySymbol, isSvgSymbol);
+          displayContent = result.content;
+          hasCurrencyPlaceholder = result.hasCurrencyPlaceholder;
+        } else if (textElement.isDynamic && textElement.dynamicContent) {
+          // Regular dynamic field
+          const sourceValue = textElement.dynamicContent;
+          displayContent = formatDynamicValue(textElement, sourceValue, currencySymbol, isSvgSymbol && isPriceField);
+        } else {
+          // Static text
+          displayContent = textElement.content;
         }
         
-        // Handle template-based currency placeholder
-        if (hasTemplateCurrency) {
-          const parts = displayContent.split('[CURRENCY_SVG]');
-          const contentNode = (
-            <>
-              {parts[0]}
-              {isSvgSymbol && currencySvgPath && (
-                <img 
-                  src={currencySvgPath} 
-                  alt={currencySymbol}
-                  style={{
-                    width: `${textElement.fontSize * 0.8}px`,
-                    height: `${textElement.fontSize * 0.8}px`,
-                    marginLeft: parts[0] ? '2px' : '0',
-                    marginRight: parts[1] ? '2px' : '0',
-                  }}
-                />
-              )}
-              {parts[1]}
-            </>
-          );
+        const currencyOptions = {
+          currencySymbol,
+          currencySvgPath,
+          isSvgSymbol,
+          textColor: textElement.color,
+          fontSize: textElement.fontSize,
+        };
+
+        // Handle template text with inline currency
+        if (hasCurrencyPlaceholder) {
+          const contentNode = renderTextWithCurrency(displayContent, currencyOptions);
           
           return (
             <div key={element.id} style={{
@@ -288,34 +99,24 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               display: 'flex',
               alignItems: 'center',
             }}>
-              {renderExportTextDecoration(contentNode)}
+              {renderTextDecoration(textElement, contentNode as any)}
             </div>
           );
         }
         
-        // Handle regular price widget text
-        const showSvgSymbol = isPriceWidgetText && isSvgSymbol && currencySvgPath && !hasTemplateCurrency;
-        displayContent = showSvgSymbol ? displayContent.replace(currencySymbol, '').trim() : displayContent;
+        // Handle price fields with prefix currency symbol
+        const showPrefixSymbol = isPriceField && isSvgSymbol && currencySvgPath;
+        const finalText = showPrefixSymbol ? stripCurrencySymbols(displayContent) : displayContent;
         
         return (
           <div key={element.id} style={{
             ...textStyles,
             display: 'flex',
             alignItems: 'center',
-            gap: showSvgSymbol ? '4px' : '0',
+            gap: showPrefixSymbol ? '4px' : '0',
           }}>
-            {showSvgSymbol && (
-              <img 
-                src={currencySvgPath} 
-                alt={currencySymbol}
-                style={{
-                  width: `${textElement.fontSize * 0.8}px`,
-                  height: `${textElement.fontSize * 0.8}px`,
-                  flexShrink: 0,
-                }}
-              />
-            )}
-            {renderExportTextDecoration(displayContent)}
+            {showPrefixSymbol && renderCurrencySymbol(currencyOptions)}
+            {renderTextDecoration(textElement, finalText)}
           </div>
         );
       }
@@ -382,13 +183,12 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 : 'none',
               pointerEvents: 'none',
               overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             <span style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -75%)',
               color: buttonElement.color,
               fontSize: `${buttonElement.fontSize}px`,
               fontFamily: buttonElement.fontFamily,
@@ -446,232 +246,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             );
           
           case 'star':
-            return (
-              <div
-                key={element.id}
-                style={{
-                  ...baseStyle,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 100 100"
-                >
-                  <defs>
-                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
-                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
-                        <image 
-                          href={shapeElement.fillImageUrl} 
-                          x="0" y="0" 
-                          width="100" height="100" 
-                          preserveAspectRatio={
-                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
-                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
-                            'none'
-                          }
-                        />
-                      </pattern>
-                    )}
-                  </defs>
-                  <polygon 
-                    points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" 
-                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
-                    stroke={shapeElement.strokeColor}
-                    strokeWidth={shapeElement.strokeWidth}
-                  />
-                </svg>
-              </div>
-            );
-          
-          case 'heart':
-            return (
-              <div
-                key={element.id}
-                style={{
-                  ...baseStyle,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 100 100"
-                >
-                  <defs>
-                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
-                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
-                        <image 
-                          href={shapeElement.fillImageUrl} 
-                          x="0" y="0" 
-                          width="100" height="100" 
-                          preserveAspectRatio={
-                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
-                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
-                            'none'
-                          }
-                        />
-                      </pattern>
-                    )}
-                  </defs>
-                  <path 
-                    d="M50,25 C50,25 25,0 0,25 C0,50 50,100 50,100 C50,100 100,50 100,25 C75,0 50,25 50,25 Z" 
-                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
-                    stroke={shapeElement.strokeColor}
-                    strokeWidth={shapeElement.strokeWidth}
-                  />
-                </svg>
-              </div>
-            );
-          
-          case 'plus':
-            return (
-              <div
-                key={element.id}
-                style={{
-                  ...baseStyle,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 100 100"
-                >
-                  <defs>
-                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
-                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
-                        <image 
-                          href={shapeElement.fillImageUrl} 
-                          x="0" y="0" 
-                          width="100" height="100" 
-                          preserveAspectRatio={
-                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
-                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
-                            'none'
-                          }
-                        />
-                      </pattern>
-                    )}
-                  </defs>
-                  <polygon 
-                    points="40,0 60,0 60,40 100,40 100,60 60,60 60,100 40,100 40,60 0,60 0,40 40,40" 
-                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
-                    stroke={shapeElement.strokeColor}
-                    strokeWidth={shapeElement.strokeWidth}
-                  />
-                </svg>
-              </div>
-            );
-          
-          case 'diamond':
-            return (
-              <div
-                key={element.id}
-                style={{
-                  ...baseStyle,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 100 100"
-                >
-                  <defs>
-                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
-                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
-                        <image 
-                          href={shapeElement.fillImageUrl} 
-                          x="0" y="0" 
-                          width="100" height="100" 
-                          preserveAspectRatio={
-                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
-                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
-                            'none'
-                          }
-                        />
-                      </pattern>
-                    )}
-                  </defs>
-                  <polygon 
-                    points="50,0 100,50 50,100 0,50" 
-                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
-                    stroke={shapeElement.strokeColor}
-                    strokeWidth={shapeElement.strokeWidth}
-                  />
-                </svg>
-              </div>
-            );
-          
-          case 'arrow':
-            return (
-              <div
-                key={element.id}
-                style={{
-                  ...baseStyle,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 100 100"
-                >
-                  <defs>
-                    {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
-                      <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
-                        <image 
-                          href={shapeElement.fillImageUrl} 
-                          x="0" y="0" 
-                          width="100" height="100" 
-                          preserveAspectRatio={
-                            shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
-                            shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
-                            'none'
-                          }
-                        />
-                      </pattern>
-                    )}
-                  </defs>
-                  <polygon 
-                    points="0,20 60,20 60,0 100,50 60,100 60,80 0,80" 
-                    fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
-                    stroke={shapeElement.strokeColor}
-                    strokeWidth={shapeElement.strokeWidth}
-                  />
-                </svg>
-              </div>
-            );
-          
-          case 'line':
-            return (
-              <div
-                key={element.id}
-                style={{
-                  ...baseStyle,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 100 100" 
-                  preserveAspectRatio="none"
-                >
-                  <line 
-                    x1="0" 
-                    y1="50" 
-                    x2="100" 
-                    y2="50" 
-                    stroke={shapeElement.strokeColor || shapeElement.fillColor}
-                    strokeWidth={shapeElement.strokeWidth || 2}
-                  />
-                </svg>
-              </div>
-            );
-          
           default:
             return (
               <div
@@ -689,209 +263,27 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
       case 'group': {
         const groupElement = element as GroupElement;
         
-        // Check conditional display
-        if (groupElement.conditionalDisplay?.enabled) {
-          // For now, we'll render it - in a real export with product data,
-          // this would check the actual condition
-          // You would pass product data to ExportRenderer and evaluate here
-        }
-        
         return (
           <div
             key={element.id}
             style={{
               ...baseStyle,
-              pointerEvents: 'auto',
+              pointerEvents: 'none',
             }}
           >
-            {groupElement.children?.map((child) => {
-              // Render child elements with offset positions
-              const childBaseStyle: React.CSSProperties = {
-                position: 'absolute',
-                left: `${child.position.x}px`,
-                top: `${child.position.y}px`,
-                width: `${child.size.width}px`,
-                height: `${child.size.height}px`,
-                transform: `rotate(${child.rotation}deg)`,
-                opacity: child.opacity / 100,
-                zIndex: child.zIndex,
-                pointerEvents: 'none',
-              };
-
-              // Render based on child type
-              if (child.type === 'text') {
-                const textChild = child as TextElement;
-                
-                // Handle dynamic content for rating widget text
-                let textContent = textChild.content;
-                if (groupElement.widgetType === 'rating' && textChild.isDynamic && textChild.dynamicField === 'rating' && groupElement.widgetData?.rating) {
-                  textContent = groupElement.widgetData.rating.toFixed(1);
-                }
-                
-                // Update text color from widgetData if exists
-                let displayColor = textChild.color;
-                if (groupElement.widgetType === 'rating' && textChild.isDynamic && textChild.dynamicField === 'rating' && groupElement.widgetData?.textColor) {
-                  displayColor = groupElement.widgetData.textColor;
-                }
-                
-                // Update fontSize from widgetData if exists
-                let displayFontSize = textChild.fontSize;
-                
-                const textStyles = {
-                  ...getTextStyles({ ...textChild, color: displayColor, fontSize: displayFontSize, content: textContent }, childBaseStyle),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                };
-                
-                const renderExportTextDecoration = () => {
-                  if (textChild.textDecoration === 'underline') {
-                    return (
-                      <span style={{
-                        textDecoration: 'underline',
-                        textDecorationColor: displayColor,
-                        textDecorationThickness: '1.5px',
-                        textUnderlineOffset: '2px',
-                      }}>
-                        {textContent}
-                      </span>
-                    );
-                  } else if (textChild.textDecoration === 'line-through') {
-                    return (
-                      <span style={{ 
-                        position: 'relative',
-                        display: 'inline-block',
-                      }}>
-                        {textContent}
-                        <span style={{
-                          position: 'absolute',
-                          left: '0',
-                          right: '0',
-                          top: '92%',
-                          height: '2px',
-                          backgroundColor: displayColor,
-                          pointerEvents: 'none',
-                        }} />
-                      </span>
-                    );
-                  }
-                  return <span>{textContent}</span>;
-                };
-                
-                return (
-                  <div key={child.id} style={textStyles}>
-                    {renderExportTextDecoration()}
-                  </div>
-                );
-              } else if (child.type === 'shape') {
-                const shapeChild = child as ShapeElement;
-                const shapeStyles = getShapeStyles(shapeChild, childBaseStyle);
-
-                switch (shapeChild.shapeType) {
-                  case 'star':
-                    // Get rating from widget data
-                    const widgetRating = groupElement.widgetData?.rating || 4.5;
-                    const starIndex = parseInt(child.id.match(/star-(\d+)/)?.[1] || '0');
-                    
-                    // Calculate if this star should be filled, half-filled, or empty
-                    const filledStars = Math.floor(widgetRating);
-                    const hasHalfStar = widgetRating % 1 >= 0.5;
-                    const isHalfStar = starIndex === filledStars && hasHalfStar;
-                    const isFilled = starIndex < filledStars;
-                    
-                    // Get colors from widget data
-                    const filledColor = groupElement.widgetData?.starFilledColor || '#E4A709';
-                    const unfilledColor = groupElement.widgetData?.starUnfilledColor || '#D1D5DB';
-                    
-                    return (
-                      <div
-                        key={child.id}
-                        style={{
-                          ...childBaseStyle,
-                          boxSizing: 'border-box',
-                        }}
-                      >
-                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-                          <defs>
-                            {isHalfStar && (
-                              <linearGradient id={`half-fill-${child.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="50%" stopColor={filledColor} />
-                                <stop offset="50%" stopColor={unfilledColor} />
-                              </linearGradient>
-                            )}
-                          </defs>
-                          <polygon 
-                            points="50,10 61,40 95,40 68,60 79,90 50,70 21,90 32,60 5,40 39,40" 
-                            fill={
-                              isHalfStar 
-                                ? `url(#half-fill-${child.id})` 
-                                : isFilled 
-                                  ? filledColor 
-                                  : unfilledColor
-                            }
-                            stroke={shapeChild.strokeColor}
-                            strokeWidth={shapeChild.strokeWidth}
-                          />
-                        </svg>
-                      </div>
-                    );
-
-                  default:
-                    return (
-                      <div
-                        key={child.id}
-                        style={{
-                          ...shapeStyles.base,
-                          borderRadius: shapeStyles.borderRadius,
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    );
-                }
-              } else if (child.type === 'image') {
-                const imageChild = child as ImageElement;
-                const imageStyles = getImageStyles(imageChild, childBaseStyle);
-                const borderRadius = imageChild.cornerRadii
-                  ? `${imageChild.cornerRadii.topLeft}px ${imageChild.cornerRadii.topRight}px ${imageChild.cornerRadii.bottomRight}px ${imageChild.cornerRadii.bottomLeft}px`
-                  : imageChild.cornerRadius || 0;
-                
-                const objectFit = 
-                  imageStyles.fillMode === 'cover' ? 'cover' :
-                  imageStyles.fillMode === 'contain' ? 'contain' :
-                  imageStyles.fillMode === 'stretch' ? 'fill' :
-                  imageStyles.fillMode === 'center' ? 'none' :
-                  imageStyles.fillMode === 'tile' ? 'initial' :
-                  'cover';
-
-                return (
-                  <div
-                    key={child.id}
-                    style={{
-                      ...childBaseStyle,
-                      overflow: 'hidden',
-                      borderRadius,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <img
-                      src={imageStyles.imageSrc}
-                      alt={imageChild.alt || ''}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                      }}
-                    />
-                  </div>
-                );
-              }
-
-              return null;
-            })}
+            {groupElement.children
+              .sort((a, b) => a.zIndex - b.zIndex)
+              .map(child => {
+                // Render child elements with adjusted positioning (relative to group)
+                return renderElement({
+                  ...child,
+                  position: {
+                    x: child.position.x,
+                    y: child.position.y,
+                  },
+                  zIndex: child.zIndex,
+                } as CanvasElement);
+              })}
           </div>
         );
       }
@@ -902,6 +294,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   };
 
   const backgroundStyle: React.CSSProperties = {
+    overflow: 'hidden',
     backgroundColor,
   };
 

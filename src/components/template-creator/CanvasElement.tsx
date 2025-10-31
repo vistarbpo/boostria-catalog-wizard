@@ -10,6 +10,13 @@ import {
   renderTriangleSVG,
 } from './renderUtils';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import {
+  processTemplatePlaceholders,
+  formatDynamicValue,
+  renderCurrencySymbol,
+  renderTextWithCurrency,
+  stripCurrencySymbols,
+} from './currencyHelpers';
 
 // Helper function to get border radius CSS value
 const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
@@ -28,73 +35,10 @@ const formatDynamicText = (element: TextElement, parentGroup?: any, globalCurren
     return parentGroup.widgetData.rating.toFixed(1);
   }
   
-  // Handle template-based dynamic text with placeholders like "Pay {price} in 4 installments" or "Pay {currency}{price} in 4 installments"
-  if ((element as any).isTemplate && element.isDynamic && element.dynamicField && element.content.includes(`{${element.dynamicField}}`)) {
-    // Get the dynamic value from dynamicContent (the source value like "$300.00")
-    let sourceValue = element.dynamicContent || element.content;
-    
-    // Strip existing currency symbols from source value
-    sourceValue = sourceValue.replace(/[$€£¥₹﷼]/g, '').trim();
-    
-    // Clean and parse the numeric value
-    let cleanedText = sourceValue.replace(/[^0-9.-]/g, '');
-    let value = parseFloat(cleanedText) || 0;
-    
-    // Apply modifiers to calculate the final value
-    if (element.modifiers) {
-      element.modifiers.forEach(mod => {
-        switch (mod.type) {
-          case 'divide':
-            if (typeof mod.value === 'number' && mod.value !== 0) {
-              value = value / mod.value;
-            }
-            break;
-          case 'multiply':
-            value = value * (mod.value || 1);
-            break;
-          case 'add':
-            value = value + (mod.value || 0);
-            break;
-          case 'subtract':
-            value = value - (mod.value || 0);
-            break;
-          case 'decimals':
-            value = parseFloat(value.toFixed(mod.value || 2));
-            break;
-        }
-      });
-    }
-    
-    // Apply formatting to the calculated value
-    let formattedValue = value.toString();
-    if (element.formatting) {
-      const fmt = element.formatting;
-      formattedValue = value.toFixed(fmt.decimals ?? 2);
-      
-      if (fmt.thousandsSeparator) {
-        formattedValue = parseFloat(formattedValue).toLocaleString('en-US', {
-          minimumFractionDigits: fmt.decimals ?? 2,
-          maximumFractionDigits: fmt.decimals ?? 2,
-        });
-      }
-      
-      // Use global currency symbol for price fields (only if not using SVG symbol)
-      const isPriceField = element.dynamicField === 'price' || element.dynamicField === 'sale_price' || element.dynamicField === 'compare_at_price';
-      const symbolToUse = isPriceField && globalCurrencySymbol && !isSvgCurrency ? globalCurrencySymbol : (fmt.currencySymbol || fmt.prefix);
-      
-      if (symbolToUse && !isSvgCurrency) formattedValue = symbolToUse + formattedValue;
-      if (!isPriceField && fmt.suffix) formattedValue = formattedValue + fmt.suffix;
-    }
-    
-    // Handle {currency} placeholder separately
-    let finalContent = element.content.replace(`{${element.dynamicField}}`, formattedValue);
-    
-    // Replace {currency} placeholder with actual currency symbol (will be rendered as SVG or text)
-    if (finalContent.includes('{currency}')) {
-      finalContent = finalContent.replace('{currency}', isSvgCurrency ? '[CURRENCY_SVG]' : globalCurrencySymbol);
-    }
-    
-    return finalContent;
+  // Handle template-based dynamic text with placeholders
+  if ((element as any).isTemplate && element.isDynamic) {
+    const result = processTemplatePlaceholders(element, globalCurrencySymbol || '$', isSvgCurrency || false);
+    return result.content;
   }
   
   // Regular dynamic content (non-template)
@@ -554,7 +498,36 @@ const CanvasElementComponent = function CanvasElement({
           (textElement.dynamicField === 'price' || 
            textElement.dynamicField === 'sale_price' || 
            textElement.dynamicField === 'compare_at_price');
+        
+        const currencyOptions = {
+          currencySymbol,
+          currencySvgPath,
+          isSvgSymbol,
+          textColor: textElement.color,
+          fontSize: textElement.fontSize,
+        };
+        
+        // Handle template text with inline currency placeholder
+        if (textContent.includes('[CURRENCY_SVG]')) {
+          const contentNode = renderTextWithCurrency(textContent, currencyOptions);
+          return (
+            <div
+              style={{
+                ...textStyles,
+                cursor: element.locked ? 'not-allowed' : 'text',
+                visibility: element.visible ? 'visible' : 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {renderTextDecoration(textElement, contentNode as any)}
+            </div>
+          );
+        }
+        
+        // Handle price fields with prefix currency symbol
         const showSvgSymbol = isPriceField && isSvgSymbol && currencySvgPath;
+        const finalText = showSvgSymbol ? stripCurrencySymbols(textContent) : textContent;
         
         return (
           <div
@@ -567,18 +540,8 @@ const CanvasElementComponent = function CanvasElement({
               gap: showSvgSymbol ? '4px' : '0',
             }}
           >
-            {showSvgSymbol && (
-              <img 
-                src={currencySvgPath} 
-                alt={currencySymbol}
-                style={{
-                  width: `${textElement.fontSize * 0.8}px`,
-                  height: `${textElement.fontSize * 0.8}px`,
-                  flexShrink: 0,
-                }}
-              />
-            )}
-            {renderTextDecoration(textElement, showSvgSymbol ? textContent.replace(currencySymbol, '').trim() : textContent)}
+            {showSvgSymbol && renderCurrencySymbol(currencyOptions)}
+            {renderTextDecoration(textElement, finalText)}
           </div>
         );
       }
@@ -934,8 +897,46 @@ const CanvasElementComponent = function CanvasElement({
           (textEl.dynamicField === 'price' || 
            textEl.dynamicField === 'sale_price' || 
            textEl.dynamicField === 'compare_at_price');
+        
+        const currencyOptions = {
+          currencySymbol,
+          currencySvgPath,
+          isSvgSymbol,
+          textColor: textEl.color,
+          fontSize: textEl.fontSize,
+        };
+        
+        // Handle template text with inline currency placeholder
+        if (textContent.includes('[CURRENCY_SVG]')) {
+          const contentNode = renderTextWithCurrency(textContent, currencyOptions);
+          return (
+            <div
+              style={{
+                ...childBaseStyle,
+                color: textEl.color,
+                fontSize: `${textEl.fontSize}px`,
+                fontWeight: textEl.fontWeight,
+                fontFamily: textEl.fontFamily,
+                textAlign: textEl.textAlign,
+                direction: textEl.direction || 'ltr',
+                letterSpacing: `${textEl.letterSpacing}px`,
+                lineHeight: textEl.lineHeight,
+                whiteSpace: textEl.textWrapping ? 'pre-wrap' : 'nowrap',
+                wordBreak: textEl.textWrapping ? 'break-word' : 'normal',
+                overflow: 'hidden',
+                padding: `${textEl.padding.top}px ${textEl.padding.right}px ${textEl.padding.bottom}px ${textEl.padding.left}px`,
+                justifyContent: textEl.textAlign === 'left' ? 'flex-start' : textEl.textAlign === 'right' ? 'flex-end' : 'center',
+                alignItems: 'flex-start',
+              }}
+            >
+              {contentNode}
+            </div>
+          );
+        }
+        
+        // Handle price fields with prefix currency symbol
         const showSvgSymbol = isPriceField && isSvgSymbol && currencySvgPath;
-        const displayText = showSvgSymbol ? textContent.replace(currencySymbol, '').trim() : textContent;
+        const displayText = showSvgSymbol ? stripCurrencySymbols(textContent) : textContent;
         
         return (
           <div
@@ -958,17 +959,7 @@ const CanvasElementComponent = function CanvasElement({
               gap: showSvgSymbol ? '4px' : '0',
             }}
           >
-            {showSvgSymbol && (
-              <img 
-                src={currencySvgPath} 
-                alt={currencySymbol}
-                style={{
-                  width: `${textEl.fontSize * 0.8}px`,
-                  height: `${textEl.fontSize * 0.8}px`,
-                  flexShrink: 0,
-                }}
-              />
-            )}
+            {showSvgSymbol && renderCurrencySymbol(currencyOptions)}
             {displayText}
           </div>
         );
