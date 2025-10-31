@@ -94,12 +94,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           const contentNode = renderTextWithCurrency(displayContent, currencyOptions);
           
           return (
-            <div key={element.id} style={{
-              ...textStyles,
-              display: 'inline-flex',
-              alignItems: 'center',
-              whiteSpace: 'nowrap',
-            }}>
+            <div key={element.id} style={textStyles}>
               {renderTextDecoration(textElement, contentNode as any)}
             </div>
           );
@@ -109,15 +104,19 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         const showPrefixSymbol = isPriceField && isSvgSymbol && currencySvgPath;
         const finalText = showPrefixSymbol ? stripCurrencySymbols(displayContent) : displayContent;
         
+        if (showPrefixSymbol) {
+          return (
+            <div key={element.id} style={textStyles}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                {renderCurrencySymbol(currencyOptions)}
+                {renderTextDecoration(textElement, finalText)}
+              </span>
+            </div>
+          );
+        }
+        
         return (
-          <div key={element.id} style={{
-            ...textStyles,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: showPrefixSymbol ? '4px' : '0',
-            whiteSpace: 'nowrap',
-          }}>
-            {showPrefixSymbol && renderCurrencySymbol(currencyOptions)}
+          <div key={element.id} style={textStyles}>
             {renderTextDecoration(textElement, finalText)}
           </div>
         );
