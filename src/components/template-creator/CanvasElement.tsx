@@ -127,7 +127,7 @@ const formatDynamicText = (
     // Use global currency symbol for price fields
     const isPriceField = element.dynamicField === 'price' || element.dynamicField === 'sale_price' || element.dynamicField === 'compare_at_price';
     const symbolToUse = isPriceField && globalCurrencySymbol 
-      ? (displayType === 'code' ? (currencyCode || 'USD') : globalCurrencySymbol)
+      ? (displayType === 'code' ? (currencyCode || 'USD') + ' ' : globalCurrencySymbol)
       : (fmt.currencySymbol || fmt.prefix);
     
     if (symbolToUse) formatted = symbolToUse + formatted;
