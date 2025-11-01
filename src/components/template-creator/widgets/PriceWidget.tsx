@@ -47,11 +47,16 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
   const elements: CanvasElement[] = [];
 
   // Calculate positions based on style with better size estimation
+  // Add extra width for currency codes (SAR, USD, etc.) vs symbols ($)
   let salePricePos = { ...position };
   let originalPricePos = { ...position };
   
-  const estimatedSalePriceWidth = salePriceFontSize * 5; // Increased for better fit
-  const estimatedOriginalPriceWidth = originalPriceFontSize * 5;
+  // Multiply by 6 to account for currency code + space + price (e.g., "SAR 299.99")
+  const estimatedSalePriceWidth = salePriceFontSize * 6; 
+  const estimatedOriginalPriceWidth = originalPriceFontSize * 6;
+  
+  // Dynamic horizontal padding based on font size
+  const horizontalPadding = Math.max(8, Math.floor(salePriceFontSize * 0.2));
 
   switch (style) {
     case 'stacked-large-small':
@@ -109,7 +114,7 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
       autoSize: true,
       textWrapping: false,
       strokeWidth: 0,
-      padding: { top: 0, right: 0, bottom: 0, left: 0 },
+      padding: { top: 0, right: horizontalPadding, bottom: 0, left: horizontalPadding },
       rotation: 0,
       opacity: 100,
       visible: true,
@@ -154,7 +159,7 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
       right: padding * 2, 
       bottom: padding, 
       left: padding * 2 
-    } : { top: 0, right: 0, bottom: 0, left: 0 },
+    } : { top: 0, right: horizontalPadding, bottom: 0, left: horizontalPadding },
     rotation: 0,
     opacity: 100,
     visible: true,
