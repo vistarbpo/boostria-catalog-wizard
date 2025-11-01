@@ -26,8 +26,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { useToast } from "@/hooks/use-toast";
 import { useAppConfig, AppConfig } from "@/hooks/useAppConfig";
 import { createDynamicDeepLinkGenerator } from "@/utils/dynamicDeepLinks";
-import { CURRENCIES, getCurrencyByCode } from "@/utils/currencies";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CurrencySelector } from "@/components/CurrencySelector";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const appConfigSchema = z.object({
   // iOS Configuration
@@ -352,99 +352,24 @@ const AppSettings = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="default_currency"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Default Currency</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a currency" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="max-h-[300px]">
-                            {CURRENCIES.map((currency) => {
-                              const currencyIcon = currency.symbolType === 'svg' && currency.svgPath ? (
-                                <img src={currency.svgPath} alt={currency.code} className="w-4 h-4" />
-                              ) : (
-                                <span className="w-4 text-center">{currency.symbol}</span>
-                              );
-                              
-                              return (
-                                <SelectItem key={currency.code} value={currency.code}>
-                                  <div className="flex items-center gap-3">
-                                    {currencyIcon}
-                                    <span className="font-medium">{currency.code}</span>
-                                    <span className="text-muted-foreground">- {currency.name}</span>
-                                  </div>
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          This currency will be used as the default for your product pricing and feeds.
-                          {field.value && (() => {
-                            const selectedCurrency = getCurrencyByCode(field.value);
-                            return selectedCurrency ? (
-                              <div className="mt-2 p-3 bg-muted rounded-md">
-                                <div className="flex items-center gap-2">
-                                  {selectedCurrency.symbolType === 'svg' && selectedCurrency.svgPath ? (
-                                    <img src={selectedCurrency.svgPath} alt={selectedCurrency.code} className="w-6 h-6" />
-                                  ) : (
-                                    <span className="text-xl">{selectedCurrency.symbol}</span>
-                                  )}
-                                  <div>
-                                    <div className="font-medium">{selectedCurrency.name} ({selectedCurrency.code})</div>
-                                    <div className="text-sm text-muted-foreground">
-                                      {selectedCurrency.countries.length > 0 
-                                        ? `Used in: ${selectedCurrency.countries.slice(0, 5).join(', ')}${selectedCurrency.countries.length > 5 ? '...' : ''}`
-                                        : 'Digital currency'}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ) : null;
-                          })()}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="rounded-lg border p-4 bg-muted/50">
-                    <h4 className="font-medium mb-2">Currency Auto-Detection</h4>
-                    <p className="text-sm text-muted-foreground">
-                      When you first set up your account, we automatically detect your currency based on your location. 
-                      You can change it here at any time.
-                    </p>
-                  </div>
-
-                  <div className="rounded-lg border p-4 bg-muted/50">
-                    <h4 className="font-medium mb-2">Supported Currencies</h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      We support {CURRENCIES.length} currencies including major global currencies and regional options.
-                    </p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {CURRENCIES.slice(0, 12).map((currency) => (
-                        <div key={currency.code} className="flex items-center gap-2 text-xs">
-                          {currency.symbolType === 'svg' && currency.svgPath ? (
-                            <img src={currency.svgPath} alt={currency.code} className="w-3 h-3" />
-                          ) : (
-                            <span>{currency.symbol}</span>
-                          )}
-                          <span className="font-medium">{currency.code}</span>
-                        </div>
-                      ))}
+                  <div className="space-y-4">
+                    <div className="flex flex-col gap-2">
+                      <Label>Default Currency</Label>
+                      <CurrencySelector showLabel={false} />
+                      <p className="text-sm text-muted-foreground">
+                        This currency will be used as the default for your product pricing, template exports, and data feeds.
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      ...and {CURRENCIES.length - 12} more
-                    </p>
+                    
+                    <div className="mt-4 p-4 bg-muted rounded-lg">
+                      <h4 className="font-medium mb-2">How Currency Settings Work</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                        <li>Templates will use this currency by default when exporting</li>
+                        <li>Product feeds will display prices in this currency</li>
+                        <li>Deep links will include pricing in this currency</li>
+                        <li>SVG currency symbols (like SAR, AED) are supported with automatic coloring</li>
+                      </ul>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
