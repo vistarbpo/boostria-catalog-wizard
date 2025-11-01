@@ -37,6 +37,7 @@ export interface AppConfig {
   
   // Currency Settings
   default_currency?: string;
+  currency_display_type?: 'code' | 'symbol';
   
   created_at?: string;
   updated_at?: string;
@@ -78,6 +79,7 @@ export const useAppConfig = () => {
           web_fallback_url: window.location.origin,
           deep_linking_enabled: false,
           default_currency: defaultCurrency,
+          currency_display_type: 'symbol' as const,
         };
 
         const { data: newConfig, error: createError } = await supabase

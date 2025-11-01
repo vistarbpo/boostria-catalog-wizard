@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -20,62 +20,88 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
   showLabel = true,
   className = '' 
 }) => {
-  const { currencyCode, setCurrency, isLoading } = useCurrency();
+  const { currencyCode, setCurrency, displayType, setDisplayType, isLoading } = useCurrency();
 
   return (
     <div className={className}>
       {showLabel && (
-        <Label htmlFor="currency-select" className="mb-2">
-          Currency
-        </Label>
+        <Label className="mb-2">Currency Settings</Label>
       )}
-      <Select
-        value={currencyCode}
-        onValueChange={setCurrency}
-        disabled={isLoading}
-      >
-        <SelectTrigger id="currency-select" className="w-full bg-background">
-          <SelectValue placeholder="Select currency">
-            {currencyCode && (
-              <span className="flex items-center gap-2">
-                <span className="font-mono text-sm">{currencyCode}</span>
-                <span className="text-muted-foreground">
-                  {CURRENCIES.find(c => c.code === currencyCode)?.symbol}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {CURRENCIES.find(c => c.code === currencyCode)?.name}
-                </span>
-              </span>
-            )}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent className="max-h-[400px] bg-popover z-[100]">
-          {CURRENCIES.map((currency) => (
-            <SelectItem
-              key={currency.code}
-              value={currency.code}
-              className="cursor-pointer"
-            >
-              <div className="flex items-center justify-between w-full gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm font-medium">
-                    {currency.code}
-                  </span>
+      <div className="flex gap-3">
+        {/* Currency Selection Dropdown */}
+        <Select
+          value={currencyCode}
+          onValueChange={setCurrency}
+          disabled={isLoading}
+        >
+          <SelectTrigger className="flex-1 bg-background">
+            <SelectValue placeholder="Select Currency">
+              {currencyCode && (
+                <span className="flex items-center gap-2">
+                  <span className="font-mono text-sm">{currencyCode}</span>
                   <span className="text-muted-foreground">
-                    {currency.symbol}
+                    {CURRENCIES.find(c => c.code === currencyCode)?.symbol}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {currency.name}
+                    {CURRENCIES.find(c => c.code === currencyCode)?.name}
                   </span>
+                </span>
+              )}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent className="max-h-[400px] bg-popover z-[100]">
+            {CURRENCIES.map((currency) => (
+              <SelectItem
+                key={currency.code}
+                value={currency.code}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center justify-between w-full gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm font-medium">
+                      {currency.code}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {currency.symbol}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {currency.name}
+                    </span>
+                  </div>
+                  {currencyCode === currency.code && (
+                    <Check className="h-4 w-4" />
+                  )}
                 </div>
-                {currencyCode === currency.code && (
-                  <Check className="h-4 w-4" />
-                )}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Display Type Selection Dropdown */}
+        <Select
+          value={displayType}
+          onValueChange={(value: 'code' | 'symbol') => setDisplayType(value)}
+          disabled={isLoading}
+        >
+          <SelectTrigger className="w-[200px] bg-background">
+            <SelectValue placeholder="Select Type" />
+          </SelectTrigger>
+          <SelectContent className="bg-popover z-[100]">
+            <SelectItem value="code" className="cursor-pointer">
+              <div className="flex items-center justify-between w-full gap-3">
+                <span>Currency Code</span>
+                {displayType === 'code' && <Check className="h-4 w-4" />}
               </div>
             </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+            <SelectItem value="symbol" className="cursor-pointer">
+              <div className="flex items-center justify-between w-full gap-3">
+                <span>Currency Symbol</span>
+                {displayType === 'symbol' && <Check className="h-4 w-4" />}
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 };

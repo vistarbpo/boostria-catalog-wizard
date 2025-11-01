@@ -99,7 +99,7 @@ export function TemplateHeader({ onExport, canvasStore }: TemplateHeaderProps) {
         
         {/* Currency Selector */}
         <div className="border-l pl-4">
-          <CurrencySelector showLabel={false} className="w-[180px]" />
+          <CurrencySelector showLabel={false} className="w-auto" />
         </div>
       </div>
 

@@ -28,7 +28,9 @@ export const formatDynamicValue = (
   element: TextElement,
   sourceValue: string,
   currencySymbol: string,
-  skipCurrencyPrefix: boolean = false
+  skipCurrencyPrefix: boolean = false,
+  displayType: 'code' | 'symbol' = 'symbol',
+  currencyCode?: string
 ): string => {
   // Strip any existing currency symbols first
   const cleanedSource = stripCurrencySymbols(sourceValue);
@@ -79,7 +81,9 @@ export const formatDynamicValue = (
                         element.dynamicField === 'compare_at_price';
     
     if (isPriceField && !skipCurrencyPrefix) {
-      formattedValue = currencySymbol + formattedValue;
+      // Use code or symbol based on displayType
+      const prefix = displayType === 'code' ? (currencyCode || 'USD') : currencySymbol;
+      formattedValue = prefix + formattedValue;
     } else if (!isPriceField) {
       if (fmt.prefix) formattedValue = fmt.prefix + formattedValue;
       if (fmt.suffix) formattedValue = formattedValue + fmt.suffix;
@@ -95,7 +99,9 @@ export const formatDynamicValue = (
 export const processTemplatePlaceholders = (
   element: TextElement,
   currencySymbol: string,
-  isSvgSymbol: boolean
+  isSvgSymbol: boolean,
+  displayType: 'code' | 'symbol' = 'symbol',
+  currencyCode?: string
 ): { content: string; hasCurrencyPlaceholder: boolean } => {
   if (!(element as any).isTemplate || !element.isDynamic || !element.dynamicField) {
     return { content: element.content, hasCurrencyPlaceholder: false };
@@ -104,7 +110,7 @@ export const processTemplatePlaceholders = (
   const sourceValue = element.dynamicContent || element.content;
   
   // Skip currency prefix when formatting since we handle {currency} separately
-  const formattedValue = formatDynamicValue(element, sourceValue, currencySymbol, true);
+  const formattedValue = formatDynamicValue(element, sourceValue, currencySymbol, true, displayType, currencyCode);
   
   // Replace {field} placeholder
   let content = element.content.replace(`{${element.dynamicField}}`, formattedValue);
@@ -112,8 +118,13 @@ export const processTemplatePlaceholders = (
   // Replace {currency} placeholder
   const hasCurrencyPlaceholder = content.includes('{currency}');
   if (hasCurrencyPlaceholder) {
-    // Use special marker for SVG symbols
-    content = content.replace('{currency}', isSvgSymbol ? '[CURRENCY_SVG]' : currencySymbol);
+    // Use code or symbol based on displayType
+    if (displayType === 'code') {
+      content = content.replace('{currency}', currencyCode || 'USD');
+    } else {
+      // Use special marker for SVG symbols, otherwise use the symbol
+      content = content.replace('{currency}', isSvgSymbol ? '[CURRENCY_SVG]' : currencySymbol);
+    }
   }
   
   return { content, hasCurrencyPlaceholder };

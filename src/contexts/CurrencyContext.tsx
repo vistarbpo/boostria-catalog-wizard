@@ -7,7 +7,9 @@ interface CurrencyContextType {
   currencySymbol: string;
   currencySvgPath?: string;
   isSvgSymbol: boolean;
+  displayType: 'code' | 'symbol';
   setCurrency: (code: string) => void;
+  setDisplayType: (type: 'code' | 'symbol') => void;
   isLoading: boolean;
 }
 
@@ -16,11 +18,15 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const { config, loading, updateConfig } = useAppConfig();
   const [currencyCode, setCurrencyCode] = useState<string>('USD');
+  const [displayType, setDisplayTypeState] = useState<'code' | 'symbol'>('symbol');
 
   // Initialize from app config
   useEffect(() => {
     if (config?.default_currency) {
       setCurrencyCode(config.default_currency);
+    }
+    if (config?.currency_display_type) {
+      setDisplayTypeState(config.currency_display_type);
     }
   }, [config]);
 
@@ -28,6 +34,12 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     setCurrencyCode(code);
     // Update the app config
     await updateConfig({ default_currency: code });
+  };
+
+  const setDisplayType = async (type: 'code' | 'symbol') => {
+    setDisplayTypeState(type);
+    // Update the app config
+    await updateConfig({ currency_display_type: type });
   };
 
   const currency = getCurrencyByCode(currencyCode);
@@ -42,7 +54,9 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
         currencySymbol,
         currencySvgPath,
         isSvgSymbol,
+        displayType,
         setCurrency,
+        setDisplayType,
         isLoading: loading
       }}
     >

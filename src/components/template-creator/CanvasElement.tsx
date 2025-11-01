@@ -29,7 +29,14 @@ const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
 };
 
 // Helper function to format dynamic text with modifiers and formatting
-const formatDynamicText = (element: TextElement, parentGroup?: any, globalCurrencySymbol?: string, isSvgCurrency?: boolean): string => {
+const formatDynamicText = (
+  element: TextElement, 
+  parentGroup?: any, 
+  globalCurrencySymbol?: string, 
+  isSvgCurrency?: boolean,
+  displayType?: 'code' | 'symbol',
+  currencyCode?: string
+): string => {
   // Handle rating widget text
   if (parentGroup?.widgetType === 'rating' && element.isDynamic && element.dynamicField === 'rating' && parentGroup.widgetData?.rating) {
     return parentGroup.widgetData.rating.toFixed(1);
@@ -37,7 +44,13 @@ const formatDynamicText = (element: TextElement, parentGroup?: any, globalCurren
   
   // Handle template-based dynamic text with placeholders
   if ((element as any).isTemplate && element.isDynamic) {
-    const result = processTemplatePlaceholders(element, globalCurrencySymbol || '$', isSvgCurrency || false);
+    const result = processTemplatePlaceholders(
+      element, 
+      globalCurrencySymbol || '$', 
+      isSvgCurrency || false,
+      displayType || 'symbol',
+      currencyCode || 'USD'
+    );
     return result.content;
   }
   
@@ -113,7 +126,9 @@ const formatDynamicText = (element: TextElement, parentGroup?: any, globalCurren
     
     // Use global currency symbol for price fields
     const isPriceField = element.dynamicField === 'price' || element.dynamicField === 'sale_price' || element.dynamicField === 'compare_at_price';
-    const symbolToUse = isPriceField && globalCurrencySymbol ? globalCurrencySymbol : (fmt.currencySymbol || fmt.prefix);
+    const symbolToUse = isPriceField && globalCurrencySymbol 
+      ? (displayType === 'code' ? (currencyCode || 'USD') : globalCurrencySymbol)
+      : (fmt.currencySymbol || fmt.prefix);
     
     if (symbolToUse) formatted = symbolToUse + formatted;
     if (!isPriceField && fmt.suffix) formatted = formatted + fmt.suffix;
@@ -156,7 +171,7 @@ const CanvasElementComponent = function CanvasElement({
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   
-  const { currencySymbol, currencySvgPath, isSvgSymbol } = useCurrency();
+  const { currencySymbol, currencySvgPath, isSvgSymbol, displayType, currencyCode } = useCurrency();
   
   const elementRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
@@ -490,7 +505,7 @@ const CanvasElementComponent = function CanvasElement({
     switch (element.type) {
       case 'text': {
         const textElement = element as TextElement;
-        const textContent = formatDynamicText(textElement, undefined, currencySymbol, isSvgSymbol);
+        const textContent = formatDynamicText(textElement, undefined, currencySymbol, isSvgSymbol, displayType, currencyCode);
         const textStyles = getTextStyles(textElement, baseStyle);
         
         // Check if this is a price field with SVG symbol
@@ -526,8 +541,8 @@ const CanvasElementComponent = function CanvasElement({
           );
         }
         
-        // Handle price fields with prefix currency symbol
-        const showSvgSymbol = isPriceField && isSvgSymbol && currencySvgPath;
+        // Handle price fields with prefix currency symbol (only for symbol mode)
+        const showSvgSymbol = isPriceField && displayType === 'symbol' && isSvgSymbol && currencySvgPath;
         const finalText = showSvgSymbol ? stripCurrencySymbols(textContent) : textContent;
         
         return (

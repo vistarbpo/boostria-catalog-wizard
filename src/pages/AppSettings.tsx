@@ -61,6 +61,7 @@ const appConfigSchema = z.object({
   
   // Currency Settings
   default_currency: z.string().optional(),
+  currency_display_type: z.enum(['code', 'symbol']).optional(),
 });
 
 type AppConfigFormData = z.infer<typeof appConfigSchema>;
@@ -91,6 +92,7 @@ const AppSettings = () => {
       deep_linking_enabled: config?.deep_linking_enabled || false,
       custom_url_scheme: config?.custom_url_scheme || "",
       default_currency: config?.default_currency || "USD",
+      currency_display_type: config?.currency_display_type || "symbol",
     },
   });
 
@@ -116,6 +118,7 @@ const AppSettings = () => {
         deep_linking_enabled: config.deep_linking_enabled || false,
         custom_url_scheme: config.custom_url_scheme || "",
         default_currency: config.default_currency || "USD",
+        currency_display_type: config.currency_display_type || "symbol",
       });
     }
   }, [config, form]);

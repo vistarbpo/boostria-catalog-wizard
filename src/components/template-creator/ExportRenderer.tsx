@@ -37,7 +37,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   backgroundImageUrl,
   backgroundMode,
 }) => {
-  const { currencySymbol, currencySvgPath, isSvgSymbol } = useCurrency();
+  const { currencySymbol, currencySvgPath, isSvgSymbol, displayType, currencyCode } = useCurrency();
   
   const renderElement = (element: CanvasElement) => {
     const baseStyle: React.CSSProperties = {
@@ -69,13 +69,14 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         // Handle different text types
         if ((textElement as any).isTemplate && textElement.isDynamic) {
           // Template-based text like "Pay {currency}{price} in 4 installments"
-          const result = processTemplatePlaceholders(textElement, currencySymbol, isSvgSymbol);
+          const result = processTemplatePlaceholders(textElement, currencySymbol, isSvgSymbol, displayType, currencyCode);
           displayContent = result.content;
           hasCurrencyPlaceholder = result.hasCurrencyPlaceholder;
         } else if (textElement.isDynamic && textElement.dynamicContent) {
           // Regular dynamic field
           const sourceValue = textElement.dynamicContent;
-          displayContent = formatDynamicValue(textElement, sourceValue, currencySymbol, isSvgSymbol && isPriceField);
+          const skipSvgPrefix = displayType === 'symbol' && isSvgSymbol && isPriceField;
+          displayContent = formatDynamicValue(textElement, sourceValue, currencySymbol, skipSvgPrefix, displayType, currencyCode);
         } else {
           // Static text
           displayContent = textElement.content;
@@ -100,8 +101,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           );
         }
         
-        // Handle price fields with prefix currency symbol
-        const showPrefixSymbol = isPriceField && isSvgSymbol && currencySvgPath;
+        // Handle price fields with prefix currency symbol (only for symbol mode)
+        const showPrefixSymbol = isPriceField && displayType === 'symbol' && isSvgSymbol && currencySvgPath;
         const finalText = showPrefixSymbol ? stripCurrencySymbols(displayContent) : displayContent;
         
         if (showPrefixSymbol) {
