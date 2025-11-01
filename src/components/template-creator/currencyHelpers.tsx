@@ -22,6 +22,56 @@ export const stripCurrencySymbols = (text: string): string => {
 };
 
 /**
+ * Apply modifiers to a numeric value
+ */
+const applyModifiers = (value: number, modifiers: any[]): number => {
+  let result = value;
+  modifiers.forEach(mod => {
+    switch (mod.type) {
+      case 'divide':
+        if (typeof mod.value === 'number' && mod.value !== 0) {
+          result = result / mod.value;
+        }
+        break;
+      case 'multiply':
+        result = result * (mod.value || 1);
+        break;
+      case 'add':
+        result = result + (mod.value || 0);
+        break;
+      case 'subtract':
+        result = result - (mod.value || 0);
+        break;
+      case 'decimals':
+        result = parseFloat(result.toFixed(mod.value || 2));
+        break;
+    }
+  });
+  return result;
+};
+
+/**
+ * Apply text modifiers (case transformations)
+ */
+const applyTextModifiers = (text: string, modifiers: any[]): string => {
+  let result = text;
+  modifiers.forEach(mod => {
+    switch (mod.type) {
+      case 'uppercase':
+        result = result.toUpperCase();
+        break;
+      case 'lowercase':
+        result = result.toLowerCase();
+        break;
+      case 'titlecase':
+        result = result.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+        break;
+    }
+  });
+  return result;
+};
+
+/**
  * Format dynamic text value with modifiers and formatting
  */
 export const formatDynamicValue = (
@@ -37,29 +87,9 @@ export const formatDynamicValue = (
   const cleanedText = cleanedSource.replace(/[^0-9.-]/g, '');
   let value = parseFloat(cleanedText) || 0;
 
-  // Apply modifiers
+  // Apply numeric modifiers
   if (element.modifiers) {
-    element.modifiers.forEach(mod => {
-      switch (mod.type) {
-        case 'divide':
-          if (typeof mod.value === 'number' && mod.value !== 0) {
-            value = value / mod.value;
-          }
-          break;
-        case 'multiply':
-          value = value * (mod.value || 1);
-          break;
-        case 'add':
-          value = value + (mod.value || 0);
-          break;
-        case 'subtract':
-          value = value - (mod.value || 0);
-          break;
-        case 'decimals':
-          value = parseFloat(value.toFixed(mod.value || 2));
-          break;
-      }
-    });
+    value = applyModifiers(value, element.modifiers);
   }
 
   // Apply formatting
@@ -81,7 +111,7 @@ export const formatDynamicValue = (
                         element.dynamicField === 'compare_at_price';
     
     if (isPriceField && !skipCurrencyPrefix) {
-      // Use code or symbol based on displayType
+      // Use code or symbol based on displayType - ALWAYS use global currency settings
       const prefix = displayType === 'code' ? (currencyCode || 'USD') + ' ' : currencySymbol;
       formattedValue = prefix + formattedValue;
     } else if (!isPriceField) {
@@ -91,6 +121,126 @@ export const formatDynamicValue = (
   }
 
   return formattedValue;
+};
+
+/**
+ * Unified text formatting function - handles all dynamic text scenarios
+ * This is the SINGLE SOURCE OF TRUTH for text formatting
+ */
+export const formatTextWithCurrency = (
+  element: TextElement,
+  parentGroup: any | undefined,
+  currencySymbol: string,
+  isSvgCurrency: boolean,
+  displayType: 'code' | 'symbol',
+  currencyCode: string
+): string => {
+  // Handle rating widget text
+  if (parentGroup?.widgetType === 'rating' && element.isDynamic && element.dynamicField === 'rating' && parentGroup.widgetData?.rating) {
+    return parentGroup.widgetData.rating.toFixed(1);
+  }
+  
+  // Handle template-based dynamic text with placeholders
+  if ((element as any).isTemplate && element.isDynamic) {
+    const result = processTemplatePlaceholders(
+      element, 
+      currencySymbol, 
+      isSvgCurrency,
+      displayType,
+      currencyCode
+    );
+    return result.content;
+  }
+  
+  // Regular dynamic content (non-template)
+  let content = element.isDynamic ? (element.dynamicContent || element.content) : element.content;
+  
+  // If not dynamic, return as is
+  if (!element.isDynamic) {
+    return content;
+  }
+
+  // Apply text modifiers (case transformations)
+  if (element.modifiers) {
+    content = applyTextModifiers(content, element.modifiers);
+  }
+
+  // If no numeric modifiers or formatting, return the content
+  const hasNumericFormatting = element.modifiers?.some(m => 
+    ['divide', 'multiply', 'add', 'subtract', 'decimals', 'numerical'].includes(m.type)
+  ) || element.formatting;
+
+  if (!hasNumericFormatting) {
+    return content;
+  }
+
+  // Check if content is numeric
+  const cleanedText = content.replace(/[^0-9.-]/g, '');
+  if (!cleanedText || isNaN(parseFloat(cleanedText))) {
+    return content;
+  }
+
+  let value = parseFloat(cleanedText);
+
+  // Apply numeric modifiers
+  if (element.modifiers) {
+    element.modifiers.forEach(mod => {
+      switch (mod.type) {
+        case 'numerical':
+          // Already handled by cleanedText
+          break;
+        case 'add':
+          value = value + (mod.value || 0);
+          break;
+        case 'subtract':
+          value = value - (mod.value || 0);
+          break;
+        case 'multiply':
+          value = value * (mod.value || 1);
+          break;
+        case 'divide':
+          if (typeof mod.value === 'number' && mod.value !== 0) {
+            value = value / mod.value;
+          }
+          break;
+        case 'decimals':
+          value = parseFloat(value.toFixed(mod.value || 2));
+          break;
+      }
+    });
+  }
+
+  // Apply formatting
+  if (element.formatting) {
+    const fmt = element.formatting;
+    let formatted = value.toFixed(fmt.decimals ?? 2);
+    
+    if (fmt.thousandsSeparator) {
+      formatted = parseFloat(formatted).toLocaleString('en-US', {
+        minimumFractionDigits: fmt.decimals ?? 2,
+        maximumFractionDigits: fmt.decimals ?? 2,
+      });
+    }
+    
+    // Check if this is a price field
+    const isPriceField = element.dynamicField === 'price' || 
+                        element.dynamicField === 'sale_price' || 
+                        element.dynamicField === 'compare_at_price';
+    
+    if (isPriceField) {
+      // For price fields, ALWAYS use global currency settings (never use local prefix)
+      const currencyPrefix = displayType === 'code' ? currencyCode + ' ' : currencySymbol;
+      formatted = currencyPrefix + formatted;
+    } else {
+      // For non-price fields, use local formatting
+      if (fmt.prefix) formatted = fmt.prefix + formatted;
+      if (fmt.suffix) formatted = formatted + fmt.suffix;
+    }
+    
+    return formatted;
+  }
+
+  return value.toString();
 };
 
 /**

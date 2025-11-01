@@ -11,10 +11,10 @@ import {
 } from './renderUtils';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import {
-  processTemplatePlaceholders,
-  formatDynamicValue,
+  formatTextWithCurrency,
   renderCurrencySymbol,
   renderTextWithCurrency,
+  processTemplatePlaceholders,
   stripCurrencySymbols,
 } from './currencyHelpers';
 
@@ -28,120 +28,8 @@ const getBorderRadiusStyle = (element: ShapeElement | ImageElement) => {
   return shapeEl.cornerRadius || 0;
 };
 
-// Helper function to format dynamic text with modifiers and formatting
-const formatDynamicText = (
-  element: TextElement, 
-  parentGroup?: any, 
-  globalCurrencySymbol?: string, 
-  isSvgCurrency?: boolean,
-  displayType?: 'code' | 'symbol',
-  currencyCode?: string
-): string => {
-  // Handle rating widget text
-  if (parentGroup?.widgetType === 'rating' && element.isDynamic && element.dynamicField === 'rating' && parentGroup.widgetData?.rating) {
-    return parentGroup.widgetData.rating.toFixed(1);
-  }
-  
-  // Handle template-based dynamic text with placeholders
-  if ((element as any).isTemplate && element.isDynamic) {
-    const result = processTemplatePlaceholders(
-      element, 
-      globalCurrencySymbol || '$', 
-      isSvgCurrency || false,
-      displayType || 'symbol',
-      currencyCode || 'USD'
-    );
-    return result.content;
-  }
-  
-  // Regular dynamic content (non-template)
-  let content = element.isDynamic ? (element.dynamicContent || element.content) : element.content;
-  
-  // If not dynamic or no modifiers/formatting, return as is
-  if (!element.isDynamic || (!element.modifiers?.length && !element.formatting)) {
-    return content;
-  }
-
-  let text = content;
-
-  // Apply modifiers
-  if (element.modifiers) {
-    // Clean the text of non-numeric characters before parsing
-    let cleanedText = text.replace(/[^0-9.-]/g, '');
-    let value = parseFloat(cleanedText) || 0;
-    element.modifiers.forEach(mod => {
-      switch (mod.type) {
-        case 'uppercase':
-          text = text.toUpperCase();
-          break;
-        case 'lowercase':
-          text = text.toLowerCase();
-          break;
-        case 'titlecase':
-          text = text.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-          break;
-        case 'numerical':
-          text = text.replace(/[^0-9.]/g, '');
-          value = parseFloat(text) || 0;
-          break;
-        case 'add':
-          value = value + (mod.value || 0);
-          text = value.toString();
-          break;
-        case 'subtract':
-          value = value - (mod.value || 0);
-          text = value.toString();
-          break;
-        case 'multiply':
-          value = value * (mod.value || 1);
-          text = value.toString();
-          break;
-        case 'divide':
-          // Only divide if we have a valid, non-zero divisor
-          if (typeof mod.value === 'number' && mod.value !== 0) {
-            value = value / mod.value;
-            text = value.toString();
-          }
-          break;
-        case 'decimals':
-          value = parseFloat(value.toFixed(mod.value || 2));
-          text = value.toString();
-          break;
-      }
-    });
-  }
-
-  // Apply formatting if text is numeric
-  if (!isNaN(parseFloat(text)) && element.formatting) {
-    const fmt = element.formatting;
-    let value = parseFloat(text);
-    let formatted = value.toFixed(fmt.decimals ?? 2);
-    
-    if (fmt.thousandsSeparator) {
-      formatted = parseFloat(formatted).toLocaleString('en-US', {
-        minimumFractionDigits: fmt.decimals ?? 2,
-        maximumFractionDigits: fmt.decimals ?? 2,
-      });
-    }
-    
-    // Use global currency symbol for price fields - always override local formatting for price fields
-    const isPriceField = element.dynamicField === 'price' || element.dynamicField === 'sale_price' || element.dynamicField === 'compare_at_price';
-    
-    if (isPriceField && globalCurrencySymbol) {
-      // For price fields, always use global currency setting (ignore local formatting prefix)
-      const currencyPrefix = displayType === 'code' ? (currencyCode || 'USD') + ' ' : globalCurrencySymbol;
-      formatted = currencyPrefix + formatted;
-    } else if (!isPriceField) {
-      // For non-price fields, use local formatting
-      if (fmt.prefix) formatted = fmt.prefix + formatted;
-      if (fmt.suffix) formatted = formatted + fmt.suffix;
-    }
-    
-    return formatted;
-  }
-
-  return text;
-};
+// Note: formatDynamicText has been replaced by formatTextWithCurrency from currencyHelpers.tsx
+// This ensures single source of truth for all text formatting
 
 
 interface CanvasElementProps {
@@ -509,7 +397,7 @@ const CanvasElementComponent = function CanvasElement({
     switch (element.type) {
       case 'text': {
         const textElement = element as TextElement;
-        const textContent = formatDynamicText(textElement, undefined, currencySymbol, isSvgSymbol, displayType, currencyCode);
+        const textContent = formatTextWithCurrency(textElement, undefined, currencySymbol, isSvgSymbol, displayType, currencyCode);
         
         // Check if this is a price field with dynamic content
         const isPriceField = textElement.isDynamic && 
@@ -912,7 +800,7 @@ const CanvasElementComponent = function CanvasElement({
     switch (childElement.type) {
       case 'text':
         const textEl = childElement as TextElement;
-        const textContent = formatDynamicText(textEl, parentGroup, currencySymbol, isSvgSymbol);
+        const textContent = formatTextWithCurrency(textEl, parentGroup, currencySymbol, isSvgSymbol, displayType, currencyCode);
         
         // Check if this is a price field with SVG symbol
         const isPriceField = textEl.isDynamic && 

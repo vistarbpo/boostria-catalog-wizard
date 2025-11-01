@@ -10,11 +10,10 @@ import {
 } from './renderUtils';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import {
-  processTemplatePlaceholders,
-  formatDynamicValue,
+  formatTextWithCurrency,
   renderCurrencySymbol,
   renderTextWithCurrency,
-  getDisplayText,
+  processTemplatePlaceholders,
   stripCurrencySymbols,
 } from './currencyHelpers';
 
@@ -64,24 +63,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         
         const textStyles = getTextStyles(textElement, baseStyle, displayType, isPriceField);
         
-        let displayContent: string;
-        let hasCurrencyPlaceholder = false;
-        
-        // Handle different text types
-        if ((textElement as any).isTemplate && textElement.isDynamic) {
-          // Template-based text like "Pay {currency}{price} in 4 installments"
-          const result = processTemplatePlaceholders(textElement, currencySymbol, isSvgSymbol, displayType, currencyCode);
-          displayContent = result.content;
-          hasCurrencyPlaceholder = result.hasCurrencyPlaceholder;
-        } else if (textElement.isDynamic && textElement.dynamicContent) {
-          // Regular dynamic field
-          const sourceValue = textElement.dynamicContent;
-          const skipSvgPrefix = displayType === 'symbol' && isSvgSymbol && isPriceField;
-          displayContent = formatDynamicValue(textElement, sourceValue, currencySymbol, skipSvgPrefix, displayType, currencyCode);
-        } else {
-          // Static text
-          displayContent = textElement.content;
-        }
+        // Use unified formatting function
+        const displayContent = formatTextWithCurrency(textElement, undefined, currencySymbol, isSvgSymbol, displayType, currencyCode);
+        const hasCurrencyPlaceholder = displayContent.includes('[CURRENCY_SVG]');
         
         const currencyOptions = {
           currencySymbol,
