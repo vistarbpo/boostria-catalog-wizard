@@ -38,7 +38,7 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
             <SelectValue placeholder="Select Currency">
               {currencyCode && (
                 <span className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{currencyCode}</span>
+                  <span className="font-mono text-sm font-medium">{currencyCode}</span>
                   <span className="text-muted-foreground">
                     {CURRENCIES.find(c => c.code === currencyCode)?.symbol}
                   </span>
@@ -84,18 +84,26 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
           disabled={isLoading}
         >
           <SelectTrigger className="w-[200px] bg-background">
-            <SelectValue placeholder="Select Type" />
+            <SelectValue>
+              {displayType === 'code' ? 'Currency Code' : 'Currency Symbol'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent className="bg-popover z-[100]">
             <SelectItem value="code" className="cursor-pointer">
               <div className="flex items-center justify-between w-full gap-3">
-                <span>Currency Code</span>
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">Currency Code</span>
+                  <span className="text-xs text-muted-foreground">SAR, USD, AED</span>
+                </div>
                 {displayType === 'code' && <Check className="h-4 w-4" />}
               </div>
             </SelectItem>
             <SelectItem value="symbol" className="cursor-pointer">
               <div className="flex items-center justify-between w-full gap-3">
-                <span>Currency Symbol</span>
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">Currency Symbol</span>
+                  <span className="text-xs text-muted-foreground">﷼, $, د.إ</span>
+                </div>
                 {displayType === 'symbol' && <Check className="h-4 w-4" />}
               </div>
             </SelectItem>
