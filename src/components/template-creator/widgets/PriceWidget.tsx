@@ -96,7 +96,7 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
     const originalPriceText: TextElement = {
       id: `price-original-${Math.random().toString(36).substr(2, 9)}`,
       type: 'text',
-      content: `${currencySymbol}48.00`,
+      content: '48.00',
       position: originalPricePos,
       size: { width: estimatedOriginalPriceWidth, height: originalPriceFontSize + 8 },
       fontSize: originalPriceFontSize,
@@ -120,7 +120,6 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
       isDynamic: true,
       dynamicField: 'price',
       formatting: {
-        prefix: currencySymbol,
         decimals: 2
       },
       conditionalDisplay: conditionalDisplay ? {
@@ -137,7 +136,7 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
   const salePriceText: TextElement = {
     id: `price-sale-${Math.random().toString(36).substr(2, 9)}`,
     type: 'text',
-    content: `${currencySymbol}28.80`,
+    content: '28.80',
     position: salePricePos,
       size: { width: estimatedSalePriceWidth, height: salePriceFontSize + (style === 'badge-style' ? padding * 2 : 8) },
       fontSize: salePriceFontSize,
@@ -165,7 +164,6 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
     isDynamic: true,
     dynamicField: 'sale_price',
     formatting: {
-      prefix: currencySymbol,
       decimals: 2
     },
     fallbackField: 'price' // Fall back to regular price if no sale price

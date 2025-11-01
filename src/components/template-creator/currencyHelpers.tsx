@@ -82,7 +82,7 @@ export const formatDynamicValue = (
     
     if (isPriceField && !skipCurrencyPrefix) {
       // Use code or symbol based on displayType
-      const prefix = displayType === 'code' ? (currencyCode || 'USD') : currencySymbol;
+      const prefix = displayType === 'code' ? (currencyCode || 'USD') + ' ' : currencySymbol;
       formattedValue = prefix + formattedValue;
     } else if (!isPriceField) {
       if (fmt.prefix) formattedValue = fmt.prefix + formattedValue;
