@@ -23,6 +23,7 @@ export interface PriceWidgetConfig {
   padding?: number; // For badge-style
   spacing?: number; // Gap between prices
   conditionalDisplay?: boolean; // Hide original price if no sale_price exists
+  displayType?: 'code' | 'symbol'; // Currency display type for dynamic padding
 }
 
 export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
@@ -41,7 +42,8 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
     backgroundColor,
     padding = 16,
     spacing = 8,
-    conditionalDisplay = true
+    conditionalDisplay = true,
+    displayType = 'symbol'
   } = config;
 
   const elements: CanvasElement[] = [];
@@ -51,12 +53,15 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
   let salePricePos = { ...position };
   let originalPricePos = { ...position };
   
-  // Multiply by 6 to account for currency code + space + price (e.g., "SAR 299.99")
-  const estimatedSalePriceWidth = salePriceFontSize * 6; 
-  const estimatedOriginalPriceWidth = originalPriceFontSize * 6;
+  // Use larger width for currency codes, smaller for symbols
+  const widthMultiplier = displayType === 'code' ? 6 : 5;
+  const estimatedSalePriceWidth = salePriceFontSize * widthMultiplier; 
+  const estimatedOriginalPriceWidth = originalPriceFontSize * widthMultiplier;
   
-  // Dynamic horizontal padding based on font size
-  const horizontalPadding = Math.max(8, Math.floor(salePriceFontSize * 0.2));
+  // Dynamic horizontal padding: more for currency codes, minimal for symbols
+  const horizontalPadding = displayType === 'code' 
+    ? Math.max(8, Math.floor(salePriceFontSize * 0.2))
+    : 0;
 
   switch (style) {
     case 'stacked-large-small':
