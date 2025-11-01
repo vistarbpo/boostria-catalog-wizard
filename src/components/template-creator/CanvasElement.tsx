@@ -124,14 +124,18 @@ const formatDynamicText = (
       });
     }
     
-    // Use global currency symbol for price fields
+    // Use global currency symbol for price fields - always override local formatting for price fields
     const isPriceField = element.dynamicField === 'price' || element.dynamicField === 'sale_price' || element.dynamicField === 'compare_at_price';
-    const symbolToUse = isPriceField && globalCurrencySymbol 
-      ? (displayType === 'code' ? (currencyCode || 'USD') + ' ' : globalCurrencySymbol)
-      : (fmt.currencySymbol || fmt.prefix);
     
-    if (symbolToUse) formatted = symbolToUse + formatted;
-    if (!isPriceField && fmt.suffix) formatted = formatted + fmt.suffix;
+    if (isPriceField && globalCurrencySymbol) {
+      // For price fields, always use global currency setting (ignore local formatting prefix)
+      const currencyPrefix = displayType === 'code' ? (currencyCode || 'USD') + ' ' : globalCurrencySymbol;
+      formatted = currencyPrefix + formatted;
+    } else if (!isPriceField) {
+      // For non-price fields, use local formatting
+      if (fmt.prefix) formatted = fmt.prefix + formatted;
+      if (fmt.suffix) formatted = formatted + fmt.suffix;
+    }
     
     return formatted;
   }

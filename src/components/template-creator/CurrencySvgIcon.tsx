@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface CurrencySvgIconProps {
   svgPath: string;
@@ -11,7 +11,7 @@ interface CurrencySvgIconProps {
 
 /**
  * Component to render SVG currency icons with dynamic coloring
- * Uses CSS mask to properly color the icon to match text color
+ * Uses inline image with CSS filter for proper color rendering
  */
 export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
   svgPath,
@@ -21,8 +21,40 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
   marginRight = '4px',
   ariaLabel = 'Currency',
 }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  // Convert color to filter values for accurate color matching
+  // For black SVGs, we need to colorize them to match the text color
+  const getColorFilter = (targetColor: string): string => {
+    // Check if it's a light color (white or near-white)
+    const isLightColor = 
+      targetColor.includes('white') || 
+      targetColor.includes('#fff') || 
+      targetColor.includes('255, 255, 255') ||
+      targetColor.includes('255,255,255') ||
+      targetColor === '#FFFFFF' ||
+      targetColor === 'rgb(255, 255, 255)';
+    
+    // For white or light colors, invert the black SVG to white
+    if (isLightColor) {
+      return 'brightness(0) invert(1)';
+    }
+    
+    // For dark colors, keep the SVG black  
+    return 'none';
+  };
+  
+  // Fallback to text symbol if image fails to load
+  if (imageError) {
+    return <span style={{ marginLeft, marginRight }}>{ariaLabel}</span>;
+  }
+  
   return (
-    <span
+    <img
+      key={svgPath} // Force re-render when path changes
+      src={svgPath}
+      alt={ariaLabel}
+      onError={() => setImageError(true)}
       style={{
         display: 'inline-block',
         width: `${size}px`,
@@ -30,13 +62,12 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
         flexShrink: 0,
         marginLeft,
         marginRight,
-        backgroundColor: color,
-        WebkitMask: `url(${svgPath}) center/contain no-repeat`,
-        mask: `url(${svgPath}) center/contain no-repeat`,
         verticalAlign: 'baseline',
+        filter: getColorFilter(color),
+        objectFit: 'contain',
       }}
       aria-label={ariaLabel}
-      role="img"
+      loading="eager"
     />
   );
 };
