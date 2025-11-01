@@ -5,7 +5,28 @@ import { TextElement, ButtonElement, ImageElement, ShapeElement } from '@/types/
  * Shared rendering utilities to ensure 100% consistency between preview and export
  */
 
-export const getTextStyles = (textElement: TextElement, baseStyle: React.CSSProperties) => {
+export const getTextStyles = (
+  textElement: TextElement, 
+  baseStyle: React.CSSProperties,
+  displayType?: 'code' | 'symbol',
+  isDynamicPriceField?: boolean
+) => {
+  // Calculate dynamic padding for price fields based on display type
+  let padding = textElement.padding;
+  
+  if (isDynamicPriceField && displayType) {
+    // For price widgets, adjust horizontal padding based on display type
+    const horizontalPadding = displayType === 'code' 
+      ? Math.max(12, Math.floor(textElement.fontSize * 0.2))
+      : Math.max(6, Math.floor(textElement.fontSize * 0.1));
+    
+    padding = {
+      ...padding,
+      left: horizontalPadding,
+      right: horizontalPadding,
+    };
+  }
+  
   return {
     ...baseStyle,
     color: textElement.color,
@@ -19,7 +40,7 @@ export const getTextStyles = (textElement: TextElement, baseStyle: React.CSSProp
     textTransform: textElement.textTransform || 'none',
     backgroundColor: textElement.backgroundColor,
     border: textElement.strokeWidth > 0 ? `${textElement.strokeWidth}px solid ${textElement.strokeColor}` : undefined,
-    padding: `${textElement.padding.top}px ${textElement.padding.right}px ${textElement.padding.bottom}px ${textElement.padding.left}px`,
+    padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
     whiteSpace: textElement.textWrapping ? 'normal' : 'nowrap',
     overflow: 'visible', // Changed from 'hidden' to prevent text cutoff
     display: 'flex',

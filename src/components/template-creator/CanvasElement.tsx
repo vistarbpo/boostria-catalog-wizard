@@ -510,13 +510,14 @@ const CanvasElementComponent = function CanvasElement({
       case 'text': {
         const textElement = element as TextElement;
         const textContent = formatDynamicText(textElement, undefined, currencySymbol, isSvgSymbol, displayType, currencyCode);
-        const textStyles = getTextStyles(textElement, baseStyle);
         
-        // Check if this is a price field with SVG symbol
+        // Check if this is a price field with dynamic content
         const isPriceField = textElement.isDynamic && 
           (textElement.dynamicField === 'price' || 
            textElement.dynamicField === 'sale_price' || 
            textElement.dynamicField === 'compare_at_price');
+        
+        const textStyles = getTextStyles(textElement, baseStyle, displayType, isPriceField);
         
         const currencyOptions = {
           currencySymbol,

@@ -55,13 +55,14 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
     switch (element.type) {
       case 'text': {
         const textElement = element as TextElement;
-        const textStyles = getTextStyles(textElement, baseStyle);
         
         // Check if this is a price field
         const isPriceField = textElement.isDynamic && 
           (textElement.dynamicField === 'price' || 
            textElement.dynamicField === 'sale_price' || 
            textElement.dynamicField === 'compare_at_price');
+        
+        const textStyles = getTextStyles(textElement, baseStyle, displayType, isPriceField);
         
         let displayContent: string;
         let hasCurrencyPlaceholder = false;
