@@ -1,5 +1,6 @@
 import React from 'react';
 import { TextElement } from '@/types/canvas';
+import { CurrencySvgIcon } from './CurrencySvgIcon';
 
 /**
  * Currency helper utilities for consistent currency rendering across canvas and export
@@ -136,19 +137,13 @@ export const renderCurrencySymbol = (
   const marginRight = position === 'inline' ? '2px' : '4px';
 
   return (
-    <span 
-      style={{
-        display: 'inline-block',
-        width: `${size}px`,
-        height: `${size}px`,
-        flexShrink: 0,
-        marginLeft,
-        marginRight,
-        backgroundColor: textColor,
-        WebkitMask: `url(${currencySvgPath}) no-repeat center / contain`,
-        mask: `url(${currencySvgPath}) no-repeat center / contain`,
-      }}
-      aria-label={currencySymbol}
+    <CurrencySvgIcon
+      svgPath={currencySvgPath}
+      color={textColor}
+      size={size}
+      marginLeft={marginLeft}
+      marginRight={marginRight}
+      ariaLabel={currencySymbol}
     />
   );
 };
