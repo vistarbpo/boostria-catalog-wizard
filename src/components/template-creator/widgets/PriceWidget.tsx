@@ -58,10 +58,11 @@ export function createPriceWidget(config: PriceWidgetConfig): CanvasElement[] {
   const estimatedSalePriceWidth = salePriceFontSize * widthMultiplier; 
   const estimatedOriginalPriceWidth = originalPriceFontSize * widthMultiplier;
   
-  // Dynamic horizontal padding: more for currency codes, minimal for symbols
+  // Dynamic horizontal padding: consistent padding for better aesthetics
+  // For code: 20% of font size, for symbol: 10% of font size
   const horizontalPadding = displayType === 'code' 
-    ? Math.max(8, Math.floor(salePriceFontSize * 0.2))
-    : 0;
+    ? Math.max(12, Math.floor(salePriceFontSize * 0.2))
+    : Math.max(6, Math.floor(salePriceFontSize * 0.1));
 
   switch (style) {
     case 'stacked-large-small':
