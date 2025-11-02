@@ -33,22 +33,35 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
   // For export/html2canvas, use filter method (more compatible)
   if (useFilter) {
     const getColorFilter = (targetColor: string): string => {
+      // Normalize color for checking
+      const normalizedColor = targetColor.toLowerCase().replace(/\s/g, '');
+      
       // Check if it's a light color (white or near-white)
       const isLightColor = 
-        targetColor.includes('white') || 
-        targetColor.includes('#fff') || 
-        targetColor.includes('255, 255, 255') ||
-        targetColor.includes('255,255,255') ||
-        targetColor === '#FFFFFF' ||
-        targetColor === 'rgb(255, 255, 255)';
+        normalizedColor.includes('white') || 
+        normalizedColor.includes('#fff') || 
+        normalizedColor === '#ffffff' ||
+        normalizedColor.includes('255,255,255') ||
+        normalizedColor.includes('rgb(255,255,255)') ||
+        normalizedColor === 'currentcolor'; // Treat currentColor as light for safety
       
       // For white or light colors, invert the black SVG to white
       if (isLightColor) {
         return 'brightness(0) invert(1)';
       }
       
-      // For dark colors, keep the SVG black  
-      return 'none';
+      // Check if it's a gray color (for strikethrough prices)
+      const isGrayColor = normalizedColor.includes('#999') || 
+                         normalizedColor.includes('#9ca3af') ||
+                         normalizedColor.includes('153,153,153');
+      
+      if (isGrayColor) {
+        // For gray, use brightness and contrast to get the gray tone
+        return 'brightness(0) saturate(0) brightness(0.6)';
+      }
+      
+      // For other dark colors, keep the SVG black with slight opacity
+      return 'brightness(0) opacity(0.9)';
     };
     
     return (

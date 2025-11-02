@@ -7,6 +7,7 @@ import {
   getImageStyles,
   getShapeStyles,
   renderTriangleSVG,
+  renderStarSVG,
 } from './renderUtils';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import {
@@ -63,6 +64,16 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         
         const textStyles = getTextStyles(textElement, baseStyle, displayType, isPriceField);
         
+        // Add vertical alignment adjustments for price fields
+        let adjustedTextStyles: React.CSSProperties = { ...textStyles };
+        if (isPriceField) {
+          // Move text up by reducing top padding/position
+          adjustedTextStyles.paddingTop = 0;
+          adjustedTextStyles.lineHeight = 1;
+          adjustedTextStyles.display = 'flex';
+          adjustedTextStyles.alignItems = 'flex-start';
+        }
+        
         // Use unified formatting function
         const displayContent = formatTextWithCurrency(textElement, undefined, currencySymbol, isSvgSymbol, displayType, currencyCode);
         const hasCurrencyPlaceholder = displayContent.includes('[CURRENCY_SVG]');
@@ -83,9 +94,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             <div 
               key={element.id} 
               style={{
-                ...textStyles,
+                ...adjustedTextStyles,
                 display: isPriceField ? 'inline-flex' : 'block',
-                alignItems: 'center',
+                alignItems: isPriceField ? 'flex-start' : 'center',
                 whiteSpace: isPriceField ? 'nowrap' : 'normal',
                 wordWrap: 'break-word',
                 overflowWrap: 'break-word',
@@ -105,13 +116,13 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             <div 
               key={element.id} 
               style={{
-                ...textStyles,
+                ...adjustedTextStyles,
                 display: 'inline-flex',
-                alignItems: 'center',
+                alignItems: 'flex-start',
                 whiteSpace: 'nowrap',
               }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: '4px' }}>
                 {renderCurrencySymbol(currencyOptions, 'before', true)}
                 {renderTextDecoration(textElement, finalText, true)}
               </span>
@@ -123,7 +134,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           <div 
             key={element.id} 
             style={{
-              ...textStyles,
+              ...adjustedTextStyles,
               display: 'block',
               whiteSpace: 'normal',
               wordWrap: 'break-word',
@@ -142,11 +153,13 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           ? `${imageElement.cornerRadii.topLeft}px ${imageElement.cornerRadii.topRight}px ${imageElement.cornerRadii.bottomRight}px ${imageElement.cornerRadii.bottomLeft}px`
           : imageElement.cornerRadius || 0;
         
+        // Determine object-fit based on fillMode from imageElement directly
+        const fillMode = imageElement.fillMode || 'cover';
         const objectFit = 
-          imageStyles.fillMode === 'cover' ? 'cover' :
-          imageStyles.fillMode === 'contain' ? 'contain' :
-          imageStyles.fillMode === 'stretch' || imageStyles.fillMode === 'fill' ? 'fill' :
-          (imageStyles.fillMode === 'center' || imageStyles.fillMode === 'tile') ? 'none' : 'cover';
+          fillMode === 'cover' ? 'cover' :
+          fillMode === 'contain' ? 'contain' :
+          fillMode === 'stretch' ? 'fill' :
+          'none'; // center and tile use 'none'
         
         return (
           <div
@@ -260,6 +273,18 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             );
           
           case 'star':
+            return (
+              <div
+                key={element.id}
+                style={{
+                  ...baseStyle,
+                  boxSizing: 'border-box',
+                }}
+              >
+                {renderStarSVG(shapeElement)}
+              </div>
+            );
+          
           default:
             return (
               <div

@@ -69,14 +69,15 @@ export const renderTextDecoration = (textElement: TextElement, content: string |
         <span style={{
           textDecoration: 'line-through',
           textDecorationColor: textElement.color,
-          textDecorationThickness: '2px',
+          textDecorationThickness: '1.5px',
+          textDecorationStyle: 'solid',
         }}>
           {content}
         </span>
       );
     }
     
-    // For preview, use custom positioned strike-through for precise control
+    // For preview, use custom positioned strike-through for precise control (moved down to 55%)
     return (
       <span style={{ 
         position: 'relative',
@@ -87,10 +88,11 @@ export const renderTextDecoration = (textElement: TextElement, content: string |
           position: 'absolute',
           left: '0',
           right: '0',
-          top: '50%',
-          height: '2px',
+          top: '55%', // Moved down from 50% to 55%
+          height: '1.5px',
           backgroundColor: textElement.color,
           pointerEvents: 'none',
+          transform: 'translateY(-50%)',
         }} />
       </span>
     );
@@ -237,6 +239,43 @@ export const renderTriangleSVG = (shapeElement: ShapeElement) => {
       </defs>
       <polygon
         points="50,10 90,90 10,90"
+        fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
+        stroke={shapeElement.strokeColor}
+        strokeWidth={shapeElement.strokeWidth}
+      />
+    </svg>
+  );
+};
+
+export const renderStarSVG = (shapeElement: ShapeElement) => {
+  // 5-pointed star path
+  const starPath = "M50,10 L61,38 L90,38 L67,56 L78,85 L50,67 L22,85 L33,56 L10,38 L39,38 Z";
+  
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        {shapeElement.fillType === 'image' && shapeElement.fillImageUrl && (
+          <pattern id={`pattern-${shapeElement.id}`} patternUnits="objectBoundingBox" width="1" height="1">
+            <image
+              href={shapeElement.fillImageUrl}
+              x="0" y="0"
+              width="100" height="100"
+              preserveAspectRatio={
+                shapeElement.fillMode === 'cover' ? 'xMidYMid slice' :
+                shapeElement.fillMode === 'contain' ? 'xMidYMid meet' :
+                'none'
+              }
+            />
+          </pattern>
+        )}
+      </defs>
+      <path
+        d={starPath}
         fill={shapeElement.fillType === 'image' ? `url(#pattern-${shapeElement.id})` : shapeElement.fillColor}
         stroke={shapeElement.strokeColor}
         strokeWidth={shapeElement.strokeWidth}
