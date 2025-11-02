@@ -77,7 +77,7 @@ export const renderTextDecoration = (textElement: TextElement, content: string |
       );
     }
     
-    // For preview, use custom positioned strike-through for precise control (moved down to 55%)
+    // For preview, use custom positioned strike-through for precise control
     return (
       <span style={{ 
         position: 'relative',
@@ -88,7 +88,7 @@ export const renderTextDecoration = (textElement: TextElement, content: string |
           position: 'absolute',
           left: '0',
           right: '0',
-          top: '55%', // Moved down from 50% to 55%
+          top: '50%', // Centered at 50%
           height: '1.5px',
           backgroundColor: textElement.color,
           pointerEvents: 'none',

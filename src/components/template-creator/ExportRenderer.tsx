@@ -107,11 +107,21 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           );
         }
         
-        // Handle price fields with prefix currency symbol (only for symbol mode)
-        const showPrefixSymbol = isPriceField && displayType === 'symbol' && isSvgSymbol && currencySvgPath;
-        const finalText = showPrefixSymbol ? stripCurrencySymbols(displayContent) : displayContent;
+        // Handle price fields with prefix currency symbol
+        // For SVG symbols in symbol mode OR code in code mode, handle separately
+        const needsSeparateSymbol = isPriceField && (
+          (displayType === 'symbol' && isSvgSymbol && currencySvgPath) ||
+          displayType === 'code'
+        );
         
-        if (showPrefixSymbol) {
+        if (needsSeparateSymbol) {
+          // Strip all currency symbols/codes from the formatted text
+          let cleanText = stripCurrencySymbols(displayContent);
+          if (displayType === 'code') {
+            // Also strip currency codes like "SAR ", "USD ", etc.
+            cleanText = cleanText.replace(/^[A-Z]{3}\s+/, '');
+          }
+          
           return (
             <div 
               key={element.id} 
@@ -123,8 +133,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               }}
             >
               <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: '4px' }}>
-                {renderCurrencySymbol(currencyOptions, 'before', true)}
-                {renderTextDecoration(textElement, finalText, true)}
+                {displayType === 'symbol' && renderCurrencySymbol(currencyOptions, 'before', true)}
+                {displayType === 'code' && <span style={{ color: textElement.color }}>{currencyCode} </span>}
+                {renderTextDecoration(textElement, cleanText, true)}
               </span>
             </div>
           );
@@ -141,7 +152,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               overflowWrap: 'break-word',
             }}
           >
-            {renderTextDecoration(textElement, finalText, true)}
+            {renderTextDecoration(textElement, displayContent, true)}
           </div>
         );
       }
