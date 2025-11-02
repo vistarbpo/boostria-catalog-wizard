@@ -77,7 +77,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
 
         // Handle template text with inline currency
         if (hasCurrencyPlaceholder) {
-          const contentNode = renderTextWithCurrency(displayContent, currencyOptions);
+          const contentNode = renderTextWithCurrency(displayContent, currencyOptions, true);
           
           return (
             <div 
@@ -91,7 +91,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 overflowWrap: 'break-word',
               }}
             >
-              {renderTextDecoration(textElement, contentNode as any)}
+              {renderTextDecoration(textElement, contentNode, true)}
             </div>
           );
         }
@@ -112,8 +112,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               }}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                {renderCurrencySymbol(currencyOptions)}
-                {renderTextDecoration(textElement, finalText)}
+                {renderCurrencySymbol(currencyOptions, 'before', true)}
+                {renderTextDecoration(textElement, finalText, true)}
               </span>
             </div>
           );
@@ -130,7 +130,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               overflowWrap: 'break-word',
             }}
           >
-            {renderTextDecoration(textElement, finalText)}
+            {renderTextDecoration(textElement, finalText, true)}
           </div>
         );
       }

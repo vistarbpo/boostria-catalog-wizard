@@ -50,7 +50,7 @@ export const getTextStyles = (
   };
 };
 
-export const renderTextDecoration = (textElement: TextElement, content: string) => {
+export const renderTextDecoration = (textElement: TextElement, content: string | React.ReactNode, useSimpleStrikethrough: boolean = false) => {
   if (textElement.textDecoration === 'underline') {
     return (
       <span style={{
@@ -63,7 +63,20 @@ export const renderTextDecoration = (textElement: TextElement, content: string) 
       </span>
     );
   } else if (textElement.textDecoration === 'line-through') {
-    // Custom positioned strike-through for precise control
+    // For export, use simple CSS text-decoration (html2canvas compatible)
+    if (useSimpleStrikethrough) {
+      return (
+        <span style={{
+          textDecoration: 'line-through',
+          textDecorationColor: textElement.color,
+          textDecorationThickness: '2px',
+        }}>
+          {content}
+        </span>
+      );
+    }
+    
+    // For preview, use custom positioned strike-through for precise control
     return (
       <span style={{ 
         position: 'relative',

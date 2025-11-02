@@ -285,7 +285,8 @@ export const processTemplatePlaceholders = (
  */
 export const renderCurrencySymbol = (
   options: CurrencyRenderOptions,
-  position: 'before' | 'inline' = 'before'
+  position: 'before' | 'inline' = 'before',
+  useFilter: boolean = false
 ): React.ReactNode => {
   const { isSvgSymbol, currencySvgPath, currencySymbol, fontSize, textColor } = options;
   
@@ -305,6 +306,7 @@ export const renderCurrencySymbol = (
       marginLeft={marginLeft}
       marginRight={marginRight}
       ariaLabel={currencySymbol}
+      useFilter={useFilter}
     />
   );
 };
@@ -314,7 +316,8 @@ export const renderCurrencySymbol = (
  */
 export const renderTextWithCurrency = (
   content: string,
-  options: CurrencyRenderOptions
+  options: CurrencyRenderOptions,
+  useFilter: boolean = false
 ): React.ReactNode => {
   const { isSvgSymbol, currencySvgPath } = options;
   
@@ -331,7 +334,7 @@ export const renderTextWithCurrency = (
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
       {parts[0]}
-      {renderCurrencySymbol(options, 'inline')}
+      {renderCurrencySymbol(options, 'inline', useFilter)}
       {parts[1]}
     </span>
   );
