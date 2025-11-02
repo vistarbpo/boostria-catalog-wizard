@@ -26,6 +26,11 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
   // Convert color to filter values for accurate color matching
   // For black SVGs, we need to colorize them to match the text color
   const getColorFilter = (targetColor: string): string => {
+    // For currentColor, inherit from parent - invert to white for proper contrast
+    if (targetColor === 'currentColor') {
+      return 'brightness(0) invert(1)';
+    }
+    
     // Check if it's a light color (white or near-white)
     const isLightColor = 
       targetColor.includes('white') || 

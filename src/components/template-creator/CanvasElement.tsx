@@ -424,9 +424,11 @@ const CanvasElementComponent = function CanvasElement({
                 ...textStyles,
                 cursor: element.locked ? 'not-allowed' : 'text',
                 visibility: element.visible ? 'visible' : 'hidden',
-                display: 'inline-flex',
+                display: isPriceField ? 'inline-flex' : 'block',
                 alignItems: 'center',
-                whiteSpace: 'nowrap',
+                whiteSpace: isPriceField ? 'nowrap' : 'normal',
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word',
               }}
             >
               {renderTextDecoration(textElement, contentNode as any)}
@@ -444,10 +446,12 @@ const CanvasElementComponent = function CanvasElement({
               ...textStyles,
               cursor: element.locked ? 'not-allowed' : 'text',
               visibility: element.visible ? 'visible' : 'hidden',
-              display: 'inline-flex',
+              display: isPriceField ? 'inline-flex' : 'block',
               alignItems: 'center',
               gap: showSvgSymbol ? '4px' : '0',
-              whiteSpace: 'nowrap',
+              whiteSpace: isPriceField ? 'nowrap' : 'normal',
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word',
             }}
           >
             {showSvgSymbol && renderCurrencySymbol(currencyOptions)}

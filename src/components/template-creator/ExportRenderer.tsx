@@ -80,7 +80,17 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           const contentNode = renderTextWithCurrency(displayContent, currencyOptions);
           
           return (
-            <div key={element.id} style={textStyles}>
+            <div 
+              key={element.id} 
+              style={{
+                ...textStyles,
+                display: isPriceField ? 'inline-flex' : 'block',
+                alignItems: 'center',
+                whiteSpace: isPriceField ? 'nowrap' : 'normal',
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word',
+              }}
+            >
               {renderTextDecoration(textElement, contentNode as any)}
             </div>
           );
@@ -92,7 +102,15 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         
         if (showPrefixSymbol) {
           return (
-            <div key={element.id} style={textStyles}>
+            <div 
+              key={element.id} 
+              style={{
+                ...textStyles,
+                display: 'inline-flex',
+                alignItems: 'center',
+                whiteSpace: 'nowrap',
+              }}
+            >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 {renderCurrencySymbol(currencyOptions)}
                 {renderTextDecoration(textElement, finalText)}
@@ -102,7 +120,16 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         }
         
         return (
-          <div key={element.id} style={textStyles}>
+          <div 
+            key={element.id} 
+            style={{
+              ...textStyles,
+              display: 'block',
+              whiteSpace: 'normal',
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word',
+            }}
+          >
             {renderTextDecoration(textElement, finalText)}
           </div>
         );
