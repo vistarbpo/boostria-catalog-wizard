@@ -42,17 +42,31 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
         normalizedColor.includes('#fff') || 
         normalizedColor === '#ffffff' ||
         normalizedColor.includes('255,255,255') ||
-        normalizedColor.includes('rgb(255,255,255)');
+        normalizedColor.includes('rgb(255,255,255)') ||
+        normalizedColor.includes('hsl(0,0%,100%)');
       
       // For white or light colors, invert the black SVG to white
       if (isLightColor) {
         return 'brightness(0) invert(1)';
       }
       
+      // Check if it's black or very dark
+      const isBlackColor = 
+        normalizedColor.includes('black') ||
+        normalizedColor.includes('#000') ||
+        normalizedColor === '#000000' ||
+        normalizedColor.includes('rgb(0,0,0)') ||
+        normalizedColor.includes('hsl(0,0%,0%)');
+      
+      if (isBlackColor) {
+        return 'brightness(0)';
+      }
+      
       // Check if it's a red color (for sale prices)
       const isRedColor = normalizedColor.includes('#ef4444') || 
                         normalizedColor.includes('#dc2626') ||
-                        normalizedColor.includes('rgb(239,68,68)') ||
+                        normalizedColor.includes('239,68,68') ||
+                        normalizedColor.includes('220,38,38') ||
                         normalizedColor.includes('red');
       
       if (isRedColor) {
@@ -63,8 +77,10 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
       // Check if it's a gray color (for strikethrough prices)
       const isGrayColor = normalizedColor.includes('#999') || 
                          normalizedColor.includes('#9ca3af') ||
+                         normalizedColor.includes('#6b7280') ||
                          normalizedColor.includes('153,153,153') ||
-                         normalizedColor.includes('rgb(156,163,175)');
+                         normalizedColor.includes('156,163,175') ||
+                         normalizedColor.includes('107,114,128');
       
       if (isGrayColor) {
         // For gray, make it black then reduce brightness

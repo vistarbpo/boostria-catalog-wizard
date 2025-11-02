@@ -323,8 +323,26 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
             currencyCode={currencyCode}
           />
         );
-        // Wait for render to complete
-        setTimeout(resolve, 200);
+        // Wait longer for SVG images to load and render properly
+        setTimeout(() => {
+          // Preload all images in the container before capture
+          const images = tempContainer.querySelectorAll('img');
+          const imagePromises = Array.from(images).map(img => {
+            return new Promise<void>((imgResolve) => {
+              if (img.complete) {
+                imgResolve();
+              } else {
+                img.onload = () => imgResolve();
+                img.onerror = () => imgResolve(); // Continue even if image fails
+              }
+            });
+          });
+          
+          Promise.all(imagePromises).then(() => {
+            // Extra delay to ensure filters are applied
+            setTimeout(resolve, 100);
+          });
+        }, 500);
       });
 
       // Capture with html2canvas

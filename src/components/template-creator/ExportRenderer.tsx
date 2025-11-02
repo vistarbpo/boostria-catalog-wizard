@@ -70,6 +70,16 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   const displayType = propDisplayType ?? contextValues.displayType;
   const currencyCode = propCurrencyCode ?? contextValues.currencyCode;
   
+  // Debug: Log currency values during export
+  console.log('[ExportRenderer] Currency config:', {
+    currencySymbol,
+    currencySvgPath,
+    isSvgSymbol,
+    displayType,
+    currencyCode,
+    hasValidSvgPath: !!currencySvgPath,
+  });
+  
   const renderElement = (element: CanvasElement) => {
     const baseStyle: React.CSSProperties = {
       position: 'absolute',
