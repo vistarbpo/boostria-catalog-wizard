@@ -26,6 +26,12 @@ interface ExportRendererProps {
   backgroundType?: 'solid' | 'image';
   backgroundImageUrl?: string;
   backgroundMode?: 'cover' | 'contain' | 'stretch' | 'tile' | 'center';
+  // Currency props (passed directly to avoid context initialization issues during export)
+  currencySymbol?: string;
+  currencySvgPath?: string;
+  isSvgSymbol?: boolean;
+  displayType?: 'code' | 'symbol';
+  currencyCode?: string;
 }
 
 export const ExportRenderer: React.FC<ExportRendererProps> = ({
@@ -36,8 +42,33 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   backgroundType,
   backgroundImageUrl,
   backgroundMode,
+  currencySymbol: propCurrencySymbol,
+  currencySvgPath: propCurrencySvgPath,
+  isSvgSymbol: propIsSvgSymbol,
+  displayType: propDisplayType,
+  currencyCode: propCurrencyCode,
 }) => {
-  const { currencySymbol, currencySvgPath, isSvgSymbol, displayType, currencyCode } = useCurrency();
+  // Try to use context if available, otherwise use props
+  let contextValues;
+  try {
+    contextValues = useCurrency();
+  } catch {
+    // Context not available (e.g., during export), use defaults
+    contextValues = {
+      currencySymbol: '$',
+      currencySvgPath: undefined,
+      isSvgSymbol: false,
+      displayType: 'symbol' as const,
+      currencyCode: 'USD',
+    };
+  }
+  
+  // Prefer props over context for export scenarios
+  const currencySymbol = propCurrencySymbol ?? contextValues.currencySymbol;
+  const currencySvgPath = propCurrencySvgPath ?? contextValues.currencySvgPath;
+  const isSvgSymbol = propIsSvgSymbol ?? contextValues.isSvgSymbol;
+  const displayType = propDisplayType ?? contextValues.displayType;
+  const currencyCode = propCurrencyCode ?? contextValues.currencyCode;
   
   const renderElement = (element: CanvasElement) => {
     const baseStyle: React.CSSProperties = {

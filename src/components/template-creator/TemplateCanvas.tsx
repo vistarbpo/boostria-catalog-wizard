@@ -20,7 +20,7 @@ import { useCanvasStore } from "../../hooks/useCanvasStore";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
 import { ExportRenderer } from './ExportRenderer';
-import { CurrencyProvider } from '@/contexts/CurrencyContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 interface TemplateCanvasProps {
   canvasStore: ReturnType<typeof useCanvasStore>;
 }
@@ -30,6 +30,7 @@ export interface TemplateCanvasRef {
 export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>(({
   canvasStore
 }, ref) => {
+  const { currencySymbol, currencySvgPath, isSvgSymbol, displayType, currencyCode } = useCurrency();
   const [selectedDevice, setSelectedDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [selectedSize, setSelectedSize] = useState("instagram-post");
   const [zoomLevel, setZoomLevel] = useState<number | "fit">("fit");
@@ -307,17 +308,20 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       const root = createRoot(tempContainer);
       await new Promise<void>((resolve) => {
         root.render(
-          <CurrencyProvider>
-            <ExportRenderer
-              elements={canvasStore.canvasState.elements}
-              canvasWidth={currentSize.width}
-              canvasHeight={currentSize.height}
-              backgroundColor={bgColor}
-              backgroundType={canvasStore.canvasState.backgroundType}
-              backgroundImageUrl={canvasStore.canvasState.backgroundImageUrl}
-              backgroundMode={canvasStore.canvasState.backgroundMode}
-            />
-          </CurrencyProvider>
+          <ExportRenderer
+            elements={canvasStore.canvasState.elements}
+            canvasWidth={currentSize.width}
+            canvasHeight={currentSize.height}
+            backgroundColor={bgColor}
+            backgroundType={canvasStore.canvasState.backgroundType}
+            backgroundImageUrl={canvasStore.canvasState.backgroundImageUrl}
+            backgroundMode={canvasStore.canvasState.backgroundMode}
+            currencySymbol={currencySymbol}
+            currencySvgPath={currencySvgPath}
+            isSvgSymbol={isSvgSymbol}
+            displayType={displayType}
+            currencyCode={currencyCode}
+          />
         );
         // Wait for render to complete
         setTimeout(resolve, 200);
@@ -366,7 +370,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
       console.error('Export failed:', error);
       toast.error("Failed to export template");
     }
-  }, [currentSize, canvasRef, canvasStore]);
+  }, [currentSize, canvasRef, canvasStore, currencySymbol, currencySvgPath, isSvgSymbol, displayType, currencyCode]);
 
   // Expose export function through ref
   useImperativeHandle(ref, () => ({
