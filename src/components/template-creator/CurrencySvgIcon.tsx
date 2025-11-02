@@ -11,7 +11,7 @@ interface CurrencySvgIconProps {
 
 /**
  * Component to render SVG currency icons with dynamic coloring
- * Uses inline image with CSS filter for proper color rendering
+ * Uses CSS mask for perfect color matching with text
  */
 export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
   svgPath,
@@ -23,43 +23,15 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
 }) => {
   const [imageError, setImageError] = useState(false);
   
-  // Convert color to filter values for accurate color matching
-  // For black SVGs, we need to colorize them to match the text color
-  const getColorFilter = (targetColor: string): string => {
-    // For currentColor, inherit from parent - invert to white for proper contrast
-    if (targetColor === 'currentColor') {
-      return 'brightness(0) invert(1)';
-    }
-    
-    // Check if it's a light color (white or near-white)
-    const isLightColor = 
-      targetColor.includes('white') || 
-      targetColor.includes('#fff') || 
-      targetColor.includes('255, 255, 255') ||
-      targetColor.includes('255,255,255') ||
-      targetColor === '#FFFFFF' ||
-      targetColor === 'rgb(255, 255, 255)';
-    
-    // For white or light colors, invert the black SVG to white
-    if (isLightColor) {
-      return 'brightness(0) invert(1)';
-    }
-    
-    // For dark colors, keep the SVG black  
-    return 'none';
-  };
-  
   // Fallback to text symbol if image fails to load
   if (imageError) {
-    return <span style={{ marginLeft, marginRight }}>{ariaLabel}</span>;
+    return <span style={{ marginLeft, marginRight, color }}>{ariaLabel}</span>;
   }
   
+  // Use the SVG as a mask and apply the color directly
+  // This ensures perfect color matching regardless of the text color
   return (
-    <img
-      key={svgPath} // Force re-render when path changes
-      src={svgPath}
-      alt={ariaLabel}
-      onError={() => setImageError(true)}
+    <span
       style={{
         display: 'inline-block',
         width: `${size}px`,
@@ -68,11 +40,18 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
         marginLeft,
         marginRight,
         verticalAlign: 'baseline',
-        filter: getColorFilter(color),
-        objectFit: 'contain',
+        backgroundColor: color,
+        maskImage: `url(${svgPath})`,
+        WebkitMaskImage: `url(${svgPath})`,
+        maskSize: 'contain',
+        WebkitMaskSize: 'contain',
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+        maskPosition: 'center',
+        WebkitMaskPosition: 'center',
       }}
       aria-label={ariaLabel}
-      loading="eager"
+      role="img"
     />
   );
 };
