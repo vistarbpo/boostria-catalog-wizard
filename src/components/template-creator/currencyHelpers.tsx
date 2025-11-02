@@ -15,10 +15,11 @@ export interface CurrencyRenderOptions {
 }
 
 /**
- * Strip all currency symbols from a string
+ * Strip all currency symbols from a string (including Arabic ones)
  */
 export const stripCurrencySymbols = (text: string): string => {
-  return text.replace(/[$€£¥₹﷼]/g, '').trim();
+  // Strip common currency symbols AND Arabic currency symbols
+  return text.replace(/[$€£¥₹﷼د\.إر\.قد\.كد\.بر\.ع\.د\.اد\.م\.د\.ت₪₺]/g, '').trim();
 };
 
 /**

@@ -42,26 +42,37 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
         normalizedColor.includes('#fff') || 
         normalizedColor === '#ffffff' ||
         normalizedColor.includes('255,255,255') ||
-        normalizedColor.includes('rgb(255,255,255)') ||
-        normalizedColor === 'currentcolor'; // Treat currentColor as light for safety
+        normalizedColor.includes('rgb(255,255,255)');
       
       // For white or light colors, invert the black SVG to white
       if (isLightColor) {
         return 'brightness(0) invert(1)';
       }
       
+      // Check if it's a red color (for sale prices)
+      const isRedColor = normalizedColor.includes('#ef4444') || 
+                        normalizedColor.includes('#dc2626') ||
+                        normalizedColor.includes('rgb(239,68,68)') ||
+                        normalizedColor.includes('red');
+      
+      if (isRedColor) {
+        // Convert black SVG to red: brightness(0) makes it black, then sepia + hue-rotate to red
+        return 'brightness(0) saturate(100%) invert(27%) sepia(98%) saturate(7426%) hue-rotate(358deg) brightness(95%) contrast(111%)';
+      }
+      
       // Check if it's a gray color (for strikethrough prices)
       const isGrayColor = normalizedColor.includes('#999') || 
                          normalizedColor.includes('#9ca3af') ||
-                         normalizedColor.includes('153,153,153');
+                         normalizedColor.includes('153,153,153') ||
+                         normalizedColor.includes('rgb(156,163,175)');
       
       if (isGrayColor) {
-        // For gray, use brightness and contrast to get the gray tone
+        // For gray, make it black then reduce brightness
         return 'brightness(0) saturate(0) brightness(0.6)';
       }
       
-      // For other dark colors, keep the SVG black with slight opacity
-      return 'brightness(0) opacity(0.9)';
+      // For currentColor or other dark colors, keep the SVG black
+      return 'brightness(0)';
     };
     
     return (

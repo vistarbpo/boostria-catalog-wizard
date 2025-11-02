@@ -70,22 +70,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   const displayType = propDisplayType ?? contextValues.displayType;
   const currencyCode = propCurrencyCode ?? contextValues.currencyCode;
   
-  // Debug logging for export
-  console.log('ExportRenderer currency values:', {
-    currencySymbol,
-    currencySvgPath,
-    isSvgSymbol,
-    displayType,
-    currencyCode,
-    propsReceived: {
-      propCurrencySymbol,
-      propCurrencySvgPath,
-      propIsSvgSymbol,
-      propDisplayType,
-      propCurrencyCode,
-    }
-  });
-  
   const renderElement = (element: CanvasElement) => {
     const baseStyle: React.CSSProperties = {
       position: 'absolute',
@@ -157,19 +141,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         // Handle price fields with prefix currency symbol
         // For SVG symbols in symbol mode OR code in code mode, handle separately
         const needsSeparateSymbol = isPriceField && (
-          (displayType === 'symbol' && isSvgSymbol && currencySvgPath) ||
+          (displayType === 'symbol' && isSvgSymbol && !!currencySvgPath) ||
           displayType === 'code'
         );
-        
-        console.log('Price field rendering:', {
-          isPriceField,
-          needsSeparateSymbol,
-          displayType,
-          isSvgSymbol,
-          currencySvgPath,
-          elementId: element.id,
-          displayContent,
-        });
         
         if (needsSeparateSymbol) {
           // Strip all currency symbols/codes from the formatted text
