@@ -351,7 +351,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
             currencyCode={currencyCode}
           />
         );
-        // Wait for initial render
+        // Wait for initial render and SVG conversion
         setTimeout(() => {
           // Preload all images in the container before capture
           const images = tempContainer.querySelectorAll('img');
@@ -359,11 +359,11 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
           
           const imagePromises = Array.from(images).map((img, idx) => {
             return new Promise<void>((imgResolve) => {
-              if (img.complete) {
-                console.log(`[Export] Image ${idx} already loaded:`, img.src);
+              if (img.complete && img.naturalWidth > 0) {
+                console.log(`[Export] Image ${idx} already loaded:`, img.src.substring(0, 100));
                 imgResolve();
               } else {
-                console.log(`[Export] Waiting for image ${idx}:`, img.src);
+                console.log(`[Export] Waiting for image ${idx}:`, img.src.substring(0, 100));
                 img.onload = () => {
                   console.log(`[Export] Image ${idx} loaded successfully`);
                   imgResolve();
@@ -372,19 +372,21 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
                   console.error(`[Export] Image ${idx} failed to load:`, e);
                   imgResolve(); // Continue even if image fails
                 };
+                // Add timeout for stubborn images
+                setTimeout(() => imgResolve(), 2000);
               }
             });
           });
           
           Promise.all(imagePromises).then(() => {
-            console.log('[Export] All images loaded, waiting for filters to apply...');
-            // Longer delay to ensure CSS filters are fully applied
+            console.log('[Export] All images loaded, final wait...');
+            // Extra delay for SVG data URLs to fully render
             setTimeout(() => {
               console.log('[Export] Ready to capture');
               resolve();
-            }, 500);
+            }, 800);
           });
-        }, 800);
+        }, 1200);
       });
 
       // Capture with html2canvas
