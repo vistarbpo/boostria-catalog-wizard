@@ -294,6 +294,34 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
 
       // Get background color from canvas settings (default to white if not set)
       const bgColor = canvasStore.canvasState.backgroundColor || '#ffffff';
+      
+      // Convert SVG path to absolute URL if it exists
+      let absoluteSvgPath = currencySvgPath;
+      if (currencySvgPath) {
+        try {
+          // If it's already absolute, use it; otherwise make it absolute
+          if (currencySvgPath.startsWith('http') || currencySvgPath.startsWith('data:')) {
+            absoluteSvgPath = currencySvgPath;
+          } else {
+            // Convert relative path to absolute
+            absoluteSvgPath = new URL(currencySvgPath, window.location.origin).href;
+          }
+          console.log('[Export] SVG path conversion:', { 
+            original: currencySvgPath, 
+            absolute: absoluteSvgPath 
+          });
+        } catch (err) {
+          console.error('[Export] Failed to convert SVG path:', err);
+        }
+      }
+      
+      console.log('[Export] Currency config:', {
+        currencySymbol,
+        currencySvgPath: absoluteSvgPath,
+        isSvgSymbol,
+        displayType,
+        currencyCode,
+      });
 
       // Create a temporary container for the export renderer
       const tempContainer = document.createElement('div');
@@ -317,7 +345,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
             backgroundImageUrl={canvasStore.canvasState.backgroundImageUrl}
             backgroundMode={canvasStore.canvasState.backgroundMode}
             currencySymbol={currencySymbol}
-            currencySvgPath={currencySvgPath}
+            currencySvgPath={absoluteSvgPath}
             isSvgSymbol={isSvgSymbol}
             displayType={displayType}
             currencyCode={currencyCode}

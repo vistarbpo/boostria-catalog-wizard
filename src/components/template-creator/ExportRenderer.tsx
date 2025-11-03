@@ -78,7 +78,21 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
     displayType,
     currencyCode,
     hasValidSvgPath: !!currencySvgPath,
+    svgPathType: currencySvgPath ? (currencySvgPath.startsWith('http') ? 'absolute' : 'relative') : 'none',
   });
+  
+  // Log when rendering price fields
+  const priceFields = elements.filter(el => 
+    el.type === 'text' && 
+    (el as any).isDynamic && 
+    ((el as any).dynamicField === 'price' || 
+     (el as any).dynamicField === 'sale_price' || 
+     (el as any).dynamicField === 'compare_at_price')
+  );
+  console.log('[ExportRenderer] Found price fields:', priceFields.length);
+  if (isSvgSymbol && currencySvgPath) {
+    console.log('[ExportRenderer] Will render SVG currency symbols for price fields');
+  }
   
   const renderElement = (element: CanvasElement) => {
     const baseStyle: React.CSSProperties = {
