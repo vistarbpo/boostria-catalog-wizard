@@ -175,17 +175,38 @@ export const formatTextWithCurrency = (
     return content;
   }
 
+  // Check if this is a price field EARLY
+  const isPriceField = element.dynamicField === 'price' || 
+                      element.dynamicField === 'sale_price' || 
+                      element.dynamicField === 'compare_at_price';
+
   // Apply text modifiers (case transformations)
   if (element.modifiers) {
     content = applyTextModifiers(content, element.modifiers);
   }
 
-  // If no numeric modifiers or formatting, return the content
+  // If no numeric modifiers or formatting
   const hasNumericFormatting = element.modifiers?.some(m => 
     ['divide', 'multiply', 'add', 'subtract', 'decimals', 'numerical'].includes(m.type)
   ) || element.formatting;
 
   if (!hasNumericFormatting) {
+    // For price fields, ALWAYS process currency even without formatting
+    if (isPriceField) {
+      // Strip existing currency symbols and extract numeric value
+      const cleaned = stripCurrencySymbols(content).replace(/[^0-9.-]/g, '');
+      const numValue = parseFloat(cleaned);
+      if (!isNaN(numValue)) {
+        // Apply default formatting with global currency
+        const formatted = numValue.toFixed(2);
+        if (displayType === 'code') {
+          return currencyCode + ' ' + formatted;
+        } else {
+          const prefix = isSvgCurrency ? '[CURRENCY_SVG]' : currencySymbol;
+          return prefix + formatted;
+        }
+      }
+    }
     return content;
   }
 
