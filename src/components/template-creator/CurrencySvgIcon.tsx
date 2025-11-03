@@ -56,7 +56,8 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
         normalizedColor.includes('#000') ||
         normalizedColor === '#000000' ||
         normalizedColor.includes('rgb(0,0,0)') ||
-        normalizedColor.includes('hsl(0,0%,0%)');
+        normalizedColor.includes('hsl(0,0%,0%)') ||
+        normalizedColor.includes('0,0,0');
       
       if (isBlackColor) {
         return 'brightness(0)';
@@ -95,6 +96,7 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
       <img
         src={svgPath}
         alt={ariaLabel}
+        crossOrigin="anonymous"
         onError={() => setImageError(true)}
         style={{
           display: 'inline-block',

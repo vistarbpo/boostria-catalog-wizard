@@ -19,7 +19,8 @@ export interface CurrencyRenderOptions {
  */
 export const stripCurrencySymbols = (text: string): string => {
   // Strip common currency symbols AND Arabic currency symbols
-  return text.replace(/[$€£¥₹﷼د\.إر\.قد\.كد\.بر\.ع\.د\.اد\.م\.د\.ت₪₺]/g, '').trim();
+  // Use proper escaping for dots in د.إ and other Arabic symbols
+  return text.replace(/[$€£¥₹﷼₪₺]|د\.إ|ر\.ق|د\.ك|د\.ب|ر\.ع\.|د\.ا|ل\.ل|د\.م\./g, '').trim();
 };
 
 /**
