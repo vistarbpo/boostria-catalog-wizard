@@ -6,7 +6,6 @@ interface CurrencyContextType {
   currencyCode: string;
   currencySymbol: string;
   currencySvgPath?: string;
-  currencyFontFamily?: string;
   isSvgSymbol: boolean;
   displayType: 'code' | 'symbol';
   setCurrency: (code: string) => void;
@@ -47,7 +46,6 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const isSvgSymbol = currency?.symbolType === 'svg';
   const currencySymbol = currency?.symbol || '$';
   const currencySvgPath = currency?.svgPath;
-  const currencyFontFamily = currency?.fontFamily;
 
   return (
     <CurrencyContext.Provider 
@@ -55,7 +53,6 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
         currencyCode, 
         currencySymbol,
         currencySvgPath,
-        currencyFontFamily,
         isSvgSymbol,
         displayType,
         setCurrency,

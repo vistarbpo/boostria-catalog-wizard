@@ -2,47 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Fonts */
-@font-face {
-  font-family: 'Rubik';
-  src: url('/fonts/Rubik-Regular.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Rubik';
-  src: url('/fonts/Rubik-Light.otf') format('opentype');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Rubik';
-  src: url('/fonts/Rubik-SemiBold.otf') format('opentype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Rubik';
-  src: url('/fonts/Rubik-ExtraBold.otf') format('opentype');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Rubik';
-  src: url('/fonts/Rubik-Black.otf') format('opentype');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Boostria Catalog Manager - Dark Theme Design System */
 
 @layer base {

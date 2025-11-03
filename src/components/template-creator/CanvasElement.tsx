@@ -63,7 +63,7 @@ const CanvasElementComponent = function CanvasElement({
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   
-  const { currencySymbol, currencySvgPath, currencyFontFamily, isSvgSymbol, displayType, currencyCode } = useCurrency();
+  const { currencySymbol, currencySvgPath, isSvgSymbol, displayType, currencyCode } = useCurrency();
   
   const elementRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
@@ -410,7 +410,6 @@ const CanvasElementComponent = function CanvasElement({
         const currencyOptions = {
           currencySymbol,
           currencySvgPath,
-          currencyFontFamily,
           isSvgSymbol,
           textColor: textElement.color,
           fontSize: textElement.fontSize,
@@ -816,7 +815,6 @@ const CanvasElementComponent = function CanvasElement({
         const currencyOptions = {
           currencySymbol,
           currencySvgPath,
-          currencyFontFamily,
           isSvgSymbol,
           textColor: textEl.color,
           fontSize: textEl.fontSize,
