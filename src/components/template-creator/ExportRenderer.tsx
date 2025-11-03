@@ -34,6 +34,38 @@ interface ExportRendererProps {
   currencyCode?: string;
 }
 
+// Helper function to convert color to CSS filter for SVG recoloring
+const getColorFilter = (color: string): string => {
+  const normalized = color.toLowerCase().replace(/\s/g, '');
+  
+  // White or light colors
+  if (normalized.includes('white') || normalized.includes('#fff') || normalized === '#ffffff' ||
+      normalized.includes('255,255,255') || normalized.includes('rgb(255,255,255)')) {
+    return 'brightness(0) invert(1)';
+  }
+  
+  // Black or dark colors
+  if (normalized.includes('black') || normalized.includes('#000') || normalized === '#000000' ||
+      normalized.includes('rgb(0,0,0)') || normalized.includes('0,0,0')) {
+    return 'brightness(0)';
+  }
+  
+  // Red colors (for sale prices)
+  if (normalized.includes('#ef4444') || normalized.includes('#dc2626') ||
+      normalized.includes('239,68,68') || normalized.includes('220,38,38') || normalized.includes('red')) {
+    return 'brightness(0) saturate(100%) invert(27%) sepia(98%) saturate(7426%) hue-rotate(358deg) brightness(95%) contrast(111%)';
+  }
+  
+  // Gray colors
+  if (normalized.includes('#999') || normalized.includes('#9ca3af') || normalized.includes('#6b7280') ||
+      normalized.includes('153,153,153') || normalized.includes('156,163,175') || normalized.includes('107,114,128')) {
+    return 'brightness(0) saturate(0) brightness(0.6)';
+  }
+  
+  // Default to black
+  return 'brightness(0)';
+};
+
 export const ExportRenderer: React.FC<ExportRendererProps> = ({
   elements,
   canvasWidth,
@@ -143,8 +175,50 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
 
         // Handle template text with inline currency
         if (hasCurrencyPlaceholder) {
-          const contentNode = renderTextWithCurrency(displayContent, currencyOptions, true);
+          // For export, render SVG symbols directly as images
+          if (isSvgSymbol && currencySvgPath) {
+            const parts = displayContent.split('[CURRENCY_SVG]');
+            const symbolSize = textElement.fontSize * 0.8;
+            
+            return (
+              <div 
+                key={element.id} 
+                style={{
+                  ...adjustedTextStyles,
+                  display: 'inline-flex',
+                  alignItems: 'flex-start',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {renderTextDecoration(
+                  textElement,
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                    {parts[0]}
+                    <img
+                      src={currencySvgPath}
+                      alt={currencySymbol}
+                      crossOrigin="anonymous"
+                      style={{
+                        display: 'inline-block',
+                        width: `${symbolSize}px`,
+                        height: `${symbolSize}px`,
+                        marginLeft: '2px',
+                        marginRight: '2px',
+                        filter: getColorFilter(textElement.color),
+                        objectFit: 'contain',
+                        flexShrink: 0,
+                      }}
+                    />
+                    {parts[1]}
+                  </span>,
+                  true
+                )}
+              </div>
+            );
+          }
           
+          // Fallback to text symbol
+          const contentNode = displayContent.replace('[CURRENCY_SVG]', currencySymbol);
           return (
             <div 
               key={element.id} 
@@ -177,6 +251,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             cleanText = cleanText.replace(/^[A-Z]{3}\s+/, '');
           }
           
+          const symbolSize = textElement.fontSize * 0.8;
+          
           return (
             <div 
               key={element.id} 
@@ -187,8 +263,23 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 whiteSpace: 'nowrap',
               }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: '4px' }}>
-                {displayType === 'symbol' && renderCurrencySymbol(currencyOptions, 'before', true)}
+              <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: '0' }}>
+                {displayType === 'symbol' && isSvgSymbol && currencySvgPath && (
+                  <img
+                    src={currencySvgPath}
+                    alt={currencySymbol}
+                    crossOrigin="anonymous"
+                    style={{
+                      display: 'inline-block',
+                      width: `${symbolSize}px`,
+                      height: `${symbolSize}px`,
+                      marginRight: '4px',
+                      filter: getColorFilter(textElement.color),
+                      objectFit: 'contain',
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
                 {displayType === 'code' && <span style={{ color: textElement.color }}>{currencyCode} </span>}
                 {renderTextDecoration(textElement, cleanText, true)}
               </span>
