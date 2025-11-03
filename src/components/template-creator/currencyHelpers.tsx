@@ -15,12 +15,15 @@ export interface CurrencyRenderOptions {
 }
 
 /**
- * Strip all currency symbols from a string (including Arabic ones)
+ * Strip all currency symbols from a string (including Arabic ones and SVG placeholder)
  */
 export const stripCurrencySymbols = (text: string): string => {
-  // Strip common currency symbols AND Arabic currency symbols
+  // Strip common currency symbols AND Arabic currency symbols AND SVG placeholder
   // Use proper escaping for dots in د.إ and other Arabic symbols
-  return text.replace(/[$€£¥₹﷼₪₺]|د\.إ|ر\.ق|د\.ك|د\.ب|ر\.ع\.|د\.ا|ل\.ل|د\.م\./g, '').trim();
+  return text
+    .replace(/\[CURRENCY_SVG\]/g, '')
+    .replace(/[$€£¥₹﷼₪₺]|د\.إ|ر\.ق|د\.ك|د\.ب|ر\.ع\.|د\.ا|ل\.ل|د\.م\./g, '')
+    .trim();
 };
 
 /**

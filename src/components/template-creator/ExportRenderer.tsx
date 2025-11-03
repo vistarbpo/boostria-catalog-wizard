@@ -165,6 +165,19 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         const displayContent = formatTextWithCurrency(textElement, undefined, currencySymbol, isSvgSymbol, displayType, currencyCode);
         const hasCurrencyPlaceholder = displayContent.includes('[CURRENCY_SVG]');
         
+        // Debug logging for price fields
+        if (isPriceField) {
+          console.log('[ExportRenderer] Price field rendering:', {
+            elementId: element.id,
+            dynamicField: textElement.dynamicField,
+            displayContent,
+            hasCurrencyPlaceholder,
+            isSvgSymbol,
+            currencySvgPath: !!currencySvgPath,
+            displayType,
+          });
+        }
+        
         const currencyOptions = {
           currencySymbol,
           currencySvgPath,
@@ -175,11 +188,19 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
 
         // Handle template text with inline currency
         if (hasCurrencyPlaceholder) {
+          console.log('[ExportRenderer] Rendering currency placeholder:', {
+            hasSvgPath: !!currencySvgPath,
+            svgPath: currencySvgPath,
+            parts: displayContent.split('[CURRENCY_SVG]'),
+          });
+          
           // For export, render SVG symbols directly as images
           if (isSvgSymbol && currencySvgPath) {
             const parts = displayContent.split('[CURRENCY_SVG]');
             // Smaller SVG size (60% of font size)
             const symbolSize = textElement.fontSize * 0.6;
+            
+            console.log('[ExportRenderer] Rendering SVG img with size:', symbolSize, 'filter:', getColorFilter(textElement.color));
             
             return (
               <div 
@@ -197,8 +218,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                     {parts[0]}
                     <img
                       src={currencySvgPath}
-                      alt={currencySymbol}
+                      alt="Currency"
                       crossOrigin="anonymous"
+                      onLoad={() => console.log('[ExportRenderer] SVG loaded successfully')}
+                      onError={(e) => console.error('[ExportRenderer] SVG failed to load:', e)}
                       style={{
                         display: 'inline-block',
                         width: `${symbolSize}px`,
@@ -208,6 +231,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                         filter: getColorFilter(textElement.color),
                         objectFit: 'contain',
                         flexShrink: 0,
+                        visibility: 'visible',
+                        opacity: 1,
                       }}
                     />
                     {parts[1]}
@@ -219,6 +244,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           }
           
           // Fallback to text symbol
+          console.log('[ExportRenderer] Falling back to text symbol');
           const contentNode = displayContent.replace('[CURRENCY_SVG]', currencySymbol);
           return (
             <div 
