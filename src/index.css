@@ -2,15 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom font for Saudi Riyal symbol */
-@font-face {
-  font-family: 'Claudion';
-  src: url('/fonts/Claudion.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Boostria Catalog Manager - Dark Theme Design System */
 
 @layer base {
@@ -133,10 +124,5 @@
 
   body {
     @apply bg-background text-foreground;
-  }
-  
-  /* Apply Claudion font to Saudi Riyal symbol */
-  .currency-sar {
-    font-family: 'Claudion', sans-serif;
   }
 }

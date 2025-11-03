@@ -409,7 +409,6 @@ const CanvasElementComponent = function CanvasElement({
         
         const currencyOptions = {
           currencySymbol,
-          currencyCode,
           currencySvgPath,
           isSvgSymbol,
           textColor: textElement.color,
@@ -815,7 +814,6 @@ const CanvasElementComponent = function CanvasElement({
         
         const currencyOptions = {
           currencySymbol,
-          currencyCode,
           currencySvgPath,
           isSvgSymbol,
           textColor: textEl.color,

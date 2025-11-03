@@ -8,7 +8,6 @@ import { CurrencySvgIcon } from './CurrencySvgIcon';
 
 export interface CurrencyRenderOptions {
   currencySymbol: string;
-  currencyCode?: string;
   currencySvgPath?: string;
   isSvgSymbol: boolean;
   textColor: string;
@@ -330,14 +329,10 @@ export const renderCurrencySymbol = (
   position: 'before' | 'inline' = 'before',
   useFilter: boolean = false
 ): React.ReactNode => {
-  const { isSvgSymbol, currencySvgPath, currencySymbol, currencyCode, fontSize, textColor } = options;
+  const { isSvgSymbol, currencySvgPath, currencySymbol, fontSize, textColor } = options;
   
   if (!isSvgSymbol || !currencySvgPath) {
-    // Apply Claudion font for SAR currency symbol
-    const className = currencyCode === 'SAR' ? 'currency-sar' : undefined;
-    return position === 'inline' ? (
-      <span className={className}>{currencySymbol}</span>
-    ) : null;
+    return position === 'inline' ? currencySymbol : null;
   }
 
   const size = fontSize * 0.8;

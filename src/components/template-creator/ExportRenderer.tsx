@@ -186,7 +186,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         
         const currencyOptions = {
           currencySymbol,
-          currencyCode,
           currencySvgPath,
           isSvgSymbol,
           textColor: textElement.color,
