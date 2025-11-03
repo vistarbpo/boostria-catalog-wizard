@@ -117,6 +117,7 @@ export const formatDynamicValue = (
     
     if (isPriceField && !skipCurrencyPrefix) {
       // Use code or symbol based on displayType - ALWAYS use global currency settings
+      // DO NOT use local prefix/suffix for price fields
       if (displayType === 'code') {
         formattedValue = (currencyCode || 'USD') + ' ' + formattedValue;
       } else {
@@ -124,9 +125,13 @@ export const formatDynamicValue = (
         // The caller will handle SVG rendering
         formattedValue = currencySymbol + formattedValue;
       }
-    } else if (!isPriceField) {
-      if (fmt.prefix) formattedValue = fmt.prefix + formattedValue;
-      if (fmt.suffix) formattedValue = formattedValue + fmt.suffix;
+    } else if (!isPriceField && fmt.prefix) {
+      // Only apply prefix/suffix for non-price fields
+      formattedValue = fmt.prefix + formattedValue;
+    }
+    
+    if (!isPriceField && fmt.suffix) {
+      formattedValue = formattedValue + fmt.suffix;
     }
   }
 
@@ -238,7 +243,7 @@ export const formatTextWithCurrency = (
                         element.dynamicField === 'compare_at_price';
     
     if (isPriceField) {
-      // For price fields, ALWAYS use global currency settings
+      // For price fields, ALWAYS use global currency settings (ignore local prefix/suffix)
       if (displayType === 'code') {
         formatted = currencyCode + ' ' + formatted;
       } else {
