@@ -351,7 +351,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
             currencyCode={currencyCode}
           />
         );
-        // Wait for initial render and SVG conversion
+        // Wait for initial render
         setTimeout(() => {
           // Preload all images in the container before capture
           const images = tempContainer.querySelectorAll('img');
@@ -359,11 +359,11 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
           
           const imagePromises = Array.from(images).map((img, idx) => {
             return new Promise<void>((imgResolve) => {
-              if (img.complete && img.naturalWidth > 0) {
-                console.log(`[Export] Image ${idx} already loaded:`, img.src.substring(0, 100));
+              if (img.complete) {
+                console.log(`[Export] Image ${idx} already loaded:`, img.src);
                 imgResolve();
               } else {
-                console.log(`[Export] Waiting for image ${idx}:`, img.src.substring(0, 100));
+                console.log(`[Export] Waiting for image ${idx}:`, img.src);
                 img.onload = () => {
                   console.log(`[Export] Image ${idx} loaded successfully`);
                   imgResolve();
@@ -372,21 +372,19 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
                   console.error(`[Export] Image ${idx} failed to load:`, e);
                   imgResolve(); // Continue even if image fails
                 };
-                // Add timeout for stubborn images
-                setTimeout(() => imgResolve(), 2000);
               }
             });
           });
           
           Promise.all(imagePromises).then(() => {
-            console.log('[Export] All images loaded, final wait...');
-            // Extra delay for SVG data URLs to fully render
+            console.log('[Export] All images loaded, waiting for filters to apply...');
+            // Longer delay to ensure CSS filters are fully applied
             setTimeout(() => {
               console.log('[Export] Ready to capture');
               resolve();
-            }, 800);
+            }, 500);
           });
-        }, 1200);
+        }, 800);
       });
 
       // Capture with html2canvas

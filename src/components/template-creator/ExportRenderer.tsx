@@ -34,26 +34,36 @@ interface ExportRendererProps {
   currencyCode?: string;
 }
 
-// Helper function to fetch and convert SVG to data URL with proper fill color
-const convertSvgToColoredDataUrl = async (svgUrl: string, color: string): Promise<string> => {
-  try {
-    const response = await fetch(svgUrl);
-    let svgText = await response.text();
-    
-    // Add fill color to the SVG
-    // Insert fill attribute into path, g, or svg elements
-    svgText = svgText.replace(/<path\s/g, `<path fill="${color}" `);
-    svgText = svgText.replace(/<circle\s/g, `<circle fill="${color}" `);
-    svgText = svgText.replace(/<rect\s/g, `<rect fill="${color}" `);
-    svgText = svgText.replace(/<polygon\s/g, `<polygon fill="${color}" `);
-    
-    // Convert to base64
-    const base64 = btoa(unescape(encodeURIComponent(svgText)));
-    return `data:image/svg+xml;base64,${base64}`;
-  } catch (err) {
-    console.error('[Export] Failed to convert SVG:', err);
-    return svgUrl; // Fallback to original URL
+// Helper function to convert color to CSS filter for SVG recoloring
+const getColorFilter = (color: string): string => {
+  const normalized = color.toLowerCase().replace(/\s/g, '');
+  
+  // White or light colors
+  if (normalized.includes('white') || normalized.includes('#fff') || normalized === '#ffffff' ||
+      normalized.includes('255,255,255') || normalized.includes('rgb(255,255,255)')) {
+    return 'brightness(0) invert(1)';
   }
+  
+  // Black or dark colors
+  if (normalized.includes('black') || normalized.includes('#000') || normalized === '#000000' ||
+      normalized.includes('rgb(0,0,0)') || normalized.includes('0,0,0')) {
+    return 'brightness(0)';
+  }
+  
+  // Red colors (for sale prices)
+  if (normalized.includes('#ef4444') || normalized.includes('#dc2626') ||
+      normalized.includes('239,68,68') || normalized.includes('220,38,38') || normalized.includes('red')) {
+    return 'brightness(0) saturate(100%) invert(27%) sepia(98%) saturate(7426%) hue-rotate(358deg) brightness(95%) contrast(111%)';
+  }
+  
+  // Gray colors
+  if (normalized.includes('#999') || normalized.includes('#9ca3af') || normalized.includes('#6b7280') ||
+      normalized.includes('153,153,153') || normalized.includes('156,163,175') || normalized.includes('107,114,128')) {
+    return 'brightness(0) saturate(0) brightness(0.6)';
+  }
+  
+  // Default to black
+  return 'brightness(0)';
 };
 
 export const ExportRenderer: React.FC<ExportRendererProps> = ({
@@ -70,8 +80,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   displayType: propDisplayType,
   currencyCode: propCurrencyCode,
 }) => {
-  const [coloredSvgCache, setColoredSvgCache] = React.useState<Map<string, string>>(new Map());
-  
   // Try to use context if available, otherwise use props
   let contextValues;
   try {
@@ -93,20 +101,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   const isSvgSymbol = propIsSvgSymbol ?? contextValues.isSvgSymbol;
   const displayType = propDisplayType ?? contextValues.displayType;
   const currencyCode = propCurrencyCode ?? contextValues.currencyCode;
-  
-  // Helper to get colored SVG data URL (with caching)
-  const getColoredSvg = React.useCallback(async (color: string): Promise<string> => {
-    if (!currencySvgPath) return '';
-    
-    const cacheKey = `${currencySvgPath}-${color}`;
-    if (coloredSvgCache.has(cacheKey)) {
-      return coloredSvgCache.get(cacheKey)!;
-    }
-    
-    const dataUrl = await convertSvgToColoredDataUrl(currencySvgPath, color);
-    setColoredSvgCache(new Map(coloredSvgCache.set(cacheKey, dataUrl)));
-    return dataUrl;
-  }, [currencySvgPath, coloredSvgCache]);
   
   // Debug: Log currency values during export
   console.log('[ExportRenderer] Currency config:', {
@@ -200,42 +194,13 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             parts: displayContent.split('[CURRENCY_SVG]'),
           });
           
-          // For export, render SVG symbols directly as images with proper coloring
+          // For export, render SVG symbols directly as images
           if (isSvgSymbol && currencySvgPath) {
             const parts = displayContent.split('[CURRENCY_SVG]');
             // Smaller SVG size (60% of font size)
             const symbolSize = textElement.fontSize * 0.6;
             
-            console.log('[ExportRenderer] Rendering SVG with inline color:', textElement.color);
-            
-            // Create a component that fetches and renders colored SVG
-            const ColoredSvgSymbol = () => {
-              const [svgDataUrl, setSvgDataUrl] = React.useState<string>('');
-              
-              React.useEffect(() => {
-                getColoredSvg(textElement.color).then(setSvgDataUrl);
-              }, []);
-              
-              if (!svgDataUrl) return null;
-              
-              return (
-                <img
-                  src={svgDataUrl}
-                  alt="Currency"
-                  onLoad={() => console.log('[ExportRenderer] Colored SVG loaded')}
-                  onError={(e) => console.error('[ExportRenderer] Colored SVG failed:', e)}
-                  style={{
-                    display: 'inline-block',
-                    width: `${symbolSize}px`,
-                    height: `${symbolSize}px`,
-                    marginLeft: '2px',
-                    marginRight: '2px',
-                    objectFit: 'contain',
-                    flexShrink: 0,
-                  }}
-                />
-              );
-            };
+            console.log('[ExportRenderer] Rendering SVG img with size:', symbolSize, 'filter:', getColorFilter(textElement.color));
             
             return (
               <div 
@@ -251,7 +216,25 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                   textElement,
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0' }}>
                     {parts[0]}
-                    <ColoredSvgSymbol />
+                    <img
+                      src={currencySvgPath}
+                      alt="Currency"
+                      crossOrigin="anonymous"
+                      onLoad={() => console.log('[ExportRenderer] SVG loaded successfully')}
+                      onError={(e) => console.error('[ExportRenderer] SVG failed to load:', e)}
+                      style={{
+                        display: 'inline-block',
+                        width: `${symbolSize}px`,
+                        height: `${symbolSize}px`,
+                        marginLeft: '2px',
+                        marginRight: '2px',
+                        filter: getColorFilter(textElement.color),
+                        objectFit: 'contain',
+                        flexShrink: 0,
+                        visibility: 'visible',
+                        opacity: 1,
+                      }}
+                    />
                     {parts[1]}
                   </span>,
                   true
@@ -298,34 +281,6 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           // Smaller SVG size (60% of font size instead of 80%)
           const symbolSize = textElement.fontSize * 0.6;
           
-          // Create colored SVG component
-          const PrefixSvgSymbol = () => {
-            const [svgDataUrl, setSvgDataUrl] = React.useState<string>('');
-            
-            React.useEffect(() => {
-              if (displayType === 'symbol' && isSvgSymbol && currencySvgPath) {
-                getColoredSvg(textElement.color).then(setSvgDataUrl);
-              }
-            }, []);
-            
-            if (!svgDataUrl) return null;
-            
-            return (
-              <img
-                src={svgDataUrl}
-                alt={currencySymbol}
-                style={{
-                  display: 'inline-block',
-                  width: `${symbolSize}px`,
-                  height: `${symbolSize}px`,
-                  marginRight: '3px',
-                  objectFit: 'contain',
-                  flexShrink: 0,
-                }}
-              />
-            );
-          };
-          
           return (
             <div 
               key={element.id} 
@@ -337,7 +292,22 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               }}
             >
               <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: '0' }}>
-                {displayType === 'symbol' && isSvgSymbol && currencySvgPath && <PrefixSvgSymbol />}
+                {displayType === 'symbol' && isSvgSymbol && currencySvgPath && (
+                  <img
+                    src={currencySvgPath}
+                    alt={currencySymbol}
+                    crossOrigin="anonymous"
+                    style={{
+                      display: 'inline-block',
+                      width: `${symbolSize}px`,
+                      height: `${symbolSize}px`,
+                      marginRight: '3px',
+                      filter: getColorFilter(textElement.color),
+                      objectFit: 'contain',
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
                 {displayType === 'code' && <span style={{ color: textElement.color }}>{currencyCode} </span>}
                 {renderTextDecoration(textElement, cleanText, true)}
               </span>
