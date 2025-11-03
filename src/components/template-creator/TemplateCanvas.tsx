@@ -351,26 +351,40 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
             currencyCode={currencyCode}
           />
         );
-        // Wait longer for SVG images to load and render properly
+        // Wait for initial render
         setTimeout(() => {
           // Preload all images in the container before capture
           const images = tempContainer.querySelectorAll('img');
-          const imagePromises = Array.from(images).map(img => {
+          console.log('[Export] Found images to load:', images.length);
+          
+          const imagePromises = Array.from(images).map((img, idx) => {
             return new Promise<void>((imgResolve) => {
               if (img.complete) {
+                console.log(`[Export] Image ${idx} already loaded:`, img.src);
                 imgResolve();
               } else {
-                img.onload = () => imgResolve();
-                img.onerror = () => imgResolve(); // Continue even if image fails
+                console.log(`[Export] Waiting for image ${idx}:`, img.src);
+                img.onload = () => {
+                  console.log(`[Export] Image ${idx} loaded successfully`);
+                  imgResolve();
+                };
+                img.onerror = (e) => {
+                  console.error(`[Export] Image ${idx} failed to load:`, e);
+                  imgResolve(); // Continue even if image fails
+                };
               }
             });
           });
           
           Promise.all(imagePromises).then(() => {
-            // Extra delay to ensure filters are applied
-            setTimeout(resolve, 100);
+            console.log('[Export] All images loaded, waiting for filters to apply...');
+            // Longer delay to ensure CSS filters are fully applied
+            setTimeout(() => {
+              console.log('[Export] Ready to capture');
+              resolve();
+            }, 500);
           });
-        }, 500);
+        }, 800);
       });
 
       // Capture with html2canvas
