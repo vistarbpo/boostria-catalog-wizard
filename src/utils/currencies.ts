@@ -18,7 +18,7 @@ export const CURRENCIES: Currency[] = [
   { code: 'CNY', symbol: '¥', name: 'Chinese Yuan', symbolType: 'unicode', countries: ['CN'] },
   
   // Middle East
-  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal', symbolType: 'unicode', countries: ['SA'] },
+  { code: 'SAR', symbol: '\u20C0', name: 'Saudi Riyal', symbolType: 'unicode', countries: ['SA'] },
   { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', symbolType: 'svg', svgPath: uaeDirhamIcon, countries: ['AE'] },
   { code: 'QAR', symbol: 'ر.ق', name: 'Qatari Riyal', symbolType: 'unicode', countries: ['QA'] },
   { code: 'KWD', symbol: 'د.ك', name: 'Kuwaiti Dinar', symbolType: 'unicode', countries: ['KW'] },
