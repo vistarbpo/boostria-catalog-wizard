@@ -30,7 +30,7 @@ export interface TemplateCanvasRef {
 export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>(({
   canvasStore
 }, ref) => {
-  const { currencySymbol, currencySvgPath, isSvgSymbol, displayType, currencyCode } = useCurrency();
+  const { currencySymbol, currencySvgPath, currencyFontFamily, isSvgSymbol, displayType, currencyCode } = useCurrency();
   const [selectedDevice, setSelectedDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [selectedSize, setSelectedSize] = useState("instagram-post");
   const [zoomLevel, setZoomLevel] = useState<number | "fit">("fit");
@@ -346,6 +346,7 @@ export const TemplateCanvas = forwardRef<TemplateCanvasRef, TemplateCanvasProps>
             backgroundMode={canvasStore.canvasState.backgroundMode}
             currencySymbol={currencySymbol}
             currencySvgPath={absoluteSvgPath}
+            currencyFontFamily={currencyFontFamily}
             isSvgSymbol={isSvgSymbol}
             displayType={displayType}
             currencyCode={currencyCode}

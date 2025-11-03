@@ -29,6 +29,7 @@ interface ExportRendererProps {
   // Currency props (passed directly to avoid context initialization issues during export)
   currencySymbol?: string;
   currencySvgPath?: string;
+  currencyFontFamily?: string;
   isSvgSymbol?: boolean;
   displayType?: 'code' | 'symbol';
   currencyCode?: string;
@@ -44,6 +45,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   backgroundMode,
   currencySymbol: propCurrencySymbol,
   currencySvgPath: propCurrencySvgPath,
+  currencyFontFamily: propCurrencyFontFamily,
   isSvgSymbol: propIsSvgSymbol,
   displayType: propDisplayType,
   currencyCode: propCurrencyCode,
@@ -57,6 +59,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
     contextValues = {
       currencySymbol: '$',
       currencySvgPath: undefined,
+      currencyFontFamily: undefined,
       isSvgSymbol: false,
       displayType: 'symbol' as const,
       currencyCode: 'USD',
@@ -66,6 +69,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
   // Prefer props over context for export scenarios
   const currencySymbol = propCurrencySymbol ?? contextValues.currencySymbol;
   const currencySvgPath = propCurrencySvgPath ?? contextValues.currencySvgPath;
+  const currencyFontFamily = propCurrencyFontFamily ?? contextValues.currencyFontFamily;
   const isSvgSymbol = propIsSvgSymbol ?? contextValues.isSvgSymbol;
   const displayType = propDisplayType ?? contextValues.displayType;
   const currencyCode = propCurrencyCode ?? contextValues.currencyCode;
@@ -136,6 +140,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         const currencyOptions = {
           currencySymbol,
           currencySvgPath,
+          currencyFontFamily,
           isSvgSymbol,
           textColor: textElement.color,
           fontSize: textElement.fontSize,

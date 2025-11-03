@@ -1,4 +1,3 @@
-import saudiRiyalIcon from '@/assets/currency/saudi-riyal.svg';
 import uaeDirhamIcon from '@/assets/currency/uae-dirham.svg';
 
 export interface Currency {
@@ -7,6 +6,7 @@ export interface Currency {
   name: string;
   symbolType: 'unicode' | 'svg';
   svgPath?: string;
+  fontFamily?: string;
   countries: string[];
 }
 
@@ -19,7 +19,7 @@ export const CURRENCIES: Currency[] = [
   { code: 'CNY', symbol: '¥', name: 'Chinese Yuan', symbolType: 'unicode', countries: ['CN'] },
   
   // Middle East
-  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal', symbolType: 'svg', svgPath: saudiRiyalIcon, countries: ['SA'] },
+  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal', symbolType: 'unicode', fontFamily: 'Rubik', countries: ['SA'] },
   { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', symbolType: 'svg', svgPath: uaeDirhamIcon, countries: ['AE'] },
   { code: 'QAR', symbol: 'ر.ق', name: 'Qatari Riyal', symbolType: 'unicode', countries: ['QA'] },
   { code: 'KWD', symbol: 'د.ك', name: 'Kuwaiti Dinar', symbolType: 'unicode', countries: ['KW'] },

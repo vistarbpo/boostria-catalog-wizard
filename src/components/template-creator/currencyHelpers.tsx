@@ -10,6 +10,7 @@ export interface CurrencyRenderOptions {
   currencySymbol: string;
   currencySvgPath?: string;
   isSvgSymbol: boolean;
+  currencyFontFamily?: string;
   textColor: string;
   fontSize: number;
 }
@@ -290,9 +291,21 @@ export const renderCurrencySymbol = (
   position: 'before' | 'inline' = 'before',
   useFilter: boolean = false
 ): React.ReactNode => {
-  const { isSvgSymbol, currencySvgPath, currencySymbol, fontSize, textColor } = options;
+  const { isSvgSymbol, currencySvgPath, currencySymbol, currencyFontFamily, fontSize, textColor } = options;
   
   if (!isSvgSymbol || !currencySvgPath) {
+    // For unicode symbols with custom font, wrap in a span with the font
+    if (currencyFontFamily && position === 'inline') {
+      return (
+        <span style={{ 
+          fontFamily: currencyFontFamily,
+          color: textColor,
+          fontSize: `${fontSize}px`,
+        }}>
+          {currencySymbol}
+        </span>
+      );
+    }
     return position === 'inline' ? currencySymbol : null;
   }
 
