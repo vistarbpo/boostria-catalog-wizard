@@ -289,7 +289,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                         filter: getColorFilter(textElement.color),
                         objectFit: 'contain',
                         flexShrink: 0,
-                        transform: 'translateY(-0.5px)',
+                        transform: 'translateY(2px)',
                         visibility: 'visible',
                         opacity: 1,
                       }}
