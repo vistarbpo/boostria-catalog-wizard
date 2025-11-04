@@ -35,34 +35,91 @@ interface ExportRendererProps {
 }
 
 // Helper function to convert color to CSS filter for SVG recoloring
-const getColorFilter = (color: string): string => {
-  const normalized = color.toLowerCase().replace(/\s/g, '');
+// Using robust version from CurrencySvgIcon for accurate color matching
+const getColorFilter = (targetColor: string): string => {
+  // Normalize color for checking
+  const normalizedColor = targetColor.toLowerCase().replace(/\s/g, '');
   
-  // White or light colors
-  if (normalized.includes('white') || normalized.includes('#fff') || normalized === '#ffffff' ||
-      normalized.includes('255,255,255') || normalized.includes('rgb(255,255,255)')) {
+  // Extract RGB values from various formats
+  const extractRGB = (colorStr: string): { r: number; g: number; b: number } | null => {
+    // Try rgb() format
+    const rgbMatch = colorStr.match(/rgb\((\d+),(\d+),(\d+)\)/);
+    if (rgbMatch) {
+      return { r: parseInt(rgbMatch[1]), g: parseInt(rgbMatch[2]), b: parseInt(rgbMatch[3]) };
+    }
+    
+    // Try hex format
+    const hexMatch = colorStr.match(/#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/);
+    if (hexMatch) {
+      return { 
+        r: parseInt(hexMatch[1], 16), 
+        g: parseInt(hexMatch[2], 16), 
+        b: parseInt(hexMatch[3], 16) 
+      };
+    }
+    
+    return null;
+  };
+  
+  const rgb = extractRGB(normalizedColor);
+  
+  // Check if it's a light color (white or near-white)
+  const isLightColor = 
+    normalizedColor.includes('white') || 
+    normalizedColor.includes('#fff') || 
+    normalizedColor === '#ffffff' ||
+    normalizedColor.includes('255,255,255') ||
+    normalizedColor.includes('rgb(255,255,255)') ||
+    normalizedColor.includes('hsl(0,0%,100%)') ||
+    (rgb && rgb.r > 240 && rgb.g > 240 && rgb.b > 240);
+  
+  // For white or light colors, invert the black SVG to white
+  if (isLightColor) {
     return 'brightness(0) invert(1)';
   }
   
-  // Black or dark colors
-  if (normalized.includes('black') || normalized.includes('#000') || normalized === '#000000' ||
-      normalized.includes('rgb(0,0,0)') || normalized.includes('0,0,0')) {
+  // Check if it's black or very dark
+  const isBlackColor = 
+    normalizedColor.includes('black') ||
+    normalizedColor.includes('#000') ||
+    normalizedColor === '#000000' ||
+    normalizedColor.includes('rgb(0,0,0)') ||
+    normalizedColor.includes('hsl(0,0%,0%)') ||
+    normalizedColor.includes('0,0,0') ||
+    (rgb && rgb.r < 15 && rgb.g < 15 && rgb.b < 15);
+  
+  if (isBlackColor) {
     return 'brightness(0)';
   }
   
-  // Red colors (for sale prices)
-  if (normalized.includes('#ef4444') || normalized.includes('#dc2626') ||
-      normalized.includes('239,68,68') || normalized.includes('220,38,38') || normalized.includes('red')) {
+  // Check if it's a red color (for sale prices)
+  const isRedColor = normalizedColor.includes('#ef4444') || 
+                    normalizedColor.includes('#dc2626') ||
+                    normalizedColor.includes('239,68,68') ||
+                    normalizedColor.includes('220,38,38') ||
+                    normalizedColor.includes('red') ||
+                    (rgb && rgb.r > 200 && rgb.g < 100 && rgb.b < 100);
+  
+  if (isRedColor) {
+    // Convert black SVG to red
     return 'brightness(0) saturate(100%) invert(27%) sepia(98%) saturate(7426%) hue-rotate(358deg) brightness(95%) contrast(111%)';
   }
   
-  // Gray colors
-  if (normalized.includes('#999') || normalized.includes('#9ca3af') || normalized.includes('#6b7280') ||
-      normalized.includes('153,153,153') || normalized.includes('156,163,175') || normalized.includes('107,114,128')) {
+  // Check if it's a gray color (for strikethrough prices)
+  const isGrayColor = normalizedColor.includes('#999') || 
+                     normalizedColor.includes('#9ca3af') ||
+                     normalizedColor.includes('#6b7280') ||
+                     normalizedColor.includes('153,153,153') ||
+                     normalizedColor.includes('156,163,175') ||
+                     normalizedColor.includes('107,114,128') ||
+                     (rgb && Math.abs(rgb.r - rgb.g) < 20 && Math.abs(rgb.g - rgb.b) < 20 && rgb.r > 100 && rgb.r < 180);
+  
+  if (isGrayColor) {
+    // For gray, make it black then reduce brightness
     return 'brightness(0) saturate(0) brightness(0.6)';
   }
   
-  // Default to black
+  // For any other dark color, keep the SVG black
   return 'brightness(0)';
 };
 
@@ -158,7 +215,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           adjustedTextStyles.paddingTop = 0;
           adjustedTextStyles.lineHeight = 1;
           adjustedTextStyles.display = 'flex';
-          adjustedTextStyles.alignItems = 'flex-start';
+          adjustedTextStyles.alignItems = 'center';
         }
         
         // Use unified formatting function
@@ -208,7 +265,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 style={{
                   ...adjustedTextStyles,
                   display: 'inline-flex',
-                  alignItems: 'flex-start',
+                  alignItems: 'center',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -228,9 +285,11 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                         height: `${symbolSize}px`,
                         marginLeft: '2px',
                         marginRight: '2px',
+                        verticalAlign: 'middle',
                         filter: getColorFilter(textElement.color),
                         objectFit: 'contain',
                         flexShrink: 0,
+                        transform: 'translateY(-0.5px)',
                         visibility: 'visible',
                         opacity: 1,
                       }}
@@ -287,11 +346,11 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               style={{
                 ...adjustedTextStyles,
                 display: 'inline-flex',
-                alignItems: 'flex-start',
+                alignItems: 'center',
                 whiteSpace: 'nowrap',
               }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: '0' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0' }}>
                 {displayType === 'symbol' && isSvgSymbol && currencySvgPath && (
                   <img
                     src={currencySvgPath}
@@ -302,9 +361,11 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                       width: `${symbolSize}px`,
                       height: `${symbolSize}px`,
                       marginRight: '3px',
+                      verticalAlign: 'middle',
                       filter: getColorFilter(textElement.color),
                       objectFit: 'contain',
                       flexShrink: 0,
+                      transform: 'translateY(-0.5px)',
                     }}
                   />
                 )}
