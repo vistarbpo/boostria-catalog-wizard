@@ -24,12 +24,17 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
   useFilter = false,
 }) => {
   const [imageError, setImageError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   
-  // Preload the SVG to prevent rectangle flash
+  // Preload the SVG and add delay to ensure mask applies before showing
   React.useEffect(() => {
     const img = new Image();
-    img.onload = () => setIsLoaded(true);
+    img.onload = () => {
+      // Wait for next frame to ensure mask is applied
+      requestAnimationFrame(() => {
+        setTimeout(() => setIsReady(true), 50);
+      });
+    };
     img.onerror = () => setImageError(true);
     img.src = svgPath;
   }, [svgPath]);
@@ -152,8 +157,8 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
   }
   
   // For preview, use CSS mask (perfect color matching)
-  // Only show once SVG is preloaded to prevent rectangle flash
-  if (!isLoaded) {
+  // Only show once SVG is fully ready to prevent rectangle flash
+  if (!isReady) {
     return (
       <span
         style={{
@@ -163,7 +168,7 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
           flexShrink: 0,
           marginLeft,
           marginRight,
-          verticalAlign: 'baseline',
+          verticalAlign: 'middle',
           opacity: 0,
         }}
         aria-label={ariaLabel}
