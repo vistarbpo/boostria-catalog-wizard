@@ -24,6 +24,15 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
   useFilter = false,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Preload the SVG to prevent rectangle flash
+  React.useEffect(() => {
+    const img = new Image();
+    img.onload = () => setIsLoaded(true);
+    img.onerror = () => setImageError(true);
+    img.src = svgPath;
+  }, [svgPath]);
   
   // Fallback to text symbol if image fails to load
   if (imageError) {
@@ -115,6 +124,26 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
   }
   
   // For preview, use CSS mask (perfect color matching)
+  // Only show once SVG is preloaded to prevent rectangle flash
+  if (!isLoaded) {
+    return (
+      <span
+        style={{
+          display: 'inline-block',
+          width: `${size}px`,
+          height: `${size}px`,
+          flexShrink: 0,
+          marginLeft,
+          marginRight,
+          verticalAlign: 'baseline',
+          opacity: 0,
+        }}
+        aria-label={ariaLabel}
+        role="img"
+      />
+    );
+  }
+  
   return (
     <span
       style={{
