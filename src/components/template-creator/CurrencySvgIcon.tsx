@@ -45,6 +45,29 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
       // Normalize color for checking
       const normalizedColor = targetColor.toLowerCase().replace(/\s/g, '');
       
+      // Extract RGB values from various formats
+      const extractRGB = (colorStr: string): { r: number; g: number; b: number } | null => {
+        // Try rgb() format
+        const rgbMatch = colorStr.match(/rgb\((\d+),(\d+),(\d+)\)/);
+        if (rgbMatch) {
+          return { r: parseInt(rgbMatch[1]), g: parseInt(rgbMatch[2]), b: parseInt(rgbMatch[3]) };
+        }
+        
+        // Try hex format
+        const hexMatch = colorStr.match(/#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/);
+        if (hexMatch) {
+          return { 
+            r: parseInt(hexMatch[1], 16), 
+            g: parseInt(hexMatch[2], 16), 
+            b: parseInt(hexMatch[3], 16) 
+          };
+        }
+        
+        return null;
+      };
+      
+      const rgb = extractRGB(normalizedColor);
+      
       // Check if it's a light color (white or near-white)
       const isLightColor = 
         normalizedColor.includes('white') || 
@@ -52,7 +75,8 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
         normalizedColor === '#ffffff' ||
         normalizedColor.includes('255,255,255') ||
         normalizedColor.includes('rgb(255,255,255)') ||
-        normalizedColor.includes('hsl(0,0%,100%)');
+        normalizedColor.includes('hsl(0,0%,100%)') ||
+        (rgb && rgb.r > 240 && rgb.g > 240 && rgb.b > 240);
       
       // For white or light colors, invert the black SVG to white
       if (isLightColor) {
@@ -66,7 +90,8 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
         normalizedColor === '#000000' ||
         normalizedColor.includes('rgb(0,0,0)') ||
         normalizedColor.includes('hsl(0,0%,0%)') ||
-        normalizedColor.includes('0,0,0');
+        normalizedColor.includes('0,0,0') ||
+        (rgb && rgb.r < 15 && rgb.g < 15 && rgb.b < 15);
       
       if (isBlackColor) {
         return 'brightness(0)';
@@ -77,10 +102,11 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
                         normalizedColor.includes('#dc2626') ||
                         normalizedColor.includes('239,68,68') ||
                         normalizedColor.includes('220,38,38') ||
-                        normalizedColor.includes('red');
+                        normalizedColor.includes('red') ||
+                        (rgb && rgb.r > 200 && rgb.g < 100 && rgb.b < 100);
       
       if (isRedColor) {
-        // Convert black SVG to red: brightness(0) makes it black, then sepia + hue-rotate to red
+        // Convert black SVG to red
         return 'brightness(0) saturate(100%) invert(27%) sepia(98%) saturate(7426%) hue-rotate(358deg) brightness(95%) contrast(111%)';
       }
       
@@ -90,14 +116,15 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
                          normalizedColor.includes('#6b7280') ||
                          normalizedColor.includes('153,153,153') ||
                          normalizedColor.includes('156,163,175') ||
-                         normalizedColor.includes('107,114,128');
+                         normalizedColor.includes('107,114,128') ||
+                         (rgb && Math.abs(rgb.r - rgb.g) < 20 && Math.abs(rgb.g - rgb.b) < 20 && rgb.r > 100 && rgb.r < 180);
       
       if (isGrayColor) {
         // For gray, make it black then reduce brightness
         return 'brightness(0) saturate(0) brightness(0.6)';
       }
       
-      // For currentColor or other dark colors, keep the SVG black
+      // For any other dark color, keep the SVG black
       return 'brightness(0)';
     };
     
@@ -114,9 +141,10 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
           flexShrink: 0,
           marginLeft,
           marginRight,
-          verticalAlign: 'baseline',
+          verticalAlign: 'middle',
           filter: getColorFilter(color),
           objectFit: 'contain',
+          transform: 'translateY(-0.5px)',
         }}
         aria-label={ariaLabel}
       />
@@ -153,7 +181,7 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
         flexShrink: 0,
         marginLeft,
         marginRight,
-        verticalAlign: 'baseline',
+        verticalAlign: 'middle',
         backgroundColor: color,
         maskImage: `url(${svgPath})`,
         WebkitMaskImage: `url(${svgPath})`,
@@ -163,6 +191,7 @@ export const CurrencySvgIcon: React.FC<CurrencySvgIconProps> = ({
         WebkitMaskRepeat: 'no-repeat',
         maskPosition: 'center',
         WebkitMaskPosition: 'center',
+        transform: 'translateY(-0.5px)',
       }}
       aria-label={ariaLabel}
       role="img"
