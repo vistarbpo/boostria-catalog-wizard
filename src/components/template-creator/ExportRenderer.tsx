@@ -212,13 +212,16 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         let adjustedTextStyles: React.CSSProperties = { ...textStyles };
         if (isPriceField && textElement.backgroundColor) {
           // For price fields with backgrounds, ensure vertical centering
-          // by balancing top and bottom padding
           const verticalPadding = Math.max(textElement.padding.top, textElement.padding.bottom);
-          adjustedTextStyles.paddingTop = `${verticalPadding}px`;
-          adjustedTextStyles.paddingBottom = `${verticalPadding}px`;
-          adjustedTextStyles.lineHeight = '1';
-          adjustedTextStyles.display = 'flex';
-          adjustedTextStyles.alignItems = 'center';
+          adjustedTextStyles = {
+            ...adjustedTextStyles,
+            paddingTop: `${verticalPadding}px`,
+            paddingBottom: `${verticalPadding}px`,
+            lineHeight: '1',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          };
         }
         
         // Use unified formatting function
@@ -267,22 +270,21 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 key={element.id} 
                 style={{
                   ...adjustedTextStyles,
-                  display: 'inline-flex',
+                  display: 'flex',
                   alignItems: 'center',
                   whiteSpace: 'nowrap',
                 }}
               >
                 {renderTextDecoration(
                   textElement,
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
                     {parts[0]}
                     <img
                       src={currencySvgPath}
                       alt="Currency"
                       crossOrigin="anonymous"
                       onLoad={(e) => {
-                        console.log('[ExportRenderer] SVG loaded successfully');
-                        // Force filter application
+                        console.log('[ExportRenderer] SVG loaded, applying filter:', getColorFilter(textElement.color));
                         e.currentTarget.style.filter = getColorFilter(textElement.color);
                       }}
                       onError={(e) => console.error('[ExportRenderer] SVG failed to load:', e)}
@@ -296,10 +298,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                         filter: getColorFilter(textElement.color),
                         objectFit: 'contain',
                         flexShrink: 0,
-                        transform: 'translateY(6px)',
+                        transform: 'translateY(0)',
                         visibility: 'visible',
                         opacity: 1,
-                        imageRendering: 'crisp-edges',
+                        imageRendering: 'auto',
                       }}
                     />
                     {parts[1]}
@@ -353,19 +355,19 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               key={element.id} 
               style={{
                 ...adjustedTextStyles,
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
                 whiteSpace: 'nowrap',
               }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
                 {displayType === 'symbol' && isSvgSymbol && currencySvgPath && (
                   <img
                     src={currencySvgPath}
                     alt={currencySymbol}
                     crossOrigin="anonymous"
                     onLoad={(e) => {
-                      // Force filter application on load
+                      console.log('[ExportRenderer] Prefix SVG loaded, applying filter:', getColorFilter(textElement.color));
                       e.currentTarget.style.filter = getColorFilter(textElement.color);
                     }}
                     style={{
@@ -377,8 +379,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                       filter: getColorFilter(textElement.color),
                       objectFit: 'contain',
                       flexShrink: 0,
-                      transform: 'translateY(6px)',
-                      imageRendering: 'crisp-edges',
+                      transform: 'translateY(0)',
+                      imageRendering: 'auto',
                     }}
                   />
                 )}
