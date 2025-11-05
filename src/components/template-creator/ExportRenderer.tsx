@@ -74,19 +74,25 @@ const InlineSvgSymbol: React.FC<{
     fetchSvgContent(svgPath).then(content => {
       if (content) {
         const coloredSvg = applySvgFill(content, color);
-        setSvgContent(coloredSvg);
+        // Add width/height and viewBox attributes to ensure proper sizing
+        const svgWithSize = coloredSvg
+          .replace(/<svg/, `<svg width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet"`);
+        setSvgContent(svgWithSize);
       }
     });
-  }, [svgPath, color]);
+  }, [svgPath, color, size]);
   
   if (!svgContent) return null;
   
   return (
     <div
       style={{
-        display: 'inline-block',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         width: `${size}px`,
         height: `${size}px`,
+        flexShrink: 0,
         ...style,
       }}
       dangerouslySetInnerHTML={{ __html: svgContent }}
@@ -207,6 +213,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             isSvgSymbol,
             currencySvgPath: !!currencySvgPath,
             displayType,
+            currencySymbolSize: textElement.currencySymbolSize,
+            fontSize: textElement.fontSize,
           });
         }
         
@@ -233,7 +241,13 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             const sizeMultiplier = textElement.currencySymbolSize ?? 0.8;
             const symbolSize = textElement.fontSize * sizeMultiplier;
             
-            console.log('[ExportRenderer] Rendering inline SVG with color:', textElement.color);
+            console.log('[ExportRenderer] SVG Symbol Size Calculation:', {
+              fontSize: textElement.fontSize,
+              currencySymbolSize: textElement.currencySymbolSize,
+              sizeMultiplier,
+              calculatedSize: symbolSize,
+              color: textElement.color,
+            });
             
             return (
               <div 
@@ -305,6 +319,14 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           // Use custom currency symbol size or default (80% of font size)
           const sizeMultiplier = textElement.currencySymbolSize ?? 0.8;
           const symbolSize = textElement.fontSize * sizeMultiplier;
+          
+          console.log('[ExportRenderer] Prefix Symbol Size Calculation:', {
+            fontSize: textElement.fontSize,
+            currencySymbolSize: textElement.currencySymbolSize,
+            sizeMultiplier,
+            calculatedSize: symbolSize,
+            displayType,
+          });
           
           return (
             <div 
