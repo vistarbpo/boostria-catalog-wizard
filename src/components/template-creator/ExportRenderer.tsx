@@ -280,7 +280,11 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                       src={currencySvgPath}
                       alt="Currency"
                       crossOrigin="anonymous"
-                      onLoad={() => console.log('[ExportRenderer] SVG loaded successfully')}
+                      onLoad={(e) => {
+                        console.log('[ExportRenderer] SVG loaded successfully');
+                        // Force filter application
+                        e.currentTarget.style.filter = getColorFilter(textElement.color);
+                      }}
                       onError={(e) => console.error('[ExportRenderer] SVG failed to load:', e)}
                       style={{
                         display: 'inline-block',
@@ -295,6 +299,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                         transform: 'translateY(6px)',
                         visibility: 'visible',
                         opacity: 1,
+                        imageRendering: 'crisp-edges',
                       }}
                     />
                     {parts[1]}
@@ -359,6 +364,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                     src={currencySvgPath}
                     alt={currencySymbol}
                     crossOrigin="anonymous"
+                    onLoad={(e) => {
+                      // Force filter application on load
+                      e.currentTarget.style.filter = getColorFilter(textElement.color);
+                    }}
                     style={{
                       display: 'inline-block',
                       width: `${symbolSize}px`,
@@ -369,6 +378,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                       objectFit: 'contain',
                       flexShrink: 0,
                       transform: 'translateY(6px)',
+                      imageRendering: 'crisp-edges',
                     }}
                   />
                 )}
