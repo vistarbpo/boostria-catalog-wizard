@@ -212,10 +212,11 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         let adjustedTextStyles: React.CSSProperties = { ...textStyles };
         if (isPriceField && textElement.backgroundColor) {
           // For price fields with backgrounds, ensure vertical centering
-          // by balancing top and bottom padding
-          const verticalPadding = Math.max(textElement.padding.top, textElement.padding.bottom);
-          adjustedTextStyles.paddingTop = `${verticalPadding}px`;
-          adjustedTextStyles.paddingBottom = `${verticalPadding}px`;
+          const totalVerticalPadding = textElement.padding.top + textElement.padding.bottom;
+          const centerPadding = totalVerticalPadding / 2;
+          
+          adjustedTextStyles.paddingTop = `${centerPadding}px`;
+          adjustedTextStyles.paddingBottom = `${centerPadding}px`;
           adjustedTextStyles.lineHeight = '1';
           adjustedTextStyles.display = 'flex';
           adjustedTextStyles.alignItems = 'center';
