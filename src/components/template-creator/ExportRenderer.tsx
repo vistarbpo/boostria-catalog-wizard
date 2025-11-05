@@ -254,8 +254,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 key={element.id} 
                 style={{
                   ...adjustedTextStyles,
-                  display: 'inline-flex',
+                  display: 'flex',
                   alignItems: 'center',
+                  justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -289,8 +290,11 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               key={element.id} 
               style={{
                 ...adjustedTextStyles,
-                display: isPriceField ? 'inline-flex' : 'block',
-                alignItems: isPriceField ? 'flex-start' : 'center',
+                display: isPriceField ? 'flex' : 'block',
+                alignItems: isPriceField ? 'center' : undefined,
+                justifyContent: isPriceField 
+                  ? (textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start')
+                  : undefined,
                 whiteSpace: isPriceField ? 'nowrap' : 'normal',
                 wordWrap: 'break-word',
                 overflowWrap: 'break-word',
@@ -333,8 +337,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               key={element.id} 
               style={{
                 ...adjustedTextStyles,
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
+                justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
                 whiteSpace: 'nowrap',
               }}
             >
