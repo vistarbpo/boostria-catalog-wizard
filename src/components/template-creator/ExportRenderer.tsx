@@ -257,6 +257,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+                  paddingTop: '20%',
+                  paddingBottom: '50%',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -295,6 +297,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 justifyContent: isPriceField 
                   ? (textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start')
                   : undefined,
+                paddingTop: isPriceField ? '20%' : undefined,
+                paddingBottom: isPriceField ? '50%' : undefined,
                 whiteSpace: isPriceField ? 'nowrap' : 'normal',
                 wordWrap: 'break-word',
                 overflowWrap: 'break-word',
@@ -340,6 +344,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+                paddingTop: '20%',
+                paddingBottom: '50%',
                 whiteSpace: 'nowrap',
               }}
             >

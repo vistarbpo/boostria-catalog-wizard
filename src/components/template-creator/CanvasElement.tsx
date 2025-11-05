@@ -841,9 +841,11 @@ const CanvasElementComponent = function CanvasElement({
                 wordBreak: 'normal',
                 overflow: 'hidden',
                 padding: `${textEl.padding.top}px ${textEl.padding.right}px ${textEl.padding.bottom}px ${textEl.padding.left}px`,
+                paddingTop: '20%',
+                paddingBottom: '50%',
                 justifyContent: textEl.textAlign === 'left' ? 'flex-start' : textEl.textAlign === 'right' ? 'flex-end' : 'center',
-                alignItems: 'flex-start',
-                display: 'inline-flex',
+                alignItems: 'center',
+                display: 'flex',
               }}
             >
               {contentNode}
@@ -871,10 +873,12 @@ const CanvasElementComponent = function CanvasElement({
               wordBreak: textEl.textWrapping ? 'break-word' : 'normal',
               overflow: 'hidden',
               padding: `${textEl.padding.top}px ${textEl.padding.right}px ${textEl.padding.bottom}px ${textEl.padding.left}px`,
+              paddingTop: showSvgSymbol ? '20%' : undefined,
+              paddingBottom: showSvgSymbol ? '50%' : undefined,
               justifyContent: textEl.textAlign === 'left' ? 'flex-start' : textEl.textAlign === 'right' ? 'flex-end' : 'center',
-              alignItems: 'flex-start',
+              alignItems: showSvgSymbol ? 'center' : 'flex-start',
               gap: showSvgSymbol ? '4px' : '0',
-              display: showSvgSymbol ? 'inline-flex' : undefined,
+              display: showSvgSymbol ? 'flex' : undefined,
             }}
           >
             {showSvgSymbol && renderCurrencySymbol(currencyOptions)}
