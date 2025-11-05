@@ -34,93 +34,64 @@ interface ExportRendererProps {
   currencyCode?: string;
 }
 
-// Helper function to convert color to CSS filter for SVG recoloring
-// Using robust version from CurrencySvgIcon for accurate color matching
-const getColorFilter = (targetColor: string): string => {
-  // Normalize color for checking
-  const normalizedColor = targetColor.toLowerCase().replace(/\s/g, '');
-  
-  // Extract RGB values from various formats
-  const extractRGB = (colorStr: string): { r: number; g: number; b: number } | null => {
-    // Try rgb() format
-    const rgbMatch = colorStr.match(/rgb\((\d+),(\d+),(\d+)\)/);
-    if (rgbMatch) {
-      return { r: parseInt(rgbMatch[1]), g: parseInt(rgbMatch[2]), b: parseInt(rgbMatch[3]) };
-    }
-    
-    // Try hex format
-    const hexMatch = colorStr.match(/#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/);
-    if (hexMatch) {
-      return { 
-        r: parseInt(hexMatch[1], 16), 
-        g: parseInt(hexMatch[2], 16), 
-        b: parseInt(hexMatch[3], 16) 
-      };
-    }
-    
+// Helper to fetch and parse SVG content
+const fetchSvgContent = async (svgPath: string): Promise<string | null> => {
+  try {
+    const response = await fetch(svgPath);
+    if (!response.ok) return null;
+    return await response.text();
+  } catch (error) {
+    console.error('[ExportRenderer] Failed to fetch SVG:', error);
     return null;
-  };
+  }
+};
+
+// Helper to apply fill color to SVG content
+const applySvgFill = (svgContent: string, fillColor: string): string => {
+  // Replace fill attributes in path, circle, rect, polygon elements
+  let modifiedSvg = svgContent
+    .replace(/fill="[^"]*"/g, `fill="${fillColor}"`)
+    .replace(/fill='[^']*'/g, `fill='${fillColor}'`);
   
-  const rgb = extractRGB(normalizedColor);
-  
-  // Check if it's a light color (white or near-white)
-  const isLightColor = 
-    normalizedColor.includes('white') || 
-    normalizedColor.includes('#fff') || 
-    normalizedColor === '#ffffff' ||
-    normalizedColor.includes('255,255,255') ||
-    normalizedColor.includes('rgb(255,255,255)') ||
-    normalizedColor.includes('hsl(0,0%,100%)') ||
-    (rgb && rgb.r > 240 && rgb.g > 240 && rgb.b > 240);
-  
-  // For white or light colors, invert the black SVG to white
-  if (isLightColor) {
-    return 'brightness(0) invert(1)';
+  // If no fill attribute exists, add it to the SVG tag
+  if (!modifiedSvg.includes('fill=')) {
+    modifiedSvg = modifiedSvg.replace(/<svg/, `<svg fill="${fillColor}"`);
   }
   
-  // Check if it's black or very dark
-  const isBlackColor = 
-    normalizedColor.includes('black') ||
-    normalizedColor.includes('#000') ||
-    normalizedColor === '#000000' ||
-    normalizedColor.includes('rgb(0,0,0)') ||
-    normalizedColor.includes('hsl(0,0%,0%)') ||
-    normalizedColor.includes('0,0,0') ||
-    (rgb && rgb.r < 15 && rgb.g < 15 && rgb.b < 15);
+  return modifiedSvg;
+};
+
+// Component to render inline SVG with dynamic color
+const InlineSvgSymbol: React.FC<{
+  svgPath: string;
+  color: string;
+  size: number;
+  style?: React.CSSProperties;
+}> = ({ svgPath, color, size, style }) => {
+  const [svgContent, setSvgContent] = React.useState<string>('');
   
-  if (isBlackColor) {
-    return 'brightness(0)';
-  }
+  React.useEffect(() => {
+    fetchSvgContent(svgPath).then(content => {
+      if (content) {
+        const coloredSvg = applySvgFill(content, color);
+        setSvgContent(coloredSvg);
+      }
+    });
+  }, [svgPath, color]);
   
-  // Check if it's a red color (for sale prices)
-  const isRedColor = normalizedColor.includes('#ef4444') || 
-                    normalizedColor.includes('#dc2626') ||
-                    normalizedColor.includes('239,68,68') ||
-                    normalizedColor.includes('220,38,38') ||
-                    normalizedColor.includes('red') ||
-                    (rgb && rgb.r > 200 && rgb.g < 100 && rgb.b < 100);
+  if (!svgContent) return null;
   
-  if (isRedColor) {
-    // Convert black SVG to red
-    return 'brightness(0) saturate(100%) invert(27%) sepia(98%) saturate(7426%) hue-rotate(358deg) brightness(95%) contrast(111%)';
-  }
-  
-  // Check if it's a gray color (for strikethrough prices)
-  const isGrayColor = normalizedColor.includes('#999') || 
-                     normalizedColor.includes('#9ca3af') ||
-                     normalizedColor.includes('#6b7280') ||
-                     normalizedColor.includes('153,153,153') ||
-                     normalizedColor.includes('156,163,175') ||
-                     normalizedColor.includes('107,114,128') ||
-                     (rgb && Math.abs(rgb.r - rgb.g) < 20 && Math.abs(rgb.g - rgb.b) < 20 && rgb.r > 100 && rgb.r < 180);
-  
-  if (isGrayColor) {
-    // For gray, make it black then reduce brightness
-    return 'brightness(0) saturate(0) brightness(0.6)';
-  }
-  
-  // For any other dark color, keep the SVG black
-  return 'brightness(0)';
+  return (
+    <div
+      style={{
+        display: 'inline-block',
+        width: `${size}px`,
+        height: `${size}px`,
+        ...style,
+      }}
+      dangerouslySetInnerHTML={{ __html: svgContent }}
+    />
+  );
 };
 
 export const ExportRenderer: React.FC<ExportRendererProps> = ({
@@ -261,7 +232,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             // Smaller SVG size (60% of font size)
             const symbolSize = textElement.fontSize * 0.6;
             
-            console.log('[ExportRenderer] Rendering SVG img with size:', symbolSize, 'filter:', getColorFilter(textElement.color));
+            console.log('[ExportRenderer] Rendering inline SVG with color:', textElement.color);
             
             return (
               <div 
@@ -275,32 +246,16 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               >
                 {renderTextDecoration(
                   textElement,
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
                     {parts[0]}
-                    <img
-                      src={currencySvgPath}
-                      alt="Currency"
-                      crossOrigin="anonymous"
-                      onLoad={(e) => {
-                        console.log('[ExportRenderer] SVG loaded successfully');
-                        // Force filter application
-                        e.currentTarget.style.filter = getColorFilter(textElement.color);
-                      }}
-                      onError={(e) => console.error('[ExportRenderer] SVG failed to load:', e)}
+                    <InlineSvgSymbol
+                      svgPath={currencySvgPath}
+                      color={textElement.color}
+                      size={symbolSize}
                       style={{
-                        display: 'inline-block',
-                        width: `${symbolSize}px`,
-                        height: `${symbolSize}px`,
                         marginLeft: '2px',
                         marginRight: '2px',
-                        verticalAlign: 'middle',
-                        filter: getColorFilter(textElement.color),
-                        objectFit: 'contain',
                         flexShrink: 0,
-                        transform: 'translateY(6px)',
-                        visibility: 'visible',
-                        opacity: 1,
-                        imageRendering: 'crisp-edges',
                       }}
                     />
                     {parts[1]}
@@ -359,27 +314,15 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 whiteSpace: 'nowrap',
               }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
                 {displayType === 'symbol' && isSvgSymbol && currencySvgPath && (
-                  <img
-                    src={currencySvgPath}
-                    alt={currencySymbol}
-                    crossOrigin="anonymous"
-                    onLoad={(e) => {
-                      // Force filter application on load
-                      e.currentTarget.style.filter = getColorFilter(textElement.color);
-                    }}
+                  <InlineSvgSymbol
+                    svgPath={currencySvgPath}
+                    color={textElement.color}
+                    size={symbolSize}
                     style={{
-                      display: 'inline-block',
-                      width: `${symbolSize}px`,
-                      height: `${symbolSize}px`,
                       marginRight: '3px',
-                      verticalAlign: 'middle',
-                      filter: getColorFilter(textElement.color),
-                      objectFit: 'contain',
                       flexShrink: 0,
-                      transform: 'translateY(6px)',
-                      imageRendering: 'crisp-edges',
                     }}
                   />
                 )}
