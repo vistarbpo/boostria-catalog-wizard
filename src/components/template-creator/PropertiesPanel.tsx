@@ -720,6 +720,29 @@ export function PropertiesPanel({
                 </div>
               </div>
 
+              {/* Currency Symbol Size (only for price fields) */}
+              {(selectedElement as TextElement).isDynamic && 
+               ((selectedElement as TextElement).dynamicField === 'price' || 
+                (selectedElement as TextElement).dynamicField === 'sale_price' || 
+                (selectedElement as TextElement).dynamicField === 'compare_at_price') && (
+                <div>
+                  <Label className="text-xs mb-2 block">Currency Symbol Size</Label>
+                  <div className="flex items-center gap-2">
+                    <Slider
+                      value={[(selectedElement as TextElement).currencySymbolSize ?? 0.8]}
+                      onValueChange={([value]) => updateElementProperty('currencySymbolSize', value)}
+                      min={0.3}
+                      max={1.5}
+                      step={0.05}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground min-w-[3rem] text-right">
+                      {Math.round(((selectedElement as TextElement).currencySymbolSize ?? 0.8) * 100)}%
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Text Case Transform */}
               <div>
                 <Label className="text-xs mb-2 block">Case</Label>

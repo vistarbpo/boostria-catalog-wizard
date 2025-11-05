@@ -12,6 +12,7 @@ export interface CurrencyRenderOptions {
   isSvgSymbol: boolean;
   textColor: string;
   fontSize: number;
+  currencySymbolSize?: number; // Multiplier for symbol size (default 0.8)
 }
 
 /**
@@ -329,13 +330,14 @@ export const renderCurrencySymbol = (
   position: 'before' | 'inline' = 'before',
   useFilter: boolean = false
 ): React.ReactNode => {
-  const { isSvgSymbol, currencySvgPath, currencySymbol, fontSize, textColor } = options;
+  const { isSvgSymbol, currencySvgPath, currencySymbol, fontSize, textColor, currencySymbolSize } = options;
   
   if (!isSvgSymbol || !currencySvgPath) {
     return position === 'inline' ? currencySymbol : null;
   }
 
-  const size = fontSize * 0.8;
+  const sizeMultiplier = currencySymbolSize ?? 0.8;
+  const size = fontSize * sizeMultiplier;
   const marginLeft = position === 'inline' ? '2px' : '0';
   const marginRight = position === 'inline' ? '2px' : '4px';
 

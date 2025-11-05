@@ -52,6 +52,8 @@ export interface TextElement extends BaseElement {
   dynamicContent?: string; // Resolved content when isDynamic is true
   isTemplate?: boolean; // Whether to use placeholder replacement like "Pay {price} in 4 installments"
   fallbackField?: string; // Fallback field if dynamicField is empty
+  // Currency symbol size control (for price fields with SVG symbols)
+  currencySymbolSize?: number; // Multiplier for currency symbol size (0.1 to 2.0, default 0.8)
   conditionalDisplay?: {
     dependsOn?: string; // Field name to check
     hideIfEmpty?: boolean; // Hide if the dependsOn field is empty

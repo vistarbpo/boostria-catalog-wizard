@@ -413,6 +413,7 @@ const CanvasElementComponent = function CanvasElement({
           isSvgSymbol,
           textColor: textElement.color,
           fontSize: textElement.fontSize,
+          currencySymbolSize: textElement.currencySymbolSize,
         };
         
         // Handle template text with inline currency placeholder
@@ -818,6 +819,7 @@ const CanvasElementComponent = function CanvasElement({
           isSvgSymbol,
           textColor: textEl.color,
           fontSize: textEl.fontSize,
+          currencySymbolSize: textEl.currencySymbolSize,
         };
         
         // Handle template text with inline currency placeholder

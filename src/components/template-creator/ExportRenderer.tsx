@@ -229,8 +229,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           // For export, render SVG symbols directly as images
           if (isSvgSymbol && currencySvgPath) {
             const parts = displayContent.split('[CURRENCY_SVG]');
-            // Match canvas preview size (80% of font size)
-            const symbolSize = textElement.fontSize * 0.8;
+            // Use custom currency symbol size or default (80% of font size)
+            const sizeMultiplier = textElement.currencySymbolSize ?? 0.8;
+            const symbolSize = textElement.fontSize * sizeMultiplier;
             
             console.log('[ExportRenderer] Rendering inline SVG with color:', textElement.color);
             
@@ -301,8 +302,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
             cleanText = cleanText.replace(/^[A-Z]{3}\s+/, '');
           }
           
-          // Match canvas preview size (80% of font size)
-          const symbolSize = textElement.fontSize * 0.8;
+          // Use custom currency symbol size or default (80% of font size)
+          const sizeMultiplier = textElement.currencySymbolSize ?? 0.8;
+          const symbolSize = textElement.fontSize * sizeMultiplier;
           
           return (
             <div 
