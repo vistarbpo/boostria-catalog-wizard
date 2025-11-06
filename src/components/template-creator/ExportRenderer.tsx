@@ -255,7 +255,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 style={{
                   ...adjustedTextStyles,
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
+                  paddingTop: '15%',
                   justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
                   whiteSpace: 'nowrap',
                 }}
@@ -291,7 +292,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               style={{
                 ...adjustedTextStyles,
                 display: isPriceField ? 'flex' : 'block',
-                alignItems: isPriceField ? 'center' : undefined,
+                alignItems: isPriceField ? 'flex-start' : undefined,
+                paddingTop: isPriceField ? '15%' : undefined,
                 justifyContent: isPriceField 
                   ? (textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start')
                   : undefined,
@@ -338,7 +340,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               style={{
                 ...adjustedTextStyles,
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: 'flex-start',
+                paddingTop: '15%',
                 justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
                 whiteSpace: 'nowrap',
               }}

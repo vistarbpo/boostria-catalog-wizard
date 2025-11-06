@@ -843,6 +843,7 @@ const CanvasElementComponent = function CanvasElement({
                 padding: `${textEl.padding.top}px ${textEl.padding.right}px ${textEl.padding.bottom}px ${textEl.padding.left}px`,
                 justifyContent: textEl.textAlign === 'left' ? 'flex-start' : textEl.textAlign === 'right' ? 'flex-end' : 'center',
                 alignItems: 'flex-start',
+                paddingTop: `${textEl.fontSize * 0.3}px`,
                 display: 'inline-flex',
               }}
             >
@@ -873,6 +874,7 @@ const CanvasElementComponent = function CanvasElement({
               padding: `${textEl.padding.top}px ${textEl.padding.right}px ${textEl.padding.bottom}px ${textEl.padding.left}px`,
               justifyContent: textEl.textAlign === 'left' ? 'flex-start' : textEl.textAlign === 'right' ? 'flex-end' : 'center',
               alignItems: 'flex-start',
+              paddingTop: showSvgSymbol ? `${textEl.fontSize * 0.3}px` : '0',
               gap: showSvgSymbol ? '4px' : '0',
               display: showSvgSymbol ? 'inline-flex' : undefined,
             }}
