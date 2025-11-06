@@ -255,9 +255,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 style={{
                   ...adjustedTextStyles,
                   display: 'flex',
-                  alignItems: 'flex-start',
-                  paddingTop: '15%',
+                  alignItems: 'center',
                   justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+                  paddingTop: '20%',
+                  paddingBottom: '50%',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -292,11 +293,12 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               style={{
                 ...adjustedTextStyles,
                 display: isPriceField ? 'flex' : 'block',
-                alignItems: isPriceField ? 'flex-start' : undefined,
-                paddingTop: isPriceField ? '15%' : undefined,
+                alignItems: isPriceField ? 'center' : undefined,
                 justifyContent: isPriceField 
                   ? (textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start')
                   : undefined,
+                paddingTop: isPriceField ? '20%' : undefined,
+                paddingBottom: isPriceField ? '50%' : undefined,
                 whiteSpace: isPriceField ? 'nowrap' : 'normal',
                 wordWrap: 'break-word',
                 overflowWrap: 'break-word',
@@ -340,9 +342,10 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               style={{
                 ...adjustedTextStyles,
                 display: 'flex',
-                alignItems: 'flex-start',
-                paddingTop: '15%',
+                alignItems: 'center',
                 justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
+                paddingTop: '20%',
+                paddingBottom: '50%',
                 whiteSpace: 'nowrap',
               }}
             >
