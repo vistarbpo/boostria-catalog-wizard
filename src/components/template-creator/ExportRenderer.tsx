@@ -192,8 +192,9 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           const totalVerticalPadding = textElement.padding.top + textElement.padding.bottom;
           const centerPadding = totalVerticalPadding / 2;
           
-          adjustedTextStyles.paddingTop = `${centerPadding}px`;
-          adjustedTextStyles.paddingBottom = `${centerPadding}px`;
+          // Use asymmetric padding to compensate for font metrics (ascenders/descenders)
+          adjustedTextStyles.paddingTop = `${centerPadding * 0.85}px`;
+          adjustedTextStyles.paddingBottom = `${centerPadding * 1.15}px`;
           adjustedTextStyles.lineHeight = '1';
           adjustedTextStyles.display = 'flex';
           adjustedTextStyles.alignItems = 'center';

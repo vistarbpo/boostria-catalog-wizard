@@ -20,8 +20,13 @@ export const getTextStyles = (
       ? Math.max(12, Math.floor(textElement.fontSize * 0.2))
       : Math.max(6, Math.floor(textElement.fontSize * 0.1));
     
+    // Apply asymmetric vertical padding to compensate for font metrics (ascenders/descenders)
+    const totalVerticalPadding = padding.top + padding.bottom;
+    const centerPadding = totalVerticalPadding / 2;
+    
     padding = {
-      ...padding,
+      top: centerPadding * 0.85,
+      bottom: centerPadding * 1.15,
       left: horizontalPadding,
       right: horizontalPadding,
     };
