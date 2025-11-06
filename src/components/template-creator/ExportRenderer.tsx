@@ -192,8 +192,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
           const totalVerticalPadding = textElement.padding.top + textElement.padding.bottom;
           const centerPadding = totalVerticalPadding / 2;
           
-          adjustedTextStyles.paddingTop = `${centerPadding * 0.7}px`;
-          adjustedTextStyles.paddingBottom = `${centerPadding * 1.3}px`;
+          adjustedTextStyles.paddingTop = `${centerPadding}px`;
+          adjustedTextStyles.paddingBottom = `${centerPadding}px`;
           adjustedTextStyles.lineHeight = '1';
           adjustedTextStyles.display = 'flex';
           adjustedTextStyles.alignItems = 'center';
@@ -255,8 +255,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 style={{
                   ...adjustedTextStyles,
                   display: 'flex',
-                  alignItems: 'flex-start',
-                  paddingTop: `${textElement.fontSize * 0.25}px`,
+                  alignItems: 'center',
                   justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
                   whiteSpace: 'nowrap',
                 }}
@@ -339,8 +338,7 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               style={{
                 ...adjustedTextStyles,
                 display: 'flex',
-                alignItems: 'flex-start',
-                paddingTop: `${textElement.fontSize * 0.25}px`,
+                alignItems: 'center',
                 justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
                 whiteSpace: 'nowrap',
               }}
