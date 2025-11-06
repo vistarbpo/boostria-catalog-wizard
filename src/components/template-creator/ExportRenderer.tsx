@@ -188,12 +188,12 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
         // Add vertical alignment adjustments for price fields
         let adjustedTextStyles: React.CSSProperties = { ...textStyles };
         if (isPriceField && textElement.backgroundColor) {
-          // For price fields with backgrounds, ensure vertical centering
+          // For price fields with backgrounds, position text slightly above center
           const totalVerticalPadding = textElement.padding.top + textElement.padding.bottom;
           const centerPadding = totalVerticalPadding / 2;
           
-          adjustedTextStyles.paddingTop = `${centerPadding}px`;
-          adjustedTextStyles.paddingBottom = `${centerPadding}px`;
+          adjustedTextStyles.paddingTop = `${centerPadding * 0.7}px`;
+          adjustedTextStyles.paddingBottom = `${centerPadding * 1.3}px`;
           adjustedTextStyles.lineHeight = '1';
           adjustedTextStyles.display = 'flex';
           adjustedTextStyles.alignItems = 'center';
@@ -255,7 +255,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
                 style={{
                   ...adjustedTextStyles,
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
+                  paddingTop: `${textElement.fontSize * 0.25}px`,
                   justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
                   whiteSpace: 'nowrap',
                 }}
@@ -338,7 +339,8 @@ export const ExportRenderer: React.FC<ExportRendererProps> = ({
               style={{
                 ...adjustedTextStyles,
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: 'flex-start',
+                paddingTop: `${textElement.fontSize * 0.25}px`,
                 justifyContent: textElement.textAlign === 'center' ? 'center' : textElement.textAlign === 'right' ? 'flex-end' : 'flex-start',
                 whiteSpace: 'nowrap',
               }}
