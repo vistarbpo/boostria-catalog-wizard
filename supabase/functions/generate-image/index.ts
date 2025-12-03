@@ -6,30 +6,31 @@ const corsHeaders = {
 };
 
 // Map aspect ratio to dimensions and descriptive text
-function getAspectRatioConfig(aspectRatio?: string): { width: number; height: number; description: string } {
+// Note: Gemini model native max output is ~1024x1024 for square, ~1536x1024 for landscape
+function getAspectRatioConfig(aspectRatio?: string): { width: number; height: number; description: string; maxNative: string } {
   switch (aspectRatio) {
     case '1:1':
     case 'square':
-      return { width: 1024, height: 1024, description: 'square 1:1 aspect ratio' };
+      return { width: 1024, height: 1024, description: 'perfect square 1:1 aspect ratio', maxNative: '1024x1024' };
     case '16:9':
     case 'landscape':
-      return { width: 1536, height: 864, description: 'wide landscape 16:9 aspect ratio' };
+      return { width: 1536, height: 864, description: 'wide landscape 16:9 aspect ratio', maxNative: '1536x864' };
     case '9:16':
     case 'portrait':
     case 'story':
-      return { width: 864, height: 1536, description: 'tall portrait 9:16 aspect ratio (like Instagram Story)' };
+      return { width: 864, height: 1536, description: 'tall portrait 9:16 aspect ratio (like Instagram Story)', maxNative: '864x1536' };
     case '4:3':
-      return { width: 1536, height: 1152, description: 'landscape 4:3 aspect ratio' };
+      return { width: 1365, height: 1024, description: 'landscape 4:3 aspect ratio', maxNative: '1365x1024' };
     case '3:4':
-      return { width: 1152, height: 1536, description: 'portrait 3:4 aspect ratio' };
+      return { width: 1024, height: 1365, description: 'portrait 3:4 aspect ratio', maxNative: '1024x1365' };
     case '4:5':
-      return { width: 1200, height: 1500, description: 'portrait 4:5 aspect ratio (like Instagram Post)' };
+      return { width: 1024, height: 1280, description: 'portrait 4:5 aspect ratio (like Instagram Post)', maxNative: '1024x1280' };
     case '2:1':
-      return { width: 1536, height: 768, description: 'ultra-wide 2:1 panoramic aspect ratio' };
+      return { width: 1536, height: 768, description: 'ultra-wide 2:1 panoramic aspect ratio', maxNative: '1536x768' };
     case '1:2':
-      return { width: 768, height: 1536, description: 'ultra-tall 1:2 vertical aspect ratio' };
+      return { width: 768, height: 1536, description: 'ultra-tall 1:2 vertical aspect ratio', maxNative: '768x1536' };
     default:
-      return { width: 1536, height: 1024, description: 'landscape orientation' };
+      return { width: 1536, height: 1024, description: 'landscape orientation', maxNative: '1536x1024' };
   }
 }
 
@@ -157,7 +158,9 @@ Requirements:
         textContent,
         model: 'google/gemini-3-pro-image-preview',
         requestedDimensions: { width: targetWidth, height: targetHeight },
-        aspectRatio: aspectRatio || 'default'
+        maxNativeResolution: aspectConfig.maxNative,
+        aspectRatio: aspectRatio || 'default',
+        note: 'Gemini max native output is ~1024x1024 for square. For larger sizes, consider adding an upscaling service.'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
