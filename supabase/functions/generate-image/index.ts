@@ -5,6 +5,34 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Map aspect ratio to dimensions and descriptive text
+function getAspectRatioConfig(aspectRatio?: string): { width: number; height: number; description: string } {
+  switch (aspectRatio) {
+    case '1:1':
+    case 'square':
+      return { width: 1024, height: 1024, description: 'square 1:1 aspect ratio' };
+    case '16:9':
+    case 'landscape':
+      return { width: 1536, height: 864, description: 'wide landscape 16:9 aspect ratio' };
+    case '9:16':
+    case 'portrait':
+    case 'story':
+      return { width: 864, height: 1536, description: 'tall portrait 9:16 aspect ratio (like Instagram Story)' };
+    case '4:3':
+      return { width: 1536, height: 1152, description: 'landscape 4:3 aspect ratio' };
+    case '3:4':
+      return { width: 1152, height: 1536, description: 'portrait 3:4 aspect ratio' };
+    case '4:5':
+      return { width: 1200, height: 1500, description: 'portrait 4:5 aspect ratio (like Instagram Post)' };
+    case '2:1':
+      return { width: 1536, height: 768, description: 'ultra-wide 2:1 panoramic aspect ratio' };
+    case '1:2':
+      return { width: 768, height: 1536, description: 'ultra-tall 1:2 vertical aspect ratio' };
+    default:
+      return { width: 1536, height: 1024, description: 'landscape orientation' };
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -12,7 +40,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, aspectRatio } = await req.json();
+    const { prompt, aspectRatio, width, height } = await req.json();
     
     if (!prompt) {
       return new Response(
@@ -30,11 +58,31 @@ serve(async (req) => {
       );
     }
 
+    // Get aspect ratio configuration
+    const aspectConfig = getAspectRatioConfig(aspectRatio);
+    
+    // Use custom dimensions if provided, otherwise use aspect ratio config
+    const targetWidth = width || aspectConfig.width;
+    const targetHeight = height || aspectConfig.height;
+    
     console.log('Generating image with prompt:', prompt);
     console.log('Aspect ratio:', aspectRatio || 'default');
+    console.log('Target dimensions:', targetWidth, 'x', targetHeight);
+    console.log('Aspect description:', aspectConfig.description);
 
-    // Build enhanced prompt for highest quality output
-    const enhancedPrompt = `${prompt}. Ultra high resolution, 4K quality, highly detailed, professional photography quality.`;
+    // Build enhanced prompt with explicit aspect ratio and dimension guidance
+    const enhancedPrompt = `Generate a high-quality image with ${aspectConfig.description}. 
+The image should fill the entire canvas with dimensions approximately ${targetWidth}x${targetHeight} pixels.
+IMPORTANT: Extend the background and scene to fill the complete frame edge-to-edge, no cropping, no black bars.
+
+Subject/Scene: ${prompt}
+
+Requirements:
+- Ultra high resolution, maximum detail and clarity
+- Professional photography quality
+- Complete scene that fills the entire ${aspectConfig.description} frame
+- Seamless background that extends to all edges
+- 4K quality output`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -99,13 +147,17 @@ serve(async (req) => {
     const imageUrl = generatedImage?.image_url?.url || generatedImage?.url;
 
     console.log('Image generated successfully');
+    console.log('Image URL type:', typeof imageUrl);
+    console.log('Image URL length:', imageUrl?.length || 0);
 
     return new Response(
       JSON.stringify({ 
         success: true,
         imageUrl,
         textContent,
-        model: 'google/gemini-3-pro-image-preview'
+        model: 'google/gemini-3-pro-image-preview',
+        requestedDimensions: { width: targetWidth, height: targetHeight },
+        aspectRatio: aspectRatio || 'default'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
